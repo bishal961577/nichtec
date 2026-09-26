@@ -89,35 +89,40 @@ def split_table(dataset):
 
 
 def fig_order_gap(summaries):
-    show = ["MLP (backprop)", "MLP + EWC", "MLP + replay 500", "NCM (pixels)", "SLDA (pixels)", "Fly (pixels)",
-            "SPARC-online / assoc", "SPARC-online / slda", "SPARC-dev / assoc", "SPARC-dev / slda"]
-    fig, axes = plt.subplots(1, 2, figsize=(11, 5.2), sharey=True)
+    show = [("MLP (backprop)", "Backprop MLP"), ("MLP + EWC", "Backprop + EWC (best λ)"),
+            ("MLP + replay 500", "Backprop + replay (500 stored images)"), ("NCM (pixels)", "Nearest class mean (pixels)"),
+            ("SLDA (pixels)", "Streaming LDA (pixels)"), ("Fly (pixels)", "Fly model (pixels)"),
+            ("SPARC-online / assoc", "SPARC-online, Hebbian readout"), ("SPARC-online / slda", "SPARC-online, LDA readout"),
+            ("SPARC-dev / assoc", "SPARC-dev, Hebbian readout"), ("SPARC-dev / slda", "SPARC-dev, LDA readout")]
+    fig, axes = plt.subplots(1, len(summaries), figsize=(12, 5.6), sharey=True)
+    axes = np.atleast_1d(axes)
+    y = np.arange(len(show))[::-1]
+    h = 0.38
     for ax, (ds, summ) in zip(axes, summaries.items()):
-        names = []
-        for s in show:
-            hit = [k for k in summ if k.startswith(s)]
-            if hit:
-                names.append(hit[0])
-        y = np.arange(len(names))[::-1]
-        h = 0.38
-        o = [summ[n].get("ordered") or 0 for n in names]
-        s = [summ[n].get("shuffled") or 0 for n in names]
-        ax.barh(y + h / 2 + 0.01, [v * 100 for v in s], h - 0.02, color=C[1], label="shuffled (i.i.d.)")
+        def get(prefix, key):
+            hit = [k for k in summ if k.startswith(prefix)]
+            return (summ[hit[0]].get(key) or 0) if hit else 0
+        o = [get(p_, "ordered") for p_, _ in show]
+        sh = [get(p_, "shuffled") for p_, _ in show]
+        ax.barh(y + h / 2 + 0.01, [v * 100 for v in sh], h - 0.02, color=C[1], label="shuffled (i.i.d.)")
         ax.barh(y - h / 2 - 0.01, [v * 100 for v in o], h - 0.02, color=C[0], label="ordered (class by class)")
         for yi, v in zip(y, o):
-            ax.text(v * 100 + 1, yi - h / 2, f"{v * 100:.1f}", va="center", fontsize=8, color=INK)
+            if v:
+                ax.text(v * 100 + 1, yi - h / 2, f"{v * 100:.1f}", va="center", fontsize=8, color=INK)
         ub = summ.get("MLP (backprop), 5 epochs", {}).get("shuffled")
         if ub:
             ax.axvline(ub * 100, color=INK2, lw=1, ls="--")
-            ax.text(ub * 100, len(names) - 0.35, "offline backprop\n(5 epochs)", ha="right", va="bottom", fontsize=8, color=INK2)
-        ax.set_yticks(y, [n.replace(" | ", "") for n in names])
-        ax.set_xlim(0, 108)
+            ax.text(ub * 100 - 1, -0.9, "offline backprop, 5 epochs", ha="right", va="center", fontsize=7.5, color=INK2)
+        ax.set_xlim(0, 110)
+        ax.set_ylim(-1.3, len(show) - 0.4)
         ax.set_xlabel("test accuracy on all 10 classes (%)")
         ax.set_title({"mnist": "Split-MNIST", "fashion": "Split-Fashion-MNIST"}[ds])
         ax.grid(axis="y", visible=False)
-    axes[0].legend(loc="lower right", bbox_to_anchor=(1.0, -0.02), fontsize=8)
+    axes[0].set_yticks(y, [lab for _, lab in show])
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles[::-1], labels[::-1], loc="upper center", ncol=2, fontsize=9, bbox_to_anchor=(0.5, 0.93))
     fig.suptitle("Same data, same single pass: only the order changes", fontweight="bold")
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.88))
     fig.savefig(os.path.join(OUT, "fig1_order_gap.png"), dpi=150)
 
 
@@ -133,18 +138,18 @@ def fig_forgetting(summ, ds):
         x = np.arange(1, len(M) + 1)
         first = M[:, 0]
         avg = [M[i, : i + 1].mean() for i in range(len(M))]
-        for ax, series in zip(axes, (first, avg)):
-            ax.plot(x, series, color=col, lw=2, marker="o", ms=5)
-            ax.text(x[-1] + 0.08, series[-1], hit[0].replace(" | ", ""), va="center", fontsize=8, color=INK)
+        for i, (ax, series) in enumerate(zip(axes, (first, avg))):
+            ax.plot(x, series, color=col, lw=2, marker="o", ms=5, label=hit[0] if i == 0 else None)
     axes[0].set_title("Accuracy on the FIRST task (digits 0/1) as later tasks are learned")
     axes[1].set_title("Average accuracy over all classes seen so far")
     for ax in axes:
         ax.set_xlabel("tasks learned")
         ax.set_ylabel("accuracy (%)")
         ax.set_xticks(range(1, 6))
-        ax.set_xlim(0.8, 7.2)
+        ax.set_xlim(0.8, 5.2)
         ax.set_ylim(-3, 103)
-    fig.tight_layout()
+    fig.legend(*axes[0].get_legend_handles_labels(), loc="lower center", ncol=5, fontsize=8.5, bbox_to_anchor=(0.5, 0.0))
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
     fig.savefig(os.path.join(OUT, f"fig2_forgetting_{ds}.png"), dpi=150)
 
 
@@ -157,7 +162,7 @@ def sleep_table():
         lines += [f"\n**{ds}** (mean ± std over {len(next(iter(rows.values())))} seeds)\n",
                   "| Slow learner (2304-256-10 MLP, Adam, one pass) | Accuracy, all 10 classes | Forgetting |", "|---|---|---|"]
         for k, v in rows.items():
-            lines.append(f"| {k} | {ms([r['final_acc'] for r in v])} | {ms([r['forgetting'] for r in v])} |")
+            lines.append(f"| {k.replace(' | ', ', ')} | {ms([r['final_acc'] for r in v])} | {ms([r['forgetting'] for r in v])} |")
     return lines
 
 
@@ -190,9 +195,9 @@ def fig_commutativity(summaries):
         ax.set_title({"mnist": "Split-MNIST", "fashion": "Split-Fashion-MNIST"}[ds])
         ax.grid(axis="x", visible=False)
     axes[0].set_ylabel("final accuracy, all 10 classes (%)")
-    axes[0].legend(fontsize=8, loc="upper left")
+    fig.legend(*axes[0].get_legend_handles_labels(), loc="upper center", ncol=2, fontsize=9, bbox_to_anchor=(0.5, 0.93))
     fig.suptitle("Order-invariance tracks commutativity, not sparsity or locality", fontweight="bold")
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.88))
     fig.savefig(os.path.join(OUT, "fig0_commutativity.png"), dpi=150)
 
 
@@ -219,6 +224,8 @@ def fewshot():
             for (m, v), col in zip(cur.items(), C):
                 ax.plot(ns, np.array(v) * 100, color=col, lw=2, marker="o", ms=5, label=m)
             ax.set_xscale("log")
+            ax.set_xticks(ns, [str(n) for n in ns])
+            ax.minorticks_off()
             ax.set_xlabel("labelled examples per class (log scale)")
             ax.set_title({"mnist": "MNIST", "fashion": "Fashion-MNIST"}[ds])
         axes[0].set_ylabel("test accuracy (%)")
@@ -244,23 +251,32 @@ def lifelong():
         axes[0].bar(x + (i - 1.5) * w, M[-1], w - 0.02, color=col, label=k.replace(" | ordered", ""))
     for k, v in rows.items():
         M = np.array(v[0]["matrix"]) * 100
-        lines.append(f"| {k} | {v[0]['final_acc'] * 100:.1f} | {M[-1, :5].mean():.1f} | {M[-1, 5:].mean():.1f} | "
+        lines.append(f"| {k.replace(' | ', ', ')} | {v[0]['final_acc'] * 100:.1f} | {M[-1, :5].mean():.1f} | {M[-1, 5:].mean():.1f} | "
                      f"{'500 images' if 'replay' in k else 'no'} |")
     axes[0].set_xticks(x, [f"{2 * i}/{2 * i + 1}" for i in range(10)], fontsize=8)
-    axes[0].set_xlabel("task (class pair; 0-9 digits, 10-19 clothing) - learned left to right")
+    axes[0].axvline(5.5, color=INK2, lw=1, ls="--")
+    axes[0].text(3.0, 103, "digits (learned first)", ha="center", fontsize=8, color=INK2)
+    axes[0].text(8.0, 103, "clothing (learned last)", ha="center", fontsize=8, color=INK2)
+    axes[0].set_ylim(0, 110)
+    axes[0].set_xlabel("class pair, in the order learned")
     axes[0].set_ylabel("accuracy after the whole stream (%)")
     axes[0].set_title("What is still known at the end of a 20-class life")
-    axes[0].legend(fontsize=8, loc="upper left")
     axes[0].grid(axis="x", visible=False)
-    if extra.get("_growth"):
-        g = np.array(extra["_growth"][0])
-        axes[1].plot(g[:, 0], g[:, 1], color=C[0], lw=2)
-        axes[1].axvline(60000, color=INK2, lw=1, ls="--")
-        axes[1].text(61000, g[:, 1].min(), "clothing begins", fontsize=8, color=INK2)
-        axes[1].set_xlabel("images experienced")
-        axes[1].set_ylabel("feature units recruited")
-        axes[1].set_title("Novelty recruits new units; familiar input does not")
-    fig.tight_layout()
+    for key, col, lab in (("_growth", C[0], "256-unit cap (full after 13k images)"), ("_growth (512 units)", C[1], "512-unit cap (full after 56k images)")):
+        if extra.get(key):
+            g = np.array(extra[key][0])
+            axes[1].plot(g[:, 0], g[:, 1], color=col, lw=2, label=lab)
+    axes[1].axvline(60000, color=INK2, lw=1, ls="--")
+    axes[1].text(61500, 545, "clothing begins", fontsize=8, color=INK2, va="bottom")
+    axes[1].set_xlabel("images experienced")
+    axes[1].set_ylabel("feature units recruited")
+    axes[1].set_ylim(0, 580)
+    axes[1].set_title("Feature units recruited over the lifetime")
+    axes[1].legend(fontsize=8, loc="lower right")
+    from matplotlib.patches import Patch
+    proxies = [Patch(color=col, label=k.replace(" | ordered", "")) for k, col in zip(show, C) if k in rows]
+    fig.legend(handles=proxies, loc="lower left", ncol=4, fontsize=8.5, bbox_to_anchor=(0.04, 0.0))
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(os.path.join(OUT, "fig4_lifelong.png"), dpi=150)
     return lines
 

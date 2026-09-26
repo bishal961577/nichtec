@@ -19,9 +19,9 @@ from sparc.sleep import run_sleep
 
 RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "raw")
 SPLIT = [(0, 1), (2, 3), (4, 5), (6, 7), (8, 9)]
-SPARC_FEAT = {"wta": True, "mature": 200, "recruit": 0.6}  # fully online setting (chosen by the sweep in results/sweep.md)
+SPARC_FEAT = {"wta": True, "mature": 200, "recruit": 0.6}  # fully online setting (chosen by the design search in results/ablations.md)
 ASSOC = {"m": 40000, "k": 100, "vote": "norm"}
-EWC_LAMBDAS = [1e2, 1e3, 1e4, 1e5, 1e6]
+EWC_LAMBDAS = [1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8]
 OTHER = {"mnist": "fashion", "fashion": "mnist"}
 
 
