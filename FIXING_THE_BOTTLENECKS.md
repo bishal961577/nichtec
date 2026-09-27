@@ -18,10 +18,16 @@ was run on each one.
   - Using new facts in multi-step reasoning.
   - Overriding strongly held old beliefs.
 - **Not solved:** learning new skills, as opposed to facts.
-- **First real-model test (Qwen2.5-0.5B, section 4): the design failed as specified.** The storage
-  maths behaved as predicted relative to the other write rules, but the lookup key did not tell
-  people apart, so even the joint solve recalled only 36% of facts at 18% of capacity. The
-  forward-only targets of Fix 4 also failed. Test 2 changes the key; its results are pending.
+- **Real-model tests (Qwen2.5-0.5B on a laptop GPU, section 4):**
+  - **Test 1: the design failed as specified.** The lookup key did not tell people apart, so even
+    the joint solve recalled only 36% of facts at 18% of capacity. Forward-only targets also failed.
+  - **Test 2: taking the person half of the key from the person's own tokens fixed most of it.**
+    - First-night recall: 96% (written wordings) and 44% (unseen), against 36% and 6% in test 1.
+    - Known facts stayed 100% intact behind a novelty gate.
+    - A per-answer target codebook built offline matched gradient targets, so the device needs no
+      backward pass.
+  - **Open:** recall still falls to 52% as facts reach 24,000, and unseen wordings are weak. Test 3
+    addresses both; its results are pending.
 
 ---
 
@@ -256,12 +262,13 @@ This is design only, with no new result behind it.
 | Property | Status | Evidence |
 |---|---|---|
 | Same memory whatever order facts arrive in | **Guaranteed by construction** | The ridge problem has one unique solution |
-| No loss of stored facts below capacity | **Confirmed in simulation; not achieved on a real model (test 1)** | Simulation: stored fidelity 1.000 / 0.999 / 0.992 at 5K / 10K / 15K facts. Qwen2.5-0.5B: 36% recall at 0.18 constraints per slot, because the keys collided (section 4) |
+| No loss of stored facts below capacity | **Confirmed in simulation; partly on a real model** | Simulation: stored fidelity 1.000 / 0.999 / 0.992 at 5K / 10K / 15K facts. Qwen2.5-0.5B: 36% (test 1, colliding keys), then 96% at 3K facts falling to 52% at 24K (test 2, too few reachable slots) |
 | Exact deletion | **Confirmed in simulation; not exact on a real model (test 1)** | Simulation: differs from never-learned by ≤0.00018. Real model: the re-solve did not converge when keys collided |
 | Capacity overflow detected and repaired | **Detection confirmed on a real model; repair confirmed in simulation** | Test 1: the certificate flagged 99.9% of constraints the night storage failed |
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
-| Found under any wording | **Failed with last-position keys (test 1); person × relation keys in test 2** | Test 1: unseen wordings 5–6%, near the 2% base rate |
-| Learning without a backward pass | **In-context difference failed (test 1); two replacements in test 2** | Test 1: 7.7% of facts said the answer with the forward-only target, against 100% for the gradient target |
+| Found under any wording | **Partial** | Unseen wordings: 6% (test 1), 44% (test 2); snapped keys in test 3 |
+| Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
+| Base model's known facts untouched | **Confirmed with the novelty gate (test 2)** | 44 of 44 known facts kept at every night with the gate; 2–7% without it |
 | Multi-step use of new facts | **Designed, untested** (Fix 5) | Chained recall: p² by arithmetic; multi-layer editing +15.5 points (prior) |
 | Overriding strong beliefs | **Designed, untested** (Fix 6) | Failure cause documented; margin writes are new |
 | Skills | **Open** | – |
@@ -353,7 +360,77 @@ about new people.
   - The answer token's output-embedding direction.
   - A per-answer codebook of gradient targets, computed once offline on other people.
 
-It uses the same 24,000 facts. Results are pending.
+It uses the same 24,000 facts.
+
+### Real-model test 2: person × relation keys
+
+(`reallm/memtest2.py`; results in `results/reallm2/summary.md`; 57 minutes on the same laptop.) The
+person half of the key is taken from the subject's last token at block 3. It was chosen
+automatically from blocks 3, 5, 7 and 9, using written wordings only.
+
+**Slot sharing, before and after:**
+
+| | Test 1 | Test 2 |
+|---|---|---|
+| Different people, same relation: shared slots | 60% | **3.5%** |
+| A fact's left-out written wording: its slots found | 89% | 96% |
+| Unseen wording: its slots found among the written ones | 25% | **70%** |
+
+**First night's facts after each night (joint least squares):**
+
+| Facts written | Written wordings | Unseen wordings | Nightly batch LS, written | Delta rule, written |
+|---|---|---|---|---|
+| 3,000 | **96.2%** | **43.7%** | 85.5% | 6.8% |
+| 6,000 | 89.6% | 28.0% | 13.6% | 3.7% |
+| 12,000 | 72.0% | 18.7% | 10.1% | 1.3% |
+| 24,000 | 51.8% | 11.1% | 9.3% | 3.5% |
+
+**Damage and gate.** The gate reads the memory only when the person's key is close to one already
+written.
+- The 44 facts the base model knows stayed **100%** correct at every night with the gate. Without
+  it they fell to 2–7%.
+- For never-written people, the memory changed the answer 19–26% of the time with the gate, against
+  96–99% without it.
+- The gate itself let 20–27% of never-written people through, and passed 86% of unseen wordings of
+  written people.
+
+**Deletion.** Deleted facts fell from 53% to 7.8%; the base rate is 2.2%. Kept facts were unchanged
+(49.4% → 49.5%). The remaining gap comes from a solver that stopped at its iteration cap: the
+difference from a never-learned memory was 1.3, against values up to 95.
+
+**Targets without a backward pass on the device:**
+- **Per-answer codebook.** Gradient targets were computed once, offline, on the calibration people
+  and averaged per answer. Their cosine with each fact's own gradient target is 0.91.
+  - Injected directly: 99.95% (written wordings), 100% (unseen).
+  - Through the memory: **96.0%**, against 96.2% for per-fact gradient targets; 45.8% against 43.6%
+    on unseen wordings.
+  - So on the device, writing a fact becomes a table lookup plus forward passes and a linear solve.
+  - Caveat: this holds here because every answer is one token from a known list. Open-ended,
+    multi-token answers are untested.
+- **The answer token's output-embedding direction:** 22% at its best scale. It fails.
+
+**What remains, and why:**
+1. **Recall falls from 96% to 52% as facts go from 3,000 to 24,000.**
+   - Both halves of the key had 256 codes, but only 8 relations exist. The facts therefore reached
+     only 20,902 of the 65,536 slots.
+   - That puts the effective load above one fact per reachable slot, where the simulation predicted
+     degradation.
+   - The solver also stopped at its 300-iteration cap every night. The certificate flagged it:
+     73% of constraints were more than 20% off on night 1, and 99.9% by the end.
+2. **Unseen wordings: 44% on night 1.** Injecting the target directly works on them 100% of the
+   time, so the loss is in the key. A name in the middle of a new sentence has a different state at
+   its last token, and 30% of its slots move.
+3. **The gate lets 20–27% of never-written people through.** A key from the name's last token mostly
+   reflects its last word piece, and many invented surnames share one.
+
+**Test 3** (`reallm/memtest3.py`, running now) targets each cause:
+- **Person key.** The name is encoded on its own, averaged over all its tokens. It is then snapped to
+  the nearest person already written, or the memory stays silent.
+- **Relation.** The relation is snapped to the nearest known relation.
+- **Key split.** The key is split 1,024 person codes × 64 relation codes, so all slots are reachable.
+- **Solver.** The solver is preconditioned.
+- **Context comparison.** The same questions are answered with 10, 100 or 1,000 facts in the context,
+  with only the best-matching fact selected into it, and from the memory alone.
 
 ## 5. Tests that decide it, in order
 
