@@ -1,6 +1,9 @@
 # nichtec
 
-**Start here: [AGI_BOTTLENECK.md](AGI_BOTTLENECK.md)**
+Two write-ups, each with the code and raw results behind every number:
+
+- **[AGI_BOTTLENECK.md](AGI_BOTTLENECK.md)**: why AI can't learn in the order experience arrives, and a learner (SPARC) that can.
+- **[COUNTING_AI.md](COUNTING_AI.md)**: how far a language model gets when training is nothing but counting on a CPU (no GPU, no gradient descent), measured on Penn Treebank against a neural network on the same machine.
 
 The thesis: the deepest gap between today's AI and a human-like learner is that neural networks
 cannot learn from experience *in the order it arrives*. Their gradient updates do not commute, so
@@ -25,3 +28,5 @@ python3 report.py                # -> results/summary.md and results/*.png
 | `sparc/sleep.py` | "Sleep": generative replay from commutative memory into a backprop learner |
 | `sparc/protocol.py` | Streams, single-pass training loops, metrics |
 | `results/` | Raw JSON per run, aggregated tables, figures, ablations |
+| `alm/`, `run_lm.py` | Counting-only language model: Kneser-Ney, cache, skip-grams, count-derived vectors, closed-form predictor, soft n-gram, CPU LSTM baseline |
+| `results/lm/` | Per-token probabilities, timings, mixtures, exactness checks, analysis figure |

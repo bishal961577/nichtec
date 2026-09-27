@@ -1,0 +1,8 @@
+{
+ "merge_4_shards_max_abs_diff": 0.0,
+ "unlearn_max_abs_diff_vs_retrain": 0.0,
+ "unlearn_seconds": 5.51,
+ "full_train_seconds": 12.35,
+ "test_ppl_before": 141.06352439116793,
+ "test_ppl_after_unlearn": 141.91154376054993
+}

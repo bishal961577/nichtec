@@ -1,0 +1,13 @@
+{
+ "train_kn5": 12.6,
+ "eval_kn5": 0.8,
+ "train_skip2": 0.9,
+ "train_skip3": 1.0,
+ "train_embeddings": 3.7,
+ "train_ridge_stats": 66.8,
+ "train_ridge_solve": 0.8,
+ "eval_ridge": 36.1,
+ "train_softgram": 7.6,
+ "eval_soft_valid": 716.3,
+ "eval_soft_test": 815.8
+}

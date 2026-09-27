@@ -495,11 +495,19 @@ Seed 0 only (these runs are the most expensive).
 | Sparse random expansion, k-WTA and associative readout for continual learning | Dasgupta et al. 2017 (fly hashing); Shen, Dasgupta & Navlakha, *Neural Computation* 2023 (arXiv 2021) |
 | Sparse codes reduce interference | French 1991 (activation sharpening); Srivastava et al. 2013; Iyer et al. 2022 (active dendrites); Bricken et al. ICLR 2023 (SDM) |
 | Streaming sufficient-statistic classifiers | Hayes & Kanan 2020 (deep SLDA) |
+| **Closed-form ("analytic") continual learning that provably equals joint training** | **ACIL, Zhuang et al., NeurIPS 2022** (recursive least squares on a frozen backbone gives results identical to joint training); GKEAL (CVPR 2023); DS-AL (AAAI 2024); GACL (2024); **RanPAC, McDonnell et al., NeurIPS 2023** (frozen pretrained features, then a random projection and nonlinearity, then a Gram-matrix ridge classifier: essentially the SPARC-dev recipe, on large vision models); FeCAM (Goswami et al., NeurIPS 2023) |
+| Learning in "summation form" so that data can be removed exactly | Cao & Yang, IEEE S&P 2015 |
 | Consolidation and metaplasticity | Fusi, Drew & Abbott 2005; Benna & Fusi 2016; Zenke, Poole & Ganguli 2017; Kirkpatrick et al. 2017 (EWC) |
 | Recruiting fresh units | Dohare et al. *Nature* 2024 (continual backprop) |
 | Closest overall combination | CLP / CLP-SNN, Hajizada et al. 2024–2025 (WTA prototypes, local three-factor rule, metaplasticity, novelty-triggered neurogenesis, on neuromorphic hardware) |
 | Sparse memory inside LLMs for continual learning | Berges et al. 2024 (memory layers at scale); Lin et al. 2025 (sparse memory finetuning: NaturalQuestions forgetting 89% full FT, 71% LoRA, 11% sparse memory); 2026 follow-ups |
 | Order-invariance through exact Bayesian updates | Nguyen et al. 2018 (VCL) |
+
+**Correction (added after publication of the first version):** the first version of this table
+omitted ACIL, RanPAC and related "analytic continual learning" work. They already established
+that a least-squares / second-moment readout over frozen features makes class-incremental
+learning *identical* to joint training, which is the SPARC-dev result. The controlled
+Hebbian-vs-delta-rule experiment and the drift ablations are the parts not covered there.
 
 What I believe is useful here, as opposed to new in its parts: naming **update
 commutativity + representation stability** as the precise root variable, backed by a clean
@@ -580,11 +588,14 @@ generative replay), `sparc/protocol.py` (streams and metrics),
 - French, R. (1999). Catastrophic forgetting in connectionist networks. *Trends in Cognitive Sciences* 3(4).
 - Fusi, S., Drew, P. & Abbott, L. (2005). Cascade models of synaptically stored memories. *Neuron* 45.
 - Hajizada, E. et al. (2024, 2025). Continual Learning with Prototypes (CLP), arXiv:2404.00418; CLP-SNN, arXiv:2511.01553.
+- Cao, Y. & Yang, J. (2015). Towards Making Systems Forget with Machine Unlearning. IEEE S&P.
+- Goswami, D. et al. (2023). FeCAM: Exploiting the Heterogeneity of Class Distributions in Exemplar-Free Continual Learning. NeurIPS.
 - Hayes, T. & Kanan, C. (2020). Lifelong machine learning with deep streaming linear discriminant analysis. CVPR Workshops.
 - Iyer, A. et al. (2022). Avoiding catastrophe: active dendrites enable multi-task learning in dynamic environments. *Frontiers in Neurorobotics* 16.
 - Kirkpatrick, J. et al. (2017). Overcoming catastrophic forgetting in neural networks. *PNAS* 114(13).
 - Kumaran, D., Hassabis, D. & McClelland, J. (2016). What learning systems do intelligent agents need? *Trends in Cognitive Sciences* 20(7).
 - Lin, J. et al. (2025). Continual Learning via Sparse Memory Finetuning. arXiv:2510.15103.
+- McDonnell, M. et al. (2023). RanPAC: Random Projections and Pre-trained Models for Continual Learning. NeurIPS.
 - McClelland, J., McNaughton, B. & O'Reilly, R. (1995). Why there are complementary learning systems in the hippocampus and neocortex. *Psychological Review* 102(3).
 - McCloskey, M. & Cohen, N. (1989). Catastrophic interference in connectionist networks. *Psychology of Learning and Motivation* 24.
 - Nguyen, C. et al. (2018). Variational Continual Learning. ICLR.
@@ -595,4 +606,5 @@ generative replay), `sparc/protocol.py` (streams and metrics),
 - Shenfeld, I., Pari, J. & Agrawal, P. (2025). RL's Razor: Why online RL forgets less. arXiv:2509.04259.
 - Srivastava, R. et al. (2013). Compete to Compute. NIPS.
 - Zhu, F. et al. (2021). Prototype Augmentation and Self-Supervision for Incremental Learning (PASS). CVPR.
+- Zhuang, H. et al. (2022). ACIL: Analytic Class-Incremental Learning with Absolute Memorization and Privacy Protection. NeurIPS.
 - Zenke, F., Poole, B. & Ganguli, S. (2017). Continual learning through synaptic intelligence. ICML.

@@ -1,0 +1,56 @@
+{
+ "buckets": [
+  {
+   "context": "never seen",
+   "share_of_tokens": 0.18920296008734683,
+   "kn5": 179.3768843219583,
+   "additive": 143.67549114672562,
+   "lstm": 154.6749395069301,
+   "additive+lstm": 109.14903309927949
+  },
+  {
+   "context": "seen 1-4 times",
+   "share_of_tokens": 0.1885721218003154,
+   "kn5": 161.5467217381738,
+   "additive": 128.1355840956489,
+   "lstm": 140.9422617848684,
+   "additive+lstm": 97.47228277888826
+  },
+  {
+   "context": "seen 5-49 times",
+   "share_of_tokens": 0.28720126167657406,
+   "kn5": 122.60464624696989,
+   "additive": 102.20048744413579,
+   "lstm": 98.11149563151413,
+   "additive+lstm": 76.92351706764299
+  },
+  {
+   "context": "seen 50+ times",
+   "share_of_tokens": 0.3350236564357637,
+   "kn5": 128.69242036826734,
+   "additive": 111.31157338461848,
+   "lstm": 98.24026873172144,
+   "additive+lstm": 84.20545052714513
+  },
+  {
+   "context": "all",
+   "share_of_tokens": 1.0,
+   "kn5": 141.06352439116793,
+   "additive": 117.05441462303278,
+   "lstm": 114.54670374607458,
+   "additive+lstm": 88.58496337885654
+  }
+ ],
+ "additive_weights": {
+  "kn5": 0.45,
+  "cache": 0.083,
+  "skip2": 0.0,
+  "skip3": 0.0,
+  "ridge": 0.087,
+  "soft": 0.38
+ },
+ "additive_lstm_weights": [
+  0.427,
+  0.573
+ ]
+}

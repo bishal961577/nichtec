@@ -1,0 +1,93 @@
+[
+ {
+  "model": "kn5 alone",
+  "valid": 147.73700959896217,
+  "test": 141.06352439116793
+ },
+ {
+  "model": "cache alone",
+  "valid": Infinity,
+  "test": Infinity
+ },
+ {
+  "model": "skip2 alone",
+  "valid": 490.3217158717011,
+  "test": 458.3299573534402
+ },
+ {
+  "model": "skip3 alone",
+  "valid": 643.0623763770234,
+  "test": 604.6957697276839
+ },
+ {
+  "model": "ridge alone",
+  "valid": 264.73258247055236,
+  "test": 248.1164131296845
+ },
+ {
+  "model": "soft alone",
+  "valid": 157.36512432347592,
+  "test": 151.40522325352995
+ },
+ {
+  "model": "kn5",
+  "valid": 147.73700959896217,
+  "test": 141.06352439116793,
+  "weights": {
+   "kn5": 1.0
+  }
+ },
+ {
+  "model": "kn5 + cache",
+  "valid": 129.94956300803466,
+  "test": 126.58957892318536,
+  "weights": {
+   "kn5": 0.899,
+   "cache": 0.101
+  }
+ },
+ {
+  "model": "kn5 + cache + skip2 + skip3",
+  "valid": 129.33479333516303,
+  "test": 126.0661719958883,
+  "weights": {
+   "kn5": 0.87,
+   "cache": 0.097,
+   "skip2": 0.026,
+   "skip3": 0.007
+  }
+ },
+ {
+  "model": "kn5 + cache + ridge",
+  "valid": 126.05662050122308,
+  "test": 123.13858567102423,
+  "weights": {
+   "kn5": 0.759,
+   "cache": 0.089,
+   "ridge": 0.152
+  }
+ },
+ {
+  "model": "kn5 + cache + soft",
+  "valid": 120.56150954661132,
+  "test": 118.42353873908179,
+  "weights": {
+   "kn5": 0.514,
+   "cache": 0.087,
+   "soft": 0.399
+  }
+ },
+ {
+  "model": "kn5 + cache + skip2 + skip3 + ridge + soft",
+  "valid": 119.20221946043857,
+  "test": 117.05441462303268,
+  "weights": {
+   "kn5": 0.45,
+   "cache": 0.083,
+   "skip2": 0.0,
+   "skip3": 0.0,
+   "ridge": 0.087,
+   "soft": 0.38
+  }
+ }
+]
