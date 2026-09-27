@@ -18,6 +18,10 @@ was run on each one.
   - Using new facts in multi-step reasoning.
   - Overriding strongly held old beliefs.
 - **Not solved:** learning new skills, as opposed to facts.
+- **First real-model test (Qwen2.5-0.5B, section 4): the design failed as specified.** The storage
+  maths behaved as predicted relative to the other write rules, but the lookup key did not tell
+  people apart, so even the joint solve recalled only 36% of facts at 18% of capacity. The
+  forward-only targets of Fix 4 also failed. Test 2 changes the key; its results are pending.
 
 ---
 
@@ -252,12 +256,12 @@ This is design only, with no new result behind it.
 | Property | Status | Evidence |
 |---|---|---|
 | Same memory whatever order facts arrive in | **Guaranteed by construction** | The ridge problem has one unique solution |
-| No loss of stored facts below capacity | **Guaranteed, confirmed in simulation** | Stored fidelity 1.000 / 0.999 / 0.992 at 5K / 10K / 15K facts; gradient updates 0.915 → 0.792; batch editing 0.996 → 0.702 |
-| Exact deletion | **Guaranteed, confirmed in simulation** | Differs from never-learned by ≤0.00018; deleted recall 1.0 → 0.0; kept facts 1.0 |
-| Capacity overflow detected and repaired | **Confirmed in simulation** | Certificate flagged 1,992 facts; after growth, 2 flagged, fidelity 0.99 |
+| No loss of stored facts below capacity | **Confirmed in simulation; not achieved on a real model (test 1)** | Simulation: stored fidelity 1.000 / 0.999 / 0.992 at 5K / 10K / 15K facts. Qwen2.5-0.5B: 36% recall at 0.18 constraints per slot, because the keys collided (section 4) |
+| Exact deletion | **Confirmed in simulation; not exact on a real model (test 1)** | Simulation: differs from never-learned by ≤0.00018. Real model: the re-solve did not converge when keys collided |
+| Capacity overflow detected and repaired | **Detection confirmed on a real model; repair confirmed in simulation** | Test 1: the certificate flagged 99.9% of constraints the night storage failed |
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
-| Found under any wording | **Designed, untested** (Fix 3) | Simulation shows recall tracks slot overlap; canonical keys make overlap 100% if canonicalisation is consistent |
-| Learning without a backward pass | **Designed, untested** (Fix 4) | Exact rank-1 context-to-weight result exists (Dherin et al.) |
+| Found under any wording | **Failed with last-position keys (test 1); person × relation keys in test 2** | Test 1: unseen wordings 5–6%, near the 2% base rate |
+| Learning without a backward pass | **In-context difference failed (test 1); two replacements in test 2** | Test 1: 7.7% of facts said the answer with the forward-only target, against 100% for the gradient target |
 | Multi-step use of new facts | **Designed, untested** (Fix 5) | Chained recall: p² by arithmetic; multi-layer editing +15.5 points (prior) |
 | Overriding strong beliefs | **Designed, untested** (Fix 6) | Failure cause documented; margin writes are new |
 | Skills | **Open** | – |
@@ -268,7 +272,90 @@ a real model represents questions.
 
 ---
 
-## 4. Tests that decide it, in order
+## 4. Real-model test 1: Qwen2.5-0.5B on a laptop GPU
+
+**Setup** (`reallm/memtest.py`; results in `results/reallm/summary.md`; 52 minutes on an RTX 3050 laptop GPU):
+- **Model and memory.** Frozen Qwen2.5-0.5B plus an empty memory: 65,536 slots after block 14 of
+  24. The memory's output is added at the question's last position. At the start, the model is
+  exactly unchanged.
+- **Facts.** 24,000 made-up facts: 3,000 invented people × 8 relations (city, job, colour, pet,
+  instrument, sport, language, car). They arrive 3,000 per night.
+- **Wordings.** Each fact is written under 4 wordings. Two further wordings per fact are used only
+  for evaluation; nothing else ever sees them.
+- **Targets.** Each fact's target is the vector that makes the frozen model say the answer, found
+  by 25 gradient steps.
+- **Key.** The model's hidden state at the question's last position, block 14. It is projected by a
+  linear map fitted once on 300 separate calibration people.
+- **Metric.** Is the model's next token the answer?
+
+**First night's facts, written wordings, after each night:**
+
+| Facts written | Constraints per slot | Delta rule (gradient family) | Nightly batch least squares | Joint least squares (Fix 1) |
+|---|---|---|---|---|
+| 3,000 | 0.18 | 6.8% | 27.5% | **35.9%** |
+| 6,000 | 0.37 | 7.7% | 9.5% | **24.0%** |
+| 12,000 | 0.73 | 9.6% | 7.7% | **18.3%** |
+| 24,000 | 1.47 | 8.2% | 8.8% | **13.2%** |
+
+- Without the memory, the model gets 2.5% right.
+- Adding each fact's target directly at the last position gives **100%**, on written *and* unseen
+  wordings. What to store works; where it is stored is the problem.
+
+**What held:**
+- **The ordering the simulation predicted.** The joint solve is best at every night. Nightly batch
+  editing collapses after its second night (27.5% → 9.5%), the MEMIT-style failure. Sequential
+  delta-rule writes barely store at all.
+- **The certificate (Fix 2) did its job.** On night 1 it flagged 99.9% of constraints as more than
+  20% off: the failure was reported the night it happened, not discovered later.
+
+**What failed, and why:**
+1. **The key did not tell people apart.**
+   - The joint solve recalled only 36% at 0.18 constraints per slot, far below capacity; the
+     simulation stored facts exactly there.
+   - Measured slot sharing: different people with the same relation shared **60%** of their slots.
+     Different relations shared 0.4%.
+   - The key map's strongest directions separate relations; their discriminant ratios are 5,902,
+     3,380 and 1,934.
+   - Rescaling the directions to spread people apart cut sharing to 0.3%. But then a fact's own
+     written wordings found only 14% of each other's slots.
+   - The state at the question's last position simply does not carry who the person is. This
+     matches how transformers recall facts (Geva et al. 2023; Meng et al., ROME): a subject's
+     identity is assembled at the subject's own last token in early-middle layers. The final
+     position then pulls attributes out of it, and an invented person has none to pull.
+2. **Unseen wordings: 5–6% for every method,** near the base rate. Their keys found 25% of the
+   written wordings' slots.
+3. **Damage when the memory is read at every position.**
+   - With the joint solve, known facts the base model answers correctly (37 of them) fell to 38–46%.
+   - On unrelated text, the change in next-token predictions (KL divergence) was 0.37–0.55 per
+     token. "Output nothing here" constraints halved that, to 0.18–0.23.
+   - The values grew large (up to 64) because the solver was trying to satisfy colliding
+     constraints.
+4. **Deletion was not exact.**
+   - With colliding keys, the re-solve did not converge in 600 iterations. The result differed from
+     a never-learned memory by 2.3, with values up to 64.
+   - Deleted facts fell from 13.7% to 8%, not to the 2.2% base rate.
+5. **Forward-only targets (Fix 4) failed.** The in-context-minus-no-context difference, at its best
+   scale, made the model say the answer for 7.7% of facts. The gradient target does so for 100%.
+
+**Conclusion.** On a real model, the storage mathematics is not the bottleneck; the address is. The
+sparse-memory results in the simulation assumed each fact gets its own slots. With keys read from
+the question's last position, that assumption is false for the case that matters most: new facts
+about new people.
+
+**Test 2** (`reallm/memtest2.py`) changes three things:
+- **The key.** The person half of the product key comes from the subject's last token, early in the
+  network. The relation half comes from the question's last position. So each slot is a
+  (person, relation) pair: Fix 3's canonical key, read from the model's own states rather than
+  generated text.
+- **A novelty gate.** The memory is read only when the person's key is close to one already
+  written. This follows GRACE's deferral radius.
+- **Two targets that need no backward pass on the device.**
+  - The answer token's output-embedding direction.
+  - A per-answer codebook of gradient targets, computed once offline on other people.
+
+It uses the same 24,000 facts. Results are pending.
+
+## 5. Tests that decide it, in order
 
 | # | Test | Pass criterion |
 |---|---|---|

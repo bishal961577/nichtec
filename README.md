@@ -32,3 +32,6 @@ python3 report.py                # -> results/summary.md and results/*.png
 | `results/lm/` | Per-token probabilities, timings, mixtures, exactness checks, analysis figure |
 | `run_scale.py`, `alm/kn_fast.py`, `alm/imdb.py` | Data-scaling test (0.3M to 10M words of IMDB reviews): counting vs LSTM |
 | `results/scale/` | Scale-test probabilities, timings, table (`scale.json`) and figure |
+| `FIXING_THE_BOTTLENECKS.md`, `memsim/` | Fixes for a phone AI that learns into its own weights; simulations of the memory |
+| `reallm/memtest.py`, `results/reallm/` | Real-model test 1 (Qwen2.5-0.5B, laptop GPU): last-position keys, four write rules |
+| `reallm/memtest2.py`, `results/reallm2/` | Real-model test 2: person x relation keys, novelty gate, targets without a backward pass |
