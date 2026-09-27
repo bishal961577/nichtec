@@ -30,3 +30,5 @@ python3 report.py                # -> results/summary.md and results/*.png
 | `results/` | Raw JSON per run, aggregated tables, figures, ablations |
 | `alm/`, `run_lm.py` | Counting-only language model: Kneser-Ney, cache, skip-grams, count-derived vectors, closed-form predictor, soft n-gram, CPU LSTM baseline |
 | `results/lm/` | Per-token probabilities, timings, mixtures, exactness checks, analysis figure |
+| `run_scale.py`, `alm/kn_fast.py`, `alm/imdb.py` | Data-scaling test (0.3M to 10M words of IMDB reviews): counting vs LSTM |
+| `results/scale/` | Scale-test probabilities, timings, table (`scale.json`) and figure |

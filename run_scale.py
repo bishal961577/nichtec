@@ -96,7 +96,10 @@ def report():
                 both = em_weights(np.concatenate([Pv, lv[:, None]], 1))
                 r[f"counting+lstm{H}"] = mix_ppl(np.concatenate([Pt, lt[:, None]], 1), both)
                 r[f"gap{H}"] = r["counting"] / r[f"lstm{H}"]
-                r[f"lstm{H}_train_minutes"] = json.load(open(os.path.join(OUT, f"{n}_lstm{H}.json")))["train_seconds"] / 60
+                lj = json.load(open(os.path.join(OUT, f"{n}_lstm{H}.json")))
+                r[f"lstm{H}_train_minutes"] = lj["train_seconds"] / 60
+                cur = lj["curve"]
+                r[f"lstm{H}_cut_off"] = bool(len(cur) >= EPOCHS[n] and len(cur) > 1 and cur[-1][2] < 0.99 * cur[-2][2])
         tj = os.path.join(OUT, f"{n}_count_timings.json")
         if os.path.exists(tj):
             T = json.load(open(tj))
@@ -122,6 +125,11 @@ def report():
         if pts:
             xs, ys = zip(*pts)
             ax.plot(xs, ys, color=col, lw=2, marker="o", ms=6, label=lab)
+            if key.startswith("lstm"):
+                cut = [(r["train_words"], r[key]) for r in rows if r.get(key + "_cut_off")]
+                if cut:
+                    cx, cy = zip(*cut)
+                    ax.plot(cx, cy, ls="none", marker="o", ms=9, mfc=SURFACE, mec=col, mew=2)
     ax.set_xscale("log"); ax.set_yscale("log")
     ax.set_xticks(ns, [f"{n / 1e6:g}M" for n in ns]); ax.minorticks_off()
     yt = [60, 80, 100, 150, 200, 300, 400]
@@ -135,10 +143,16 @@ def report():
         if pts:
             xs, ys = zip(*pts)
             ax.plot(xs, ys, color=col, lw=2, marker="o", ms=6, label=f"counting / LSTM 2x{H}")
+            cut = [(r["train_words"], r[f"gap{H}"]) for r in rows if r.get(f"lstm{H}_cut_off")]
+            if cut:
+                cx, cy = zip(*cut)
+                ax.plot(cx, cy, ls="none", marker="o", ms=9, mfc=SURFACE, mec=col, mew=2,
+                        label="neural net stopped while still improving\n(true gap likely larger)")
             for x_, y_ in pts:
-                ax.text(x_, y_ + 0.02, f"{y_:.2f}", ha="center", fontsize=8, color=INK)
+                ax.text(x_, y_ - 0.035, f"{y_:.2f}", ha="center", va="top", fontsize=8.5, color=INK)
     ax.axhline(1.0, color=INK2, lw=1, ls="--")
-    ax.text(ns[0], 1.01, "equal quality", fontsize=8, color=INK2, va="bottom")
+    ax.text(ns[-1], 1.005, "equal quality", fontsize=8, color=INK2, va="bottom", ha="right")
+    ax.set_ylim(0.8, 1.3)
     ax.set_xscale("log"); ax.set_xticks(ns, [f"{n / 1e6:g}M" for n in ns]); ax.minorticks_off()
     ax.set_xlabel("training words (log scale)"); ax.set_ylabel("perplexity ratio (above 1: counting is worse)")
     ax.set_title("The gap: does counting fall behind as data grows?", fontweight="bold", fontsize=10)

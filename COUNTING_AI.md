@@ -163,8 +163,8 @@ that gap, including me. If one existed, training strong models would become some
 laptops could do by adding up their counts. That is the size of the prize, and it is still open.
 
 Next experiments, each runnable with this repository:
-1. **Scale test.** The same pipeline on WikiText-103 (100× more data): does counting's gap to neural
-   models shrink or grow?
+1. **Scale test.** Done at 0.3M to 10M words; see Section 8. The open part is converged, larger
+   networks at 100M+ words, which needs a GPU.
 2. **Closed-form learned features.** Reduced-rank regression / CCA between past and future
    contexts gives predictive features from sums of second moments. Does it close the gap on the
    frequent-context buckets, where counting loses today?
@@ -173,7 +173,52 @@ Next experiments, each runnable with this repository:
 4. **Counting + tiny network, pushed further.** Mix with a regularised neural model and measure how
    much neural compute the counts save at equal quality.
 
-## 8. Reproduce
+## 8. Scale test: does counting fall behind as data grows?
+
+**Setup.**
+- **Corpus:** IMDB movie reviews. WikiText-103 was blocked by this sandbox's network policy, and IMDB was the largest English corpus reachable.
+- **Training sets:** 0.3M, 1M, 3M and 10M words, a 33× range, with a 10k-word vocabulary.
+- **Scoring:** every model is scored on the same 10,000 held-out test positions.
+- **Counting model:** settings chosen on Penn Treebank, left unchanged.
+- **Neural network:** LSTM 2×200 with dropout 0.2 and early stopping. Its epoch budget was capped at 20 / 13 / 8 / 4 epochs to fit the CPU.
+
+Code: `run_scale.py`, `alm/kn_fast.py`, `alm/imdb.py`. Raw results: `results/scale/`.
+
+| Training words | Kneser-Ney 5-gram | Counting only | LSTM 2×200 | Gap (counting ÷ LSTM) | Mixed | Counting training | LSTM training |
+|---|---|---|---|---|---|---|---|
+| 0.3M | 267 | 235 | 223 | 1.06 | 184 | 0.4 min | 16 min |
+| 1M | 206 | 179 | 156 | 1.15 | 136 | 1.8 min | 40 min |
+| 3M | 168 | 147 | 138\* | 1.07\* | 119 | 5.6 min | 64 min |
+| 10M | 133 | 119 | 124\* | 0.97\* | 101 | 17 min | 92 min |
+
+\* The network was still improving when its epoch budget ran out. At 10M its validation perplexity
+went 139 → 129 → 125 → 122 over its four epochs. Training times were measured with the two
+pipelines sharing the 4-core CPU.
+
+![Scale test](results/scale/fig_scale.png)
+
+**What the numbers say, and what they don't:**
+- **Counting did not fall behind the small network across 33× more data.** The gap stayed
+  between −3% and +15%, with no upward trend.
+- **That is not evidence that counting scales like neural networks, for three reasons.**
+  - At 3M and 10M the network was stopped before converging. Extrapolating its 10M validation
+    curve suggests a converged test perplexity of roughly 110–116, a gap of about 1.03–1.08. That
+    range is a rough estimate, not a measurement.
+  - The network was held at 200 units. In practice, networks are grown as data grows.
+  - At much larger scale, the published gap is large: on the One Billion Word benchmark,
+    Kneser-Ney 5-gram scores 67.6 while large single LSTMs score about 30 (Chelba et al. 2013;
+    Jozefowicz et al. 2016).
+- **Mixing keeps paying off at every size.** It gives 12–18% lower perplexity than the better single model.
+- **The soft n-gram's scoring cost grows with the data.** At 10M words it needs about 0.27 s
+  per scored word (5,392 s for 20,000 positions), where the network needs milliseconds. This
+  is the approach's main practical weakness.
+
+**Verdict:** within a CPU budget and up to 10M words, counting keeps pace with a small neural
+network and complements it strongly. Nothing here shows it can match neural networks at the
+scale of modern AI, and the larger-scale evidence says it cannot. The experiment that would
+settle it is converged, larger networks at 100M+ words, which needs a GPU or days of CPU time.
+
+## 9. Reproduce
 
 ```bash
 pip install numpy scipy jax matplotlib
@@ -183,15 +228,20 @@ python3 run_lm.py exact        # merge / unlearn exactness
 python3 run_lm.py lstm         # CPU LSTM baseline (~25 min)
 python3 run_lm.py analyze      # per-context-frequency comparison + figure
 python3 run_lm.py bucketed     # context-dependent mixing weights
+for n in 300000 1000000 3000000 10000000; do python3 run_scale.py count $n; python3 run_scale.py lstm $n; done
+python3 run_scale.py report    # scale-test table + figure (the full loop takes ~6 h on 4 cores)
 ```
 
 ## References
 
 - Cao, Y. & Yang, J. (2015). Towards making systems forget with machine unlearning. IEEE S&P.
+- Chelba, C. et al. (2013). One billion word benchmark for measuring progress in statistical language modeling. arXiv:1312.3005.
 - Chen, S. & Goodman, J. (1998). An empirical study of smoothing techniques for language modeling. Harvard TR-10-98.
 - Dai, Z. et al. (2019). Transformer-XL: Attentive language models beyond a fixed-length context. ACL.
 - Dagan, I., Lee, L. & Pereira, F. (1999). Similarity-based models of word cooccurrence probabilities. *Machine Learning* 34.
+- Jozefowicz, R. et al. (2016). Exploring the limits of language modeling. arXiv:1602.02410.
 - Khandelwal, U. et al. (2020). Generalization through memorization: nearest neighbor language models. ICLR.
+- Maas, A. et al. (2011). Learning word vectors for sentiment analysis (the IMDB review corpus). ACL.
 - Levy, O. & Goldberg, Y. (2014). Neural word embedding as implicit matrix factorization. NeurIPS.
 - Merity, S., Keskar, N. & Socher, R. (2018). Regularizing and optimizing LSTM language models (AWD-LSTM). ICLR.
 - Mikolov, T. et al. (2011). Empirical evaluation and combination of advanced language modeling techniques. Interspeech.
