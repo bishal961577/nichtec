@@ -1,0 +1,131 @@
+{
+ "slot_share_heldout_vs_train": 0.3596875,
+ "log": [
+  {
+   "facts": 1000,
+   "constraints_per_slot": 0.06103515625,
+   "joint_iters": 24,
+   "joint_solve_s": 2.3,
+   "sgd": {
+    "first_1000": 0.765,
+    "latest_night": 0.765,
+    "all": 0.765
+   },
+   "batch_ls": {
+    "first_1000": 0.788,
+    "latest_night": 0.788,
+    "all": 0.788
+   },
+   "joint_ls": {
+    "first_1000": 0.784,
+    "latest_night": 0.784,
+    "all": 0.784
+   }
+  },
+  {
+   "facts": 2000,
+   "constraints_per_slot": 0.1220703125,
+   "joint_iters": 31,
+   "joint_solve_s": 3.6,
+   "sgd": {
+    "first_1000": 0.688,
+    "latest_night": 0.684,
+    "all": 0.686
+   },
+   "batch_ls": {
+    "first_1000": 0.691,
+    "latest_night": 0.723,
+    "all": 0.707
+   },
+   "joint_ls": {
+    "first_1000": 0.699,
+    "latest_night": 0.697,
+    "all": 0.698
+   }
+  },
+  {
+   "facts": 3000,
+   "constraints_per_slot": 0.18310546875,
+   "joint_iters": 34,
+   "joint_solve_s": 5.2,
+   "sgd": {
+    "first_1000": 0.63,
+    "latest_night": 0.631,
+    "all": 0.625
+   },
+   "batch_ls": {
+    "first_1000": 0.605,
+    "latest_night": 0.689,
+    "all": 0.643
+   },
+   "joint_ls": {
+    "first_1000": 0.64,
+    "latest_night": 0.64,
+    "all": 0.627
+   }
+  },
+  {
+   "facts": 4000,
+   "constraints_per_slot": 0.244140625,
+   "joint_iters": 36,
+   "joint_solve_s": 5.7,
+   "sgd": {
+    "first_1000": 0.581,
+    "latest_night": 0.586,
+    "all": 0.57
+   },
+   "batch_ls": {
+    "first_1000": 0.511,
+    "latest_night": 0.664,
+    "all": 0.594
+   },
+   "joint_ls": {
+    "first_1000": 0.57,
+    "latest_night": 0.592,
+    "all": 0.569
+   }
+  },
+  {
+   "facts": 5000,
+   "constraints_per_slot": 0.30517578125,
+   "joint_iters": 39,
+   "joint_solve_s": 5.9,
+   "sgd": {
+    "first_1000": 0.543,
+    "latest_night": 0.537,
+    "all": 0.536
+   },
+   "batch_ls": {
+    "first_1000": 0.455,
+    "latest_night": 0.624,
+    "all": 0.559
+   },
+   "joint_ls": {
+    "first_1000": 0.516,
+    "latest_night": 0.511,
+    "all": 0.523
+   }
+  },
+  {
+   "facts": 6000,
+   "constraints_per_slot": 0.3662109375,
+   "joint_iters": 41,
+   "joint_solve_s": 7.5,
+   "sgd": {
+    "first_1000": 0.495,
+    "latest_night": 0.524,
+    "all": 0.508
+   },
+   "batch_ls": {
+    "first_1000": 0.392,
+    "latest_night": 0.625,
+    "all": 0.499
+   },
+   "joint_ls": {
+    "first_1000": 0.462,
+    "latest_night": 0.479,
+    "all": 0.475
+   }
+  }
+ ]
+}

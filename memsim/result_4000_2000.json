@@ -1,0 +1,65 @@
+{
+ "slot_share_heldout_vs_train": 0.7009375,
+ "log": [
+  {
+   "facts": 2000,
+   "constraints_per_slot": 0.1220703125,
+   "joint_iters": 52,
+   "joint_solve_s": 6.5,
+   "sgd": {
+    "first_1000": 0.988,
+    "latest_night": 0.99,
+    "all": 0.989,
+    "first_1000_written_wording": 0.999,
+    "cos_written": 0.966,
+    "cos_heldout": 0.936
+   },
+   "batch_ls": {
+    "first_1000": 0.997,
+    "latest_night": 1.0,
+    "all": 0.998,
+    "first_1000_written_wording": 1.0,
+    "cos_written": 0.999,
+    "cos_heldout": 0.964
+   },
+   "joint_ls": {
+    "first_1000": 0.998,
+    "latest_night": 0.999,
+    "all": 0.999,
+    "first_1000_written_wording": 1.0,
+    "cos_written": 1.0,
+    "cos_heldout": 0.962
+   }
+  },
+  {
+   "facts": 4000,
+   "constraints_per_slot": 0.244140625,
+   "joint_iters": 66,
+   "joint_solve_s": 9.5,
+   "sgd": {
+    "first_1000": 0.969,
+    "latest_night": 0.973,
+    "all": 0.972,
+    "first_1000_written_wording": 0.996,
+    "cos_written": 0.931,
+    "cos_heldout": 0.881
+   },
+   "batch_ls": {
+    "first_1000": 0.991,
+    "latest_night": 0.995,
+    "all": 0.993,
+    "first_1000_written_wording": 0.997,
+    "cos_written": 0.949,
+    "cos_heldout": 0.89
+   },
+   "joint_ls": {
+    "first_1000": 0.996,
+    "latest_night": 0.993,
+    "all": 0.993,
+    "first_1000_written_wording": 1.0,
+    "cos_written": 1.0,
+    "cos_heldout": 0.923
+   }
+  }
+ ]
+}
