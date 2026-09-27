@@ -1,0 +1,7 @@
+{
+ "kn5_train": 25.6,
+ "embeddings_train": 17.0,
+ "ridge_train": 975.8,
+ "soft_train": 0.9,
+ "soft_score_20k": 5392.2
+}

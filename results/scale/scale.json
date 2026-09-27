@@ -44,6 +44,23 @@
    "ridge": 0.065,
    "soft": 0.408
   },
+  "lstm200": 137.77569473336325,
+  "counting+lstm200": 119.16103994282709,
+  "gap200": 1.0703281091012582,
+  "lstm200_train_minutes": 64.4730902115504,
   "counting_train_minutes": 5.558333333333334
+ },
+ {
+  "train_words": 10000000,
+  "kn5": 132.60828058813303,
+  "kn5+cache": 126.72402032373118,
+  "counting": 119.19954366448162,
+  "counting_weights": {
+   "kn5": 0.561,
+   "cache": 0.033,
+   "ridge": 0.009,
+   "soft": 0.396
+  },
+  "counting_train_minutes": 16.988333333333333
  }
 ]
