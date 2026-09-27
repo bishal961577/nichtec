@@ -10,6 +10,40 @@
    "ridge": 0.17,
    "soft": 0.204
   },
+  "lstm200": 222.72622256839693,
+  "counting+lstm200": 184.14711748919848,
+  "gap200": 1.057273565630334,
+  "lstm200_train_minutes": 15.90032696723938,
   "counting_train_minutes": 0.4166666666666667
+ },
+ {
+  "train_words": 1000000,
+  "kn5": 206.0682164533842,
+  "kn5+cache": 194.71313280675759,
+  "counting": 179.49106533611857,
+  "counting_weights": {
+   "kn5": 0.476,
+   "cache": 0.045,
+   "ridge": 0.131,
+   "soft": 0.348
+  },
+  "lstm200": 155.646103758507,
+  "counting+lstm200": 136.22541803727896,
+  "gap200": 1.1531998617492427,
+  "lstm200_train_minutes": 40.40445532401403,
+  "counting_train_minutes": 1.8016666666666665
+ },
+ {
+  "train_words": 3000000,
+  "kn5": 167.68271959415833,
+  "kn5+cache": 159.37062196470205,
+  "counting": 147.46519882407287,
+  "counting_weights": {
+   "kn5": 0.489,
+   "cache": 0.038,
+   "ridge": 0.065,
+   "soft": 0.408
+  },
+  "counting_train_minutes": 5.558333333333334
  }
 ]
