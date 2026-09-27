@@ -1,0 +1,15 @@
+[
+ {
+  "train_words": 300000,
+  "kn5": 266.9667682475393,
+  "kn5+cache": 250.57223857584768,
+  "counting": 235.48254749426442,
+  "counting_weights": {
+   "kn5": 0.565,
+   "cache": 0.06,
+   "ridge": 0.17,
+   "soft": 0.204
+  },
+  "counting_train_minutes": 0.4166666666666667
+ }
+]

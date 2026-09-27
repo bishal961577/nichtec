@@ -57,3 +57,44 @@ class SoftGram:
             P = P / P.sum(1, keepdims=True)
             out[s:e] = P[np.arange(e - s), targets[s:e]] + floor
         return out
+
+
+class SoftGramStream:
+    """The same kernel vote as SoftGram, computed without materialising keys.
+
+    Because a key is a concatenation of scaled word vectors, the similarity between a query and
+    stored position i decomposes into per-offset word-to-word similarities:
+        <key(q), key_i> = sum_j w_j * <E[q_{t-j}], E[x_{i-j}]>
+    so it can be computed by gathering rows of (E_q @ E^T) along the training stream. Memory is
+    O(stream length) instead of O(stream length x key dimension)."""
+
+    def __init__(self, train_ids, E, weights, V):
+        self.x = np.asarray(train_ids, np.int64)
+        self.E = np.vstack([E, np.zeros((1, E.shape[1]), E.dtype)]).astype(np.float32)  # last row = padding
+        self.pad = len(E)
+        self.w = np.asarray(weights, np.float32)
+        n = len(self.x)
+        self.prev = []
+        for j in range(1, len(self.w) + 1):
+            p = np.full(n, self.pad, np.int64)
+            p[j:] = self.x[:-j]
+            self.prev.append(p.astype(np.int32))
+        self.Yt = sp.csr_matrix((np.ones(n, np.float32), (self.x, np.arange(n))), shape=(V, n))
+
+    def target_probs(self, ids, positions, tau=0.1, chunk=32, floor=1e-6):
+        ids = np.asarray(ids, np.int64)
+        positions = np.asarray(positions)
+        out = np.empty(len(positions))
+        for s in range(0, len(positions), chunk):
+            pos = positions[s : s + chunk]
+            S = None
+            for j, prev in enumerate(self.prev, start=1):
+                q = np.where(pos - j >= 0, ids[np.maximum(pos - j, 0)], self.pad)
+                simtab = self.E[q] @ self.E.T  # (b, V+1) word-to-word similarities
+                part = simtab[:, prev]
+                S = self.w[j - 1] * part if S is None else S + self.w[j - 1] * part
+            S -= S.max(1, keepdims=True)
+            np.exp(S / tau, out=S)
+            P = np.asarray((self.Yt @ S.T).T)
+            out[s : s + len(pos)] = P[np.arange(len(pos)), ids[pos]] / P.sum(1) + floor
+        return out

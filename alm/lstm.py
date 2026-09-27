@@ -18,9 +18,18 @@ def init(V, H=200, L=2, seed=0, scale=0.1):
     return p
 
 
-def forward(p, x, state, L=2):
-    """x: (B, T) token ids; state: tuple of (h, c) per layer. Returns logits (B, T, V), new state."""
-    h_seq = p["emb"][x]  # (B, T, H)
+def _drop(h, key, rate):
+    if key is None:  # evaluation: no dropout (rate is a traced value under jit, so no Python test on it)
+        return h
+    keep = jax.random.bernoulli(key, 1 - rate, h.shape)
+    return jnp.where(keep, h / (1 - rate), 0)
+
+
+def forward(p, x, state, L=2, key=None, rate=0.0):
+    """x: (B, T) token ids; state: tuple of (h, c) per layer. Returns logits (B, T, V), new state.
+    Dropout (Zaremba et al. 2014) is applied to non-recurrent connections when a key is given."""
+    keys = jax.random.split(key, L + 1) if key is not None else [None] * (L + 1)
+    h_seq = _drop(p["emb"][x], keys[0], rate)  # (B, T, H)
     new_state = []
     for l in range(L):
         W, b = p[f"w{l}"], p[f"b{l}"]
@@ -34,26 +43,36 @@ def forward(p, x, state, L=2):
             return (h, c), h
 
         (h, c), hs = jax.lax.scan(cell, state[l], jnp.swapaxes(h_seq, 0, 1))
-        h_seq = jnp.swapaxes(hs, 0, 1)
+        h_seq = _drop(jnp.swapaxes(hs, 0, 1), keys[l + 1], rate)
         new_state.append((h, c))
     return h_seq @ p["out_w"] + p["out_b"], tuple(new_state)
 
 
-def loss_fn(p, x, y, state):
-    logits, st = forward(p, x, state)
+def loss_fn(p, x, y, state, key=None, rate=0.0):
+    logits, st = forward(p, x, state, key=key, rate=rate)
     lp = jax.nn.log_softmax(logits)
     return -jnp.take_along_axis(lp, y[..., None], -1).mean(), st
 
 
-def _train_loss(p, x, y, state):
+def _train_loss(p, x, y, state, key, rate):
     # Zaremba et al. sum the loss over the unrolled time steps and average over the batch
-    l, st = loss_fn(p, x, y, state)
+    l, st = loss_fn(p, x, y, state, key, rate)
     return l * x.shape[1], (l, st)
 
 
 @jax.jit
+def train_step_drop(p, x, y, state, lr, key, rate):
+    (_, (l, st)), g = jax.value_and_grad(_train_loss, has_aux=True)(p, x, y, state, key, rate)
+    norm = jnp.sqrt(sum(jnp.sum(v * v) for v in jax.tree_util.tree_leaves(g)))
+    scale = jnp.minimum(1.0, 5.0 / (norm + 1e-6))
+    p = jax.tree_util.tree_map(lambda a, b: a - lr * scale * b, p, g)
+    st = jax.tree_util.tree_map(jax.lax.stop_gradient, st)
+    return p, st, l
+
+
+@jax.jit
 def train_step(p, x, y, state, lr):
-    (_, (l, st)), g = jax.value_and_grad(_train_loss, has_aux=True)(p, x, y, state)
+    (_, (l, st)), g = jax.value_and_grad(_train_loss, has_aux=True)(p, x, y, state, None, 0.0)
     norm = jnp.sqrt(sum(jnp.sum(v * v) for v in jax.tree_util.tree_leaves(g)))
     scale = jnp.minimum(1.0, 5.0 / (norm + 1e-6))  # gradient clipping at 5, as in Zaremba et al.
     p = jax.tree_util.tree_map(lambda a, b: a - lr * scale * b, p, g)
@@ -125,3 +144,54 @@ def token_probs(p, ids, T=35):
         lp, st = _step_logp(p, jnp.array(x), jnp.array(y), st)
         out.append(np.exp(np.asarray(lp[0])))
     return np.concatenate(out)
+
+
+def train_plateau(tr, va, V, H=200, rate=0.2, max_epochs=13, B=20, T=20, lr=1.0, log=print, seed=0):
+    """Same LSTM, with dropout, learning rate divided by 4 whenever validation stops improving,
+    and the best-validation parameters kept (early stopping)."""
+    p = init(V, H=H, seed=seed)
+    data = batchify(tr, B)
+    key = jax.random.PRNGKey(seed + 1)
+    t0 = time.time()
+    best, best_p, curve = float("inf"), p, []
+    for ep in range(max_epochs):
+        st = zeros_state(B, H)
+        for i in range(0, data.shape[1] - 1 - T, T):
+            key, sub = jax.random.split(key)
+            p, st, l = train_step_drop(p, jnp.array(data[:, i : i + T]), jnp.array(data[:, i + 1 : i + 1 + T]), st, lr, sub, rate)
+        vppl = evaluate_h(p, va, H)
+        curve.append((ep + 1, time.time() - t0, vppl, lr))
+        log(f"H={H} epoch {ep + 1} cpu_seconds {time.time() - t0:.0f} valid_ppl {vppl:.1f} lr {lr:g}")
+        if vppl < best:
+            best, best_p = vppl, p
+        else:
+            lr /= 4
+            p = best_p
+            if lr < 0.01:
+                break
+    return best_p, curve
+
+
+def evaluate_h(p, ids, H, T=35):
+    data = batchify(ids, 1)
+    st = zeros_state(1, H)
+    tot, n = 0.0, 0
+    for i in range(0, data.shape[1] - 1, T):
+        y = data[:, i + 1 : i + 1 + T]
+        x = data[:, i : i + y.shape[1]]
+        l, st = eval_step(p, jnp.array(x), jnp.array(y), st)
+        tot += float(l) * y.shape[1]
+        n += y.shape[1]
+    return float(np.exp(tot / n))
+
+
+def token_probs_h(p, ids, H, T=35):
+    data = batchify(ids, 1)
+    st = zeros_state(1, H)
+    out = []
+    for i in range(0, data.shape[1] - 1, T):
+        y = data[:, i + 1 : i + 1 + T]
+        x = data[:, i : i + y.shape[1]]
+        lp, st = _step_logp(p, jnp.array(x), jnp.array(y), st)
+        out.append(np.exp(np.asarray(lp[0])))
+    return np.concatenate([[1.0 / p["out_b"].shape[0]], np.concatenate(out)])

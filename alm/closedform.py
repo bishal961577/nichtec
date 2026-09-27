@@ -137,3 +137,19 @@ class ClosedFormLM:
                 z -= z.max(1, keepdims=True)
                 out[s:e] = np.exp(z[r, ids[s:e]] - np.log(np.exp(z).sum(1)))
         return out
+
+
+def target_probs_at(lm, ids, positions, floor=0.1):
+    """Ridge probabilities of ids[t] at selected positions (features still use the full stream)."""
+    positions = np.asarray(positions)
+    prior = lm.n / lm.n.sum()
+    out = np.empty(len(positions))
+    for s, e, Phi in lm.f.stream(ids):
+        sel = (positions >= s) & (positions < e)
+        if not sel.any():
+            continue
+        rows = positions[sel] - s
+        z = Phi[rows] @ lm.W + lm.c
+        q = np.maximum(z, 0) + floor * prior
+        out[sel] = q[np.arange(len(rows)), ids[positions[sel]]] / q.sum(1)
+    return out
