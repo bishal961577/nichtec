@@ -35,3 +35,4 @@ python3 report.py                # -> results/summary.md and results/*.png
 | `FIXING_THE_BOTTLENECKS.md`, `memsim/` | Fixes for a phone AI that learns into its own weights; simulations of the memory |
 | `reallm/memtest.py`, `results/reallm/` | Real-model test 1 (Qwen2.5-0.5B, laptop GPU): last-position keys, four write rules |
 | `reallm/memtest2.py`, `results/reallm2/` | Real-model test 2: person x relation keys, novelty gate, targets without a backward pass |
+| `reallm/memtest3.py`, `results/reallm3/` | Real-model test 3: canonical snapped keys; the same questions answered from the prompt vs from memory |

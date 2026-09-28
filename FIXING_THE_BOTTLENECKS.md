@@ -26,8 +26,22 @@ was run on each one.
     - Known facts stayed 100% intact behind a novelty gate.
     - A per-answer target codebook built offline matched gradient targets, so the device needs no
       backward pass.
-  - **Open:** recall still falls to 52% as facts reach 24,000, and unseen wordings are weak. Test 3
-    addresses both; its results are pending.
+  - **Test 3: canonical, snapped keys make wording irrelevant and keep old facts.**
+    - The person key is the name encoded on its own, snapped to the nearest person already written.
+      The relation is snapped to the nearest known relation.
+    - First-night facts are recalled 100% on written wordings and 96.5% on wordings never seen. The
+      gap equals the relation classifier's error.
+    - After 24,000 facts, the earliest facts are still recalled at 86.8% (written) and 78.7%
+      (unseen). The usual methods fall to 2–8%.
+    - Never-written people and known facts are untouched (0% false reads).
+  - **Context vs memory, measured.** On the same unseen questions:
+    - pasting 10 / 100 / 1,000 facts into the prompt scored 43% / 27% / 13%;
+    - selecting the one matching fact into the prompt scored 92% at every size;
+    - the memory, holding all 24,000 facts with no context, scored 83%.
+  - **Open:**
+    - Only a third of the slots are reachable, so recall still declines past about 9,000 facts.
+    - Answers are single words from known lists.
+    - The subject's name and the set of relations are given to the system rather than discovered.
 
 ---
 
@@ -262,13 +276,14 @@ This is design only, with no new result behind it.
 | Property | Status | Evidence |
 |---|---|---|
 | Same memory whatever order facts arrive in | **Guaranteed by construction** | The ridge problem has one unique solution |
-| No loss of stored facts below capacity | **Confirmed in simulation; partly on a real model** | Simulation: stored fidelity 1.000 / 0.999 / 0.992 at 5K / 10K / 15K facts. Qwen2.5-0.5B: 36% (test 1, colliding keys), then 96% at 3K facts falling to 52% at 24K (test 2, too few reachable slots) |
-| Exact deletion | **Confirmed in simulation; not exact on a real model (test 1)** | Simulation: differs from never-learned by ≤0.00018. Real model: the re-solve did not converge when keys collided |
+| No loss of stored facts below capacity | **Confirmed in simulation and on a real model (test 3)** | Qwen2.5-0.5B, earliest facts: 100% at 3K–6K facts, 98.6% at 12K, 86.8% at 24K (past the reachable-slot capacity); batch editing 8.4%, delta rule 2.2% |
+| Exact deletion | **Confirmed in simulation; to chance level on a real model (test 3)** | Deleted facts 86% → 6.9% (a random answer from the relation's list is right 5–7% of the time); kept facts unchanged |
 | Capacity overflow detected and repaired | **Detection confirmed on a real model; repair confirmed in simulation** | Test 1: the certificate flagged 99.9% of constraints the night storage failed |
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
-| Found under any wording | **Partial** | Unseen wordings: 6% (test 1), 44% (test 2); snapped keys in test 3 |
+| Found under any wording | **Confirmed for known relations (test 3)** | Unseen wordings 96.5%, equal to the relation classifier's accuracy; 6% (test 1) → 44% (test 2) → 96.5% |
+| Better than pasting facts into the prompt | **Confirmed on a 0.5B model (test 3)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83% |
 | Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
-| Base model's known facts untouched | **Confirmed with the novelty gate (test 2)** | 44 of 44 known facts kept at every night with the gate; 2–7% without it |
+| Base model's known facts untouched | **Confirmed with the novelty gate (tests 2 and 3)** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3 |
 | Multi-step use of new facts | **Designed, untested** (Fix 5) | Chained recall: p² by arithmetic; multi-layer editing +15.5 points (prior) |
 | Overriding strong beliefs | **Designed, untested** (Fix 6) | Failure cause documented; margin writes are new |
 | Skills | **Open** | – |
@@ -431,6 +446,98 @@ difference from a never-learned memory was 1.3, against values up to 95.
 - **Solver.** The solver is preconditioned.
 - **Context comparison.** The same questions are answered with 10, 100 or 1,000 facts in the context,
   with only the best-matching fact selected into it, and from the memory alone.
+
+### Real-model test 3: canonical, snapped keys; context vs memory
+
+(`reallm/memtest3.py`; results in `results/reallm3/summary.md`; 62 minutes on the same laptop. The
+laptop session had to chunk one step to fit in memory; that change was made on the laptop and is not
+yet in this repo.)
+
+**The keys:**
+- **Person key.** The person's name, encoded on its own and averaged over its tokens, at block 7. It
+  is whitened, then snapped to the nearest person already written, if the cosine is at least 0.981;
+  otherwise the memory stays silent.
+- **Relation key.** The question's last-position state, classified to the nearest of 8 relation
+  centroids.
+- **Addressing.** 1,024 person codes × 64 relation codes.
+- **Solver.** Preconditioned conjugate gradient.
+
+**First night's facts after each night:**
+
+| Facts written | Joint LS, written | **Joint LS, unseen wordings** | Nightly batch LS, written | Delta rule, written |
+|---|---|---|---|---|
+| 3,000 | 100.0% | **96.5%** | 100.0% | 37.9% |
+| 6,000 | 100.0% | 96.4% | 49.9% | 15.2% |
+| 12,000 | 98.6% | 94.1% | 17.7% | 4.7% |
+| 18,000 | 93.5% | 86.8% | 9.2% | 2.4% |
+| 24,000 | **86.8%** | **78.7%** | 8.4% | 2.2% |
+
+For comparison, the earliest facts at 24,000 recalled 13.2% in test 1 and 51.8% in test 2 on
+written wordings; 5.1% and 11.1% on unseen ones.
+
+**What the numbers say:**
+1. **Wording no longer matters.**
+   - Unseen wordings are recalled at 96.5%, and the relation classifier is right on 96.5% of unseen
+     wordings. Every remaining unseen-wording error is a relation misread; none come from the memory
+     or the person key.
+   - The route to unseen wordings was: last-position key 6% → person-token key 44% → canonical,
+     snapped key 96.5%.
+2. **The joint solve keeps old facts.**
+   - With good keys, nightly batch editing also stores each night exactly (100% on its own night).
+     But it erases earlier nights: 100% → 49.9% after one more night, 8.4% by the end.
+   - The joint solve keeps them: 86.8% at 24,000 facts. This is the simulation's central
+     prediction, now on a real model.
+3. **The gate is now clean.**
+   - 0% of never-written people passed the gate, and none of their answers changed (test 2: 20–27%
+     passed).
+   - All 44 known facts stayed correct.
+   - 5 of 2,999 people were wrongly merged with a similar name at this threshold.
+4. **Deletion reaches chance level.**
+   - Deleted facts fell from 86% to 6.9%. The memory still returns other facts' answers for the
+     deleted pair's slots, and a random answer from a relation's list of 13–27 words is right about
+     5–7% of the time. So 6.9% means the deleted information is gone; the no-memory base rate is
+     2.2%.
+   - Kept facts were unchanged (87.5% → 88.4%).
+   - Difference from a never-learned memory: 0.21, against values up to 120.
+5. **Writing without a backward pass holds.** The offline per-answer codebook gives 99.95% on
+   written wordings and 96.5% on unseen, identical to per-fact gradient targets.
+
+**Context vs memory** (100 first-night facts, each asked with an unseen wording):
+
+| Setup | Accuracy |
+|---|---|
+| No context, no memory | 1% |
+| All 10 facts pasted into the prompt (103 tokens) | 43% |
+| All 100 facts pasted (974 tokens) | 27% |
+| All 1,000 facts pasted (9,633 tokens) | **13%** |
+| Only the best-matching fact selected into the prompt (any N) | **92%** |
+| Memory holding all 24,000 facts, no prompt context | **83%** |
+
+- Adding facts to the prompt cut accuracy from 43% to 13%. The model saw the answer every time.
+- Selecting the one fact first held 92% regardless of pile size.
+- The memory, with 24 times more facts than the largest prompt and no context at all, scored 83%.
+- The absolute in-context numbers are low partly because the model is small (0.5B), and larger
+  models retrieve better in context. The trend, and the gap between blending and selecting, is the
+  finding.
+
+**What remains, and why:**
+1. **Recall still declines past about 9,000 facts.**
+   - The facts reached only 21,462 of the 65,536 slots. With just 8 relations, each relation uses a
+     few of its 64 relation codes, so each relation has about 3,000 slots for about 3,000 facts.
+     That is capacity, and the certificate says so: 95% of constraints are more than 20% off by the
+     end.
+   - The fix is to bind the relation to the person key instead of taking a product with it. Rotate
+     the person key by a relation-specific random rotation, the role-filler binding of holographic
+     reduced representations (Plate, 1995), before the lookup. Every (person, relation) pair then
+     spreads over the whole table.
+2. **The address is closer to a structured key-value store.**
+   - The system is told where the name is, and it knows the 8 relations in advance. Real use needs
+     entity detection and an open, growing set of relations; growth would work as in Fix 2.
+   - What the language model contributes: fuzzy matching of names, recognising the relation from
+     free wording (96.5% on unseen wordings), and the value that makes the frozen model say the
+     answer.
+3. **Answers are one word from a known list.** Open, multi-word answers and multi-step use are
+   untested.
 
 ## 5. Tests that decide it, in order
 
