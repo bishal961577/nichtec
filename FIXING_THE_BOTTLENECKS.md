@@ -38,10 +38,20 @@ was run on each one.
     - pasting 10 / 100 / 1,000 facts into the prompt scored 43% / 27% / 13%;
     - selecting the one matching fact into the prompt scored 92% at every size;
     - the memory, holding all 24,000 facts with no context, scored 83%.
+  - **Test 4: real Wikidata edits (MQuAKE), with nothing handed to the system at question time.**
+    - The system finds the subject itself and classifies the relation itself. Answers are open and
+      multi-word.
+    - After all 2,764 edits: 95.3% on the written form, 80.4% on the question form. Unedited facts:
+      94.6% unchanged.
+    - The first night's edits held at 96.3%.
+    - Question-form misses equal lookup misses. That traces to a calibration split I made too strict,
+      now fixed.
+    - Multi-hop questions could not be measured on the 0.5B model: even unedited, it answers 2.7% of
+      them.
   - **Open:**
-    - Only a third of the slots are reachable, so recall still declines past about 9,000 facts.
-    - Answers are single words from known lists.
-    - The subject's name and the set of relations are given to the system rather than discovered.
+    - Multi-hop use of new facts needs a larger model (GPT-J, as in the published results).
+    - Test 3's capacity limit (a third of the slots reachable) is gone in test 4: the relation is bound
+      into the person key, so the whole table is used. It has not yet been tested past 2,764 facts.
 
 ---
 
@@ -281,7 +291,9 @@ This is design only, with no new result behind it.
 | Capacity overflow detected and repaired | **Detection confirmed on a real model; repair confirmed in simulation** | Test 1: the certificate flagged 99.9% of constraints the night storage failed |
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
 | Found under any wording | **Confirmed for known relations (test 3)** | Unseen wordings 96.5%, equal to the relation classifier's accuracy; 6% (test 1) → 44% (test 2) → 96.5% |
-| Better than pasting facts into the prompt | **Confirmed on a 0.5B model (test 3)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83% |
+| Better than pasting facts into the prompt | **Confirmed on a 0.5B model (tests 3 and 4)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83%. Real MQuAKE edits, question form: memory 80.4%, the matched fact pasted into the prompt 9.7% |
+| Real-world edits, subject and relation not given | **Works on a 0.5B model (test 4)** | 2,764 Wikidata edits: 95.3% written form, 80.4% question form; unedited facts 94.6% unchanged; GRACE-style 64.0% / 54.7% / 30.8% |
+| Multi-hop use of new facts | **Not measurable at 0.5B (test 4)** | The unedited model answers 2.7% of MQuAKE multi-hop questions; needs GPT-J-class |
 | Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
 | Base model's known facts untouched | **Confirmed with the novelty gate (tests 2 and 3)** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3 |
 | Multi-step use of new facts | **Designed, untested** (Fix 5) | Chained recall: p² by arithmetic; multi-layer editing +15.5 points (prior) |
@@ -539,6 +551,75 @@ written wordings; 5.1% and 11.1% on unseen ones.
      answer.
 3. **Answers are one word from a known list.** Open, multi-word answers and multi-step use are
    untested.
+
+### Real-world test 4: MQuAKE, real Wikidata edits, nothing handed to the system
+
+(`reallm/memtest4.py`; results in `results/reallm4/`; Qwen2.5-0.5B on the same laptop, 73 minutes.)
+
+**Setup:**
+- **Data.** MQuAKE-CF-3k-v2 (Zhong et al., EMNLP 2023; 2024 fixed version): 2,764 distinct real
+  Wikidata fact edits over 37 relations, with open, multi-word answers ("Fernando Santos is a citizen
+  of" → "United Kingdom"). They are written 500 per night.
+- **What the system is given.** Each edit request as the dataset states it: subject, cloze sentence,
+  question, new answer.
+- **What it is not given at question time.**
+  - Where the subject is: every word span of the question is encoded and matched against the
+    subjects written so far.
+  - Which relation is asked: a classifier fitted on separate calibration cases decides.
+  - Whether any fact applies at all: if nothing matches, the memory stays silent.
+- **Addressing.** The relation is bound into the person key by a relation-specific rotation. Test 3's
+  capacity limit goes away: 44,699 distinct slots were used for 2,701 facts.
+- **Answers.** Generated freely and scored by string match against the answer and its aliases, as in
+  MQuAKE.
+
+**Every edit after the last night:**
+
+| Method (same model, data, scoring) | Written form (cloze) | Question form |
+|---|---|---|
+| Unedited model | 2.4% | 0.7% |
+| **Joint memory (this project)** | **95.3%** | **80.4%** |
+| Same slots, nightly batch least squares (MEMIT-style) | 93.2% | 78.1% |
+| GRACE-style codebook (published lifelong editor) | 64.0% | 54.7% |
+| The matched fact pasted into the prompt (retrieval) | 88.5% | 9.7% |
+
+**Earliest facts:** the first night's edits after each later night:
+
+| Edits | Joint | Batch | GRACE |
+|---|---|---|---|
+| 500 | 97.3% | 96.7% | 58.3% |
+| 2,764 | 96.3% | 90.0% | 58.3% |
+
+**Unedited facts:** the model's answer to 1,087 unedited facts from the same cases stayed identical
+94.6% of the time with the joint memory. The other methods scored 83.9% (retrieval) and 30.8%
+(GRACE).
+
+**What the numbers say:**
+1. **Real-world editing works without being told the subject.**
+   - Injecting the stored value directly gives the new answer 99.7% of the time on both forms.
+   - The lookup, from the question alone, found the right fact 80.0% of the time. The question-form
+     score is 80.4%, so almost every question-form miss is a lookup miss.
+2. **The lookup misses have a known cause, which is my error.** The calibration split excluded any
+   case sharing any entity with the test, even common answers such as "United Kingdom". That left 44
+   cases covering 24 of the 37 relations, so the relation classifier never saw 13 of the relations it
+   was tested on. The same cause explains two locality figures:
+   - 72.7% on unedited relations of edited subjects;
+   - 86.3% on well-known facts, where the classifier routed some known-fact questions to an edited
+     relation.
+   Excluding only cases that share a subject gives 556 calibration cases covering 36 relations. The
+   code is fixed; the rerun is pending.
+3. **Old edits hold.** The joint memory kept the first night at 96–97% throughout, while batch editing
+   slid from 96.7% to 90.0%. The gap is smaller than in test 3 because 2,701 facts use a small part of
+   the capacity.
+4. **Pasting the fact into the prompt fails on questions for this small model.**
+   - It works on the cloze form (88.5%), which it can copy from, but not on the question form (9.7%).
+   - The memory answers the question form at 80.4%.
+   - Larger models read context better, so this gap is expected to shrink with model size.
+5. **Multi-hop questions: no conclusion.**
+   - With no edits at all, this 0.5B model answers only 2.7% of the multi-hop questions correctly
+     through the sub-question chain. The MQuAKE paper reports 40.5% for GPT-J.
+   - Every method scored 0.4–0.9%, which is floor level.
+   - This test needs a model that can decompose questions: GPT-J, as in the published comparison
+     (MeLLo 14.2%, MEMIT 5.4% at 3,000 edits). A 6 GB laptop cannot run it.
 
 ## 5. Tests that decide it, in order
 

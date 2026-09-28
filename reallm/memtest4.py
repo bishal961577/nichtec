@@ -488,16 +488,17 @@ def main():
     torch.manual_seed(args.seed)
     dev = args.device
 
-    # ---- data: test cases, and calibration cases sharing no entity with any test file
+    # ---- data: test cases, and calibration cases about none of the test files' subjects (test 4's first run
+    # excluded any shared entity, even common answers such as "United Kingdom": 44 cases covering 24 of 37 relations)
     cases = fetch(args.data)
     cf = fetch("MQuAKE-CF.json")
-    test_ents = set()
+    test_subj = set()
     for name in ("MQuAKE-CF-3k-v2.json", "MQuAKE-T.json"):
         for c in fetch(name):
-            for t in c["orig"]["triples_labeled"] + c["orig"]["new_triples_labeled"]:
-                test_ents.update((t[0], t[2]))
-    calib_cases = [c for c in cf if not ({t[0] for t in c["orig"]["triples_labeled"] + c["orig"]["new_triples_labeled"]}
-                                          | {t[2] for t in c["orig"]["triples_labeled"] + c["orig"]["new_triples_labeled"]}) & test_ents]
+            test_subj.update(t[0] for t in c["orig"]["triples_labeled"])
+            test_subj.update(r["subject"] for r in c["requested_rewrite"])
+    calib_cases = [c for c in cf if not ({t[0] for t in c["orig"]["triples_labeled"]}
+                                          | {r["subject"] for r in c["requested_rewrite"]}) & test_subj]
     if args.quick:
         cases = cases[:300]
         args.night, args.mh_cases, args.mh_q = 100, 100, 1
@@ -530,7 +531,7 @@ def main():
     qa = lambda q: f"Q: {q}\nA:"
 
     # ---- person key: names encoded alone, whitened on calibration entity names; threshold from them
-    cal_names = sorted({h["subject"] for h in calib_hops} | {e["subject"] for e in calib_edits} | {e["target"] for e in calib_edits})
+    cal_names = sorted(({h["subject"] for h in calib_hops} | {e["subject"] for e in calib_edits} | {e["target"] for e in calib_edits}) - test_subj)
     best = None
     for l in Lec:
         H = run.states(cal_names, l, "names", bs=256).double().cpu()

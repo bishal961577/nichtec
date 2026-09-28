@@ -1,0 +1,344 @@
+{
+ "config": {
+  "model": "Qwen/Qwen2.5-0.5B",
+  "dtype": "bf16",
+  "device": "cuda",
+  "data": "MQuAKE-CF-3k-v2.json",
+  "night": 500,
+  "nsub": 256,
+  "qe": 64,
+  "topk": 32,
+  "tau": 0.05,
+  "lam": 0.001,
+  "anchor": 0.01,
+  "iters": 500,
+  "delta_steps": 30,
+  "delta_lr": 0.2,
+  "delta_wd": 0.001,
+  "retain_n": 300,
+  "eval_edits": 0,
+  "mh_cases": 1000,
+  "mh_q": 1,
+  "methods": "base,joint_ls,batch_ls,grace,rag",
+  "mh_methods": "base,joint_ls,batch_ls,grace,rag",
+  "gen_bs": 32,
+  "out": "C:\\Users\\visha\\Desktop\\experi\\nichtec\\results\\reallm4",
+  "tiny": false,
+  "quick": false,
+  "seed": 0
+ },
+ "n_layers": 24,
+ "d": 896,
+ "edits": 2764,
+ "cases": 3000,
+ "calibration_cases": 44,
+ "nights": [
+  {
+   "night": 1,
+   "edits": 500,
+   "facts_stored": 494,
+   "subject_merges": 3,
+   "write_collisions": 6,
+   "distinct_slots_touched": 13672,
+   "target_s": 117.1,
+   "methods": {
+    "joint_ls": {
+     "iters": 70,
+     "solve_s": 5.2,
+     "cert_frac_over_0.2": 0.0,
+     "first_night_cloze": 0.9733
+    },
+    "batch_ls": {
+     "iters": 22,
+     "solve_s": 1.7,
+     "cert_frac_over_0.2": 0.1336,
+     "first_night_cloze": 0.9667
+    },
+    "grace": {
+     "first_night_cloze": 0.5833
+    }
+   },
+   "max_gpu_mem_gb": 3.63,
+   "night_s": 208.1
+  },
+  {
+   "night": 2,
+   "edits": 1000,
+   "facts_stored": 990,
+   "subject_merges": 6,
+   "write_collisions": 10,
+   "distinct_slots_touched": 23767,
+   "target_s": 186.7,
+   "methods": {
+    "joint_ls": {
+     "iters": 72,
+     "solve_s": 6.1,
+     "cert_frac_over_0.2": 0.0,
+     "first_night_cloze": 0.97
+    },
+    "batch_ls": {
+     "iters": 21,
+     "solve_s": 1.7,
+     "cert_frac_over_0.2": 0.2202,
+     "first_night_cloze": 0.9567
+    },
+    "grace": {
+     "first_night_cloze": 0.5833
+    }
+   },
+   "max_gpu_mem_gb": 4.14,
+   "night_s": 243.6
+  },
+  {
+   "night": 3,
+   "edits": 1500,
+   "facts_stored": 1480,
+   "subject_merges": 18,
+   "write_collisions": 20,
+   "distinct_slots_touched": 31778,
+   "target_s": 133.4,
+   "methods": {
+    "joint_ls": {
+     "iters": 66,
+     "solve_s": 5.0,
+     "cert_frac_over_0.2": 0.0,
+     "first_night_cloze": 0.9667
+    },
+    "batch_ls": {
+     "iters": 22,
+     "solve_s": 1.8,
+     "cert_frac_over_0.2": 0.2926,
+     "first_night_cloze": 0.9433
+    },
+    "grace": {
+     "first_night_cloze": 0.5833
+    }
+   },
+   "max_gpu_mem_gb": 4.14,
+   "night_s": 175.7
+  },
+  {
+   "night": 4,
+   "edits": 2000,
+   "facts_stored": 1972,
+   "subject_merges": 27,
+   "write_collisions": 28,
+   "distinct_slots_touched": 37957,
+   "target_s": 96.7,
+   "methods": {
+    "joint_ls": {
+     "iters": 71,
+     "solve_s": 5.3,
+     "cert_frac_over_0.2": 0.0,
+     "first_night_cloze": 0.9667
+    },
+    "batch_ls": {
+     "iters": 22,
+     "solve_s": 1.7,
+     "cert_frac_over_0.2": 0.3514,
+     "first_night_cloze": 0.93
+    },
+    "grace": {
+     "first_night_cloze": 0.5833
+    }
+   },
+   "max_gpu_mem_gb": 4.14,
+   "night_s": 137.9
+  },
+  {
+   "night": 5,
+   "edits": 2500,
+   "facts_stored": 2451,
+   "subject_merges": 56,
+   "write_collisions": 49,
+   "distinct_slots_touched": 42633,
+   "target_s": 113.9,
+   "methods": {
+    "joint_ls": {
+     "iters": 70,
+     "solve_s": 5.3,
+     "cert_frac_over_0.2": 0.0,
+     "first_night_cloze": 0.9633
+    },
+    "batch_ls": {
+     "iters": 21,
+     "solve_s": 1.6,
+     "cert_frac_over_0.2": 0.4341,
+     "first_night_cloze": 0.9067
+    },
+    "grace": {
+     "first_night_cloze": 0.5833
+    }
+   },
+   "max_gpu_mem_gb": 4.33,
+   "night_s": 155.5
+  },
+  {
+   "night": 6,
+   "edits": 2764,
+   "facts_stored": 2701,
+   "subject_merges": 71,
+   "write_collisions": 63,
+   "distinct_slots_touched": 44699,
+   "target_s": 53.8,
+   "methods": {
+    "joint_ls": {
+     "iters": 77,
+     "solve_s": 5.9,
+     "cert_frac_over_0.2": 0.0,
+     "first_night_cloze": 0.9633
+    },
+    "batch_ls": {
+     "iters": 23,
+     "solve_s": 1.7,
+     "cert_frac_over_0.2": 0.4876,
+     "first_night_cloze": 0.9
+    },
+    "grace": {
+     "first_night_cloze": 0.5833
+    }
+   },
+   "max_gpu_mem_gb": 4.33,
+   "night_s": 96.0
+  }
+ ],
+ "person_key": {
+  "block": 7,
+  "theta": 0.90494,
+  "same_name_min_cos": 0.99523,
+  "different_names_max_cos": 0.81464,
+  "calibration_names": 143,
+  "different_names_passing": 0.0
+ },
+ "memory_block": {
+  "block": 14,
+  "inject": "all",
+  "candidates": {
+   "8/last": {
+    "cloze": 1.0,
+    "question_transfer": 0.208
+   },
+   "8/all": {
+    "cloze": 1.0,
+    "question_transfer": 0.354
+   },
+   "11/last": {
+    "cloze": 1.0,
+    "question_transfer": 0.312
+   },
+   "11/all": {
+    "cloze": 1.0,
+    "question_transfer": 0.417
+   },
+   "14/last": {
+    "cloze": 1.0,
+    "question_transfer": 0.375
+   },
+   "14/all": {
+    "cloze": 1.0,
+    "question_transfer": 0.792
+   }
+  }
+ },
+ "relation_classifier": {
+  "relations": 24,
+  "training_texts": 180,
+  "calibration_edit_accuracy": 1.0
+ },
+ "grace_theta": 0.9911,
+ "known_facts_base_correct": 51,
+ "first_night_before_editing": {
+  "base": {
+   "cloze": 0.0267,
+   "question": 0.0067
+  }
+ },
+ "first_night_target_injected_directly": {
+  "cloze": 0.9967,
+  "question": 0.9967
+ },
+ "final_edits": {
+  "n": 2764,
+  "base": {
+   "cloze": 0.0235,
+   "question": 0.0072
+  },
+  "joint_ls": {
+   "cloze": 0.953,
+   "question": 0.8043
+  },
+  "batch_ls": {
+   "cloze": 0.9316,
+   "question": 0.7808
+  },
+  "grace": {
+   "cloze": 0.6404,
+   "question": 0.547
+  },
+  "rag": {
+   "cloze": 0.8849,
+   "question": 0.097
+  },
+  "lookup_right_fact_question_form": 0.8003
+ },
+ "locality": {
+  "unedited_facts": 1087,
+  "of_which_about_edited_subjects": 55,
+  "joint_ls": {
+   "unchanged": 0.9457,
+   "unchanged_same_subject_other_relation": 0.7273,
+   "known_facts_correct": 0.8627
+  },
+  "batch_ls": {
+   "unchanged": 0.9457,
+   "unchanged_same_subject_other_relation": 0.7273,
+   "known_facts_correct": 0.8627
+  },
+  "grace": {
+   "unchanged": 0.3082,
+   "unchanged_same_subject_other_relation": 0.2182,
+   "known_facts_correct": 0.8235
+  },
+  "rag": {
+   "unchanged": 0.839,
+   "unchanged_same_subject_other_relation": 0.6182,
+   "known_facts_correct": 0.9804
+  },
+  "base_accuracy_on_unedited": 0.081
+ },
+ "multihop": {
+  "cases": 1000,
+  "questions_per_case": 1,
+  "base": {
+   "chain_case_accuracy": 0.004,
+   "chain_question_accuracy": 0.004,
+   "direct_case_accuracy": 0.01,
+   "chain_case_accuracy_on_ORIGINAL_answers": 0.027
+  },
+  "joint_ls": {
+   "chain_case_accuracy": 0.009,
+   "chain_question_accuracy": 0.009,
+   "chain_gave_old_answer": 0.02,
+   "direct_case_accuracy": 0.01
+  },
+  "batch_ls": {
+   "chain_case_accuracy": 0.009,
+   "chain_question_accuracy": 0.009,
+   "chain_gave_old_answer": 0.021,
+   "direct_case_accuracy": 0.01
+  },
+  "grace": {
+   "chain_case_accuracy": 0.005,
+   "chain_question_accuracy": 0.005,
+   "chain_gave_old_answer": 0.016,
+   "direct_case_accuracy": 0.01
+  },
+  "rag": {
+   "chain_case_accuracy": 0.004,
+   "chain_question_accuracy": 0.004,
+   "chain_gave_old_answer": 0.018,
+   "direct_case_accuracy": 0.01
+  }
+ },
+ "total_s": 4411.4
+}
