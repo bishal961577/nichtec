@@ -4,3 +4,4 @@ __pycache__/
 results/cache/
 results/reallm*/tiny_result.json
 results/reallm*/tiny_summary.md
+results/reallm4_tiny/

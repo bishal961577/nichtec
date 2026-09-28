@@ -477,6 +477,8 @@ def main():
     args = ap.parse_args()
     if args.quick:
         args.out = args.out or os.path.join(ROOT, "results", "reallm4_quick")
+    if args.tiny:
+        args.out = args.out or os.path.join(ROOT, "results", "reallm4_tiny")
     tag = os.path.splitext(args.data)[0].replace("MQuAKE-", "").lower()
     args.out = args.out or os.path.join(ROOT, "results", "reallm4" if tag == "cf-3k-v2" else f"reallm4_{tag}")
     os.makedirs(args.out, exist_ok=True)
