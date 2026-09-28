@@ -450,8 +450,9 @@ difference from a never-learned memory was 1.3, against values up to 95.
 ### Real-model test 3: canonical, snapped keys; context vs memory
 
 (`reallm/memtest3.py`; results in `results/reallm3/summary.md`; 62 minutes on the same laptop. The
-laptop session had to chunk one step to fit in memory; that change was made on the laptop and is not
-yet in this repo.)
+first attempts ran out of GPU memory on the 9,633-token prompts of the context comparison. The fix,
+now in the repo, feeds long prompts through the model in 1,024-token chunks with a key-value cache;
+this gives the same attention, up to rounding.)
 
 **The keys:**
 - **Person key.** The person's name, encoded on its own and averaged over its tokens, at block 7. It

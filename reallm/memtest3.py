@@ -107,6 +107,31 @@ class Runner3(M.Runner):
         self.state = {"mode": None}
         return torch.cat(outs)
 
+    @torch.no_grad()
+    def last_logits(self, texts, state, bs=128, chunk=1024):
+        # same as M.Runner.last_logits, but an unpadded long prompt is fed in chunks through a KV cache (same causal
+        # attention, same result up to bf16 rounding): one full-length attention over the ~5k-13k token context
+        # prompts runs out of memory on a 6 GB GPU
+        if state.get("mode") is not None:
+            return super().last_logits(texts, state, bs=bs)
+        from transformers import DynamicCache
+        outs = []
+        for i in range(0, len(texts), bs):
+            ids, am, pos = self.encode(texts[i:i + bs])
+            self.state = dict(state, mask=am)
+            if bool(am.all()) and ids.shape[1] > chunk:
+                cache = DynamicCache()
+                for s in range(0, ids.shape[1], chunk):
+                    o = self.base(input_ids=ids[:, s:s + chunk], past_key_values=cache, use_cache=True)
+                    cache = o.past_key_values
+                hs = o.last_hidden_state[:, -1]
+                del cache, o
+            else:
+                hs = self.base(input_ids=ids, attention_mask=am, position_ids=pos).last_hidden_state[:, -1]
+            outs.append(self.head(hs).float())
+        self.state = {"mode": None}
+        return torch.cat(outs)
+
 
 class Memory3:
     def __init__(self, a, ent, rel, dev, seed):
@@ -492,6 +517,8 @@ def main():
     q_rel = mem.rel_class(run.capture(qtext))
     f1_keys, _ = query_keys([g_["name"] for g_ in f1])
     f1_rel = mem.rel_class(run.capture([M.prompts(g_, "train")[0] for g_ in f1]))
+    if dev == "cuda":
+        torch.cuda.empty_cache()
     crng = random.Random(args.seed + 5)
     for n in [int(x) for x in args.ctx_n.split(",")]:
         plain, sel = [], []
