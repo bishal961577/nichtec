@@ -41,13 +41,12 @@ was run on each one.
   - **Test 4: real Wikidata edits (MQuAKE), with nothing handed to the system at question time.**
     - The system finds the subject itself and classifies the relation itself. Answers are open and
       multi-word.
-    - After all 2,764 edits: 95.3% on the written form, 80.4% on the question form. Unedited facts:
-      94.6% unchanged.
-    - The first night's edits held at 96.3%.
-    - Question-form misses equal lookup misses. That traces to a calibration split I made too strict,
-      now fixed.
-    - Multi-hop questions could not be measured on the 0.5B model: even unedited, it answers 2.7% of
-      them.
+    - With the fixed calibration, after all 2,764 edits: 97.3% on the written form, 91.0% on the
+      question form. Unedited facts: 96.9% unchanged.
+    - The first night's edits held at 97.0%.
+    - The remaining question-form misses equal lookup misses (91.0%).
+    - Multi-hop questions cannot be judged on the 0.5B model: even unedited, it answers only 2.7–3.0%
+      of them.
   - **Open:**
     - Multi-hop use of new facts needs a larger model (GPT-J, as in the published results).
     - Test 3's capacity limit (a third of the slots reachable) is gone in test 4: the relation is bound
@@ -292,7 +291,7 @@ This is design only, with no new result behind it.
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
 | Found under any wording | **Confirmed for known relations (test 3)** | Unseen wordings 96.5%, equal to the relation classifier's accuracy; 6% (test 1) → 44% (test 2) → 96.5% |
 | Better than pasting facts into the prompt | **Confirmed on a 0.5B model (tests 3 and 4)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83%. Real MQuAKE edits, question form: memory 80.4%, the matched fact pasted into the prompt 9.7% |
-| Real-world edits, subject and relation not given | **Works on a 0.5B model (test 4)** | 2,764 Wikidata edits: 95.3% written form, 80.4% question form; unedited facts 94.6% unchanged; GRACE-style 64.0% / 54.7% / 30.8% |
+| Real-world edits, subject and relation not given | **Works on a 0.5B model (test 4)** | 2,764 Wikidata edits: 97.3% written form, 91.0% question form; first night kept at 97.0%; unedited facts 96.9% unchanged; GRACE-style 64.0% / 54.7% |
 | Multi-hop use of new facts | **Not measurable at 0.5B (test 4)** | The unedited model answers 2.7% of MQuAKE multi-hop questions; needs GPT-J-class |
 | Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
 | Base model's known facts untouched | **Confirmed with the novelty gate (tests 2 and 3)** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3 |
@@ -606,7 +605,7 @@ written wordings; 5.1% and 11.1% on unseen ones.
    - 86.3% on well-known facts, where the classifier routed some known-fact questions to an edited
      relation.
    Excluding only cases that share a subject gives 556 calibration cases covering 36 relations. The
-   code is fixed; the rerun is pending.
+   rerun with this fix is below.
 3. **Old edits hold.** The joint memory kept the first night at 96–97% throughout, while batch editing
    slid from 96.7% to 90.0%. The gap is smaller than in test 3 because 2,701 facts use a small part of
    the capacity.
@@ -620,6 +619,39 @@ written wordings; 5.1% and 11.1% on unseen ones.
    - Every method scored 0.4–0.9%, which is floor level.
    - This test needs a model that can decompose questions: GPT-J, as in the published comparison
      (MeLLo 14.2%, MEMIT 5.4% at 3,000 edits). A 6 GB laptop cannot run it.
+
+**Rerun with the fixed calibration** (`results/reallm4b/summary.md`; 37 minutes):
+- **Calibration.** 556 cases, 36 relations, 2,246 training texts for the relation classifier.
+- **Same edits, model, scoring and baselines** as the first run.
+
+| After all 2,764 edits | Written form | Question form | Right fact found from the question alone |
+|---|---|---|---|
+| Unedited model | 2.4% | 0.7% | – |
+| **Joint memory, first run** | 95.3% | 80.4% | 80.0% |
+| **Joint memory, fixed calibration** | **97.3%** | **91.0%** | **91.0%** |
+| Nightly batch least squares | 94.1% | 87.7% | 91.0% |
+| GRACE-style codebook | 64.0% | 54.7% | (uses no lookup) |
+| Matched fact pasted into the prompt | 90.2% | 10.9% | 91.0% |
+
+- **Earliest facts.** The first night's edits went from 98.7% to 97.0% across all six nights with the
+  joint memory. With batch editing they went from 98.3% to 92.7%.
+- **Unedited facts.** 96.9% of the 1,087 unedited facts gave identical output (first run: 94.6%).
+- **What remains.** The question-form score equals the lookup's accuracy exactly (91.0%). Every
+  remaining miss is the lookup picking the wrong fact or none: subject matching, or relation
+  classification. When the lookup is right, the stored value works.
+- **Two measurements were wrong and are now fixed in the code.**
+  1. MQuAKE applies all edits together, but the "unedited facts about edited subjects" set (55 facts)
+     included 16 facts that another test case edits. One example is "The official language of
+     Helsinki is". Changing those answers is correct. So the reported 65.5% (first run 72.7%) is not
+     a clean measure of damage. It is at worst 51% and at best 92% on the 39 truly unedited facts;
+     the per-fact outputs needed to settle it were not saved.
+  2. The known-facts check compared against base outputs generated in different batches. All five
+     methods scored exactly 94.1%, including ones that change nothing. That points to bf16 rounding
+     from padding, not to damage. The base outputs are now regenerated in the same batches.
+- **Multi-hop** (200 cases, one question each). The unedited model gives the new answer 0.5% of the
+  time and the original answer 3.0%. With the joint memory the chain gives the new answer 3.0% of the
+  time. That is as often as the unedited model uses its own knowledge, but both are 6 cases out of
+  200. It is floor-level evidence and settles nothing; that needs a GPT-J-class model.
 
 ## 5. Tests that decide it, in order
 

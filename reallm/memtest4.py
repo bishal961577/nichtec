@@ -753,8 +753,12 @@ def main():
     log("final edits", json.dumps(R["final_edits"]))
     json.dump(R, open(out_json, "w"), indent=1)
 
-    # ---- locality: unedited facts in the test cases (incl. unedited relations of edited subjects), known facts
-    hops = [h for h in hop_facts(cases) if not h["edited"]]
+    # ---- locality: unedited facts in the test cases (incl. unedited relations of edited subjects), known facts.
+    # MQuAKE applies all edits together, so a fact left unedited in one case but edited by another case is an
+    # edited fact: it is excluded here (the first test 4 runs counted 16 of them as damage).
+    edited_forms = {e["cloze"] for e in edits} | {e["question"] for e in edits}
+    all_unedited = [h for h in hop_facts(cases) if not h["edited"]]
+    hops = [h for h in all_unedited if h["cloze"] not in edited_forms and h["question"] not in edited_forms]
     seen, loc = set(), []
     for h in hops:
         if h["question"] not in seen:
@@ -766,7 +770,11 @@ def main():
         loc = rng.sample(loc, 2000)
     edited_subjects = {e["subject"] for e in edits}
     base_loc = answer("base", [qa(h["question"]) for h in loc], [h["question"] for h in loc])
-    R["locality"] = {"unedited_facts": len(loc), "of_which_about_edited_subjects": sum(h["subject"] in edited_subjects for h in loc)}
+    # base outputs regenerated on exactly the same list and batches as each method (padding changes bf16 rounding)
+    base_known = answer("base", [p for p, _ in known], [p for p, _ in known], max_new=6)
+    R["locality"] = {"unedited_facts": len(loc), "of_which_about_edited_subjects": sum(h["subject"] in edited_subjects for h in loc),
+                     "excluded_edited_by_another_case": len(all_unedited) - len(hops),
+                     "known_facts_base_correct_same_batches": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a) in zip(base_known, known)])), 4)}
     for m in methods:
         if m == "base":
             continue
@@ -776,7 +784,8 @@ def main():
         gk = answer(m, [p for p, _ in known], [p for p, _ in known], max_new=6, Vd=Vd)
         R["locality"][m] = {"unchanged": round(float(np.mean(same_out)), 4),
                             "unchanged_same_subject_other_relation": round(float(np.mean(same_sub)), 4) if same_sub else None,
-                            "known_facts_correct": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a) in zip(gk, known)])), 4)}
+                            "known_facts_correct": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a) in zip(gk, known)])), 4),
+                            "known_facts_unchanged": round(float(np.mean([first_line(a) == first_line(b) for a, b in zip(gk, base_known)])), 4)}
     R["locality"]["base_accuracy_on_unedited"] = round(float(np.mean([correct(first_line(x), h["aliases"]) for x, h in zip(base_loc, loc)])), 4)
     log("locality", json.dumps(R["locality"]))
     json.dump(R, open(out_json, "w"), indent=1)
