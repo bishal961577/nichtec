@@ -37,4 +37,4 @@ python3 report.py                # -> results/summary.md and results/*.png
 | `reallm/memtest2.py`, `results/reallm2/` | Real-model test 2: person x relation keys, novelty gate, targets without a backward pass |
 | `reallm/memtest3.py`, `results/reallm3/` | Real-model test 3: canonical snapped keys; the same questions answered from the prompt vs from memory |
 | `reallm/memtest4.py`, `results/reallm4/`, `results/reallm4b/`, `results/reallm4c/` | Real-world test 4: MQuAKE (real Wikidata edits), subject and relation found by the system, compared with batch editing, GRACE and retrieval (first run; fixed calibration; fixed locality measurement) |
-| `reallm/modal_gptj.py` | Test 4 on GPT-J-6B on one rented H100 (Modal), budget-capped; pre-registered as test 5 in `FIXING_THE_BOTTLENECKS.md` |
+| `reallm/modal_gptj.py`, `results/reallm4_gptj/`, `results/reallm4_gptj_t/` | Test 5: test 4 on GPT-J-6B on one rented H100 (Modal), budget-capped, pre-registered in `FIXING_THE_BOTTLENECKS.md`; MQuAKE-CF and MQuAKE-T results |

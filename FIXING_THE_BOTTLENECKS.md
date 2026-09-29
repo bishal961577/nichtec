@@ -49,11 +49,17 @@ was run on each one.
     - The remaining question-form misses equal lookup misses (91.0%).
     - Multi-hop questions cannot be judged on the 0.5B model: even unedited, it answers only 2.7–3.0%
       of them.
-  - **Test 5, pre-registered and not yet run:** the same test on GPT-J-6B, the model of the published
-    MQuAKE results, against MeLLo 14.2%, MEND 6.1% and MEMIT 5.4% multi-hop accuracy. Pass lines and
-    predictions were fixed before the run.
+  - **Test 5: GPT-J-6B, the model of the published MQuAKE results, with pass lines fixed before the run.**
+    - Single-hop passed every line: 95.9% written form, 95.7% question form, earliest edits kept at 97.0%,
+      unedited facts 98.7% unchanged. Every unwanted change was a name collision in the lookup ("Francis"
+      inside "Francis II").
+    - Multi-hop: 9.4%, beating the published weight editors on the same model and data (MEMIT 5.4%,
+      MEND 6.1%) but not MeLLo (14.2%). On the real-world changes of MQuAKE-T: 18.8% against MEMIT 0.0% and
+      MeLLo 30.7%.
+    - Using new facts in reasoning, relative to the model's own facts: 0.40 on MQuAKE-CF (fail), 0.82 on
+      MQuAKE-T (pass). Two of my predictions (beating MeLLo; 0.6–0.9) were wrong.
   - **Open:**
-    - Multi-hop use of new facts needs a larger model (GPT-J, as in the published results).
+    - Multi-hop use of new facts: the memory is missed when the model words the step itself.
     - Test 3's capacity limit (a third of the slots reachable) is gone in test 4: the relation is bound
       into the person key, so the whole table is used. It has not yet been tested past 2,764 facts.
 
@@ -296,10 +302,10 @@ This is design only, with no new result behind it.
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
 | Found under any wording | **Confirmed for known relations (test 3)** | Unseen wordings 96.5%, equal to the relation classifier's accuracy; 6% (test 1) → 44% (test 2) → 96.5% |
 | Better than pasting facts into the prompt | **Confirmed on a 0.5B model (tests 3 and 4)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83%. Real MQuAKE edits, question form: memory 80.4%, the matched fact pasted into the prompt 9.7% |
-| Real-world edits, subject and relation not given | **Works on a 0.5B model (test 4)** | 2,764 Wikidata edits: 97.3% written form, 91.0% question form; first night kept at 97.0%; unedited facts 98.3% unchanged (GRACE-style 86.2%); GRACE-style editing 64.0% / 54.7%; reproduced exactly in a third run |
-| Multi-hop use of new facts | **Not measurable at 0.5B (test 4)** | The unedited model answers 2.7% of MQuAKE multi-hop questions; needs GPT-J-class |
+| Real-world edits, subject and relation not given | **Works on 0.5B (test 4) and 6B (test 5)** | 2,764 Wikidata edits. Qwen-0.5B: 97.3% written form, 91.0% question form, first night kept at 97.0%, unedited 98.3% unchanged. GPT-J-6B: 95.9% / 95.7%, 97.0%, 98.7%; GRACE-style 57.5% / 50.9%, unedited 72.3% |
+| Multi-hop use of new facts | **Beats weight editing, not MeLLo (test 5, GPT-J)** | MQuAKE-CF, 3,000 edited cases: 9.4% vs MEMIT 5.4%, MEND 6.1%, MeLLo 14.2%; 0.40 of the model's own multi-hop rate. MQuAKE-T: 18.8% vs MEMIT 0.0%, MeLLo 30.7%; 0.82 |
 | Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
-| Base model's known facts untouched | **Confirmed with the novelty gate (tests 2 and 3); probable in test 4** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3. Test 4: 49 of 51 unchanged, but MQuAKE itself edits 5 of these prompts word for word (the capital of Japan, ...), so the 2 changes may be correct edits; per-fact outputs are now recorded to settle it |
+| Base model's known facts untouched | **Confirmed (tests 2, 3 and 5)** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3. Test 5 (GPT-J): 0 of 36 known facts about never-edited subjects changed; the 5 that changed are all edits MQuAKE itself asks for (the capital of Japan becomes Bondi Junction, ...) |
 | Multi-step use of new facts | **Designed, untested** (Fix 5) | Chained recall: p² by arithmetic; multi-layer editing +15.5 points (prior) |
 | Overriding strong beliefs | **Designed, untested** (Fix 6) | Failure cause documented; margin writes are new |
 | Skills | **Open** | – |
@@ -702,7 +708,7 @@ written wordings; 5.1% and 11.1% on unseen ones.
   - damage on the known facts whose subject no case edits, so that figure cannot be caused by a
     correct edit.
 
-### Real-world test 5 (pre-registered, not yet run): GPT-J-6B on one H100
+### Real-world test 5 (pre-registered in commit ca50c62; results below): GPT-J-6B on one H100
 
 (`reallm/modal_gptj.py` runs `reallm/memtest4.py` on a rented H100; results will go in
 `results/reallm4_gptj/` and `results/reallm4_gptj_t/`.) This section was written and committed before the run.
@@ -781,6 +787,94 @@ diagnostics will show how often it happens on GPT-J; the method is not changed b
 - Edits arrive in the dataset's own cloze and question form.
 - A 6B model on a datacentre GPU says nothing about power or speed on a phone.
 - Facts are keyed by named subjects; facts about unnamed things are out of scope.
+
+#### Test 5 results (`results/reallm4_gptj/summary.md`, `results/reallm4_gptj_t/summary.md`)
+
+One H100 run of about 47 minutes: 36.8 on MQuAKE-CF-3k-v2, then 8.5 on MQuAKE-T with the budget that was left.
+The target optimiser worked on the first try (calibration: 93.8% written form; stored values injected
+directly: 100%), so no retry and no abort.
+
+| Pre-registered question | Pass line | Result | Verdict | My prediction |
+|---|---|---|---|---|
+| Q1 single-hop carries over to 6B | written ≥ 90, question ≥ 85, first night ≥ 95, unedited ≥ 95 | 95.9 / 95.7 / 97.0 / 98.7% | **Pass** | Pass: right |
+| Q2 multi-hop vs published GPT-J editors | lower end > 14.2% beats MeLLo; > 5.4% beats weight editing | **9.4%** [8.4–10.5] | **Beats MEMIT (5.4%) and MEND (6.1%); not MeLLo (14.2%)** | Beats MeLLo: **wrong** |
+| Q3 memory facts in reasoning vs own facts (CF) | ≥ 0.8 pass, < 0.5 fail; valid if unedited chain ≥ 20% | 9.4% / 23.4% = **0.40** (validity 23.4%, met) | **Fail** | 0.6–0.9: **wrong** |
+| Q4 memory vs pasting the fact | pasting must match on single-hop question form and multi-hop | Question form 95.7 vs 84.0%; multi-hop 9.4 vs 8.4% (overlapping) | Pasting caught up but not on both; the memory keeps a smaller single-hop lead | Gap shrinks, pasting 50–85%: right |
+| Q5 MQuAKE-T (750 random cases of 1,868; budget) | same lines; MeLLo 30.7%, MEND 4.6%, MEMIT 0.0% | **18.8%** [16.2–21.8]; ratio **0.82** | Beats MEND and MEMIT, not MeLLo; **Q3 passes on T** | – |
+
+**Single-hop, all 2,764 edits, GPT-J:**
+
+| Method | Written form | Question form | First night after last night | Unedited facts unchanged |
+|---|---|---|---|---|
+| Unedited model | 1.0% | 0.7% | – | – |
+| **Joint memory** | **95.9%** | **95.7%** | **97.0%** (from 97.7%) | **98.7%** |
+| Nightly batch least squares | 82.3% | 77.5% | 77.7% (from 79.3%) | 98.8% |
+| GRACE-style codebook | 57.5% | 50.9% | 55.0% (from 55.0%) | 72.3% |
+| Matched fact pasted into the prompt | 91.0% | 84.0% | – | 98.3% |
+
+The lookup found the right fact from the question alone 96.4% of the time (0.5B: 91.0%). On MQuAKE-T (96 real
+changes) the joint memory scored 95.8% on both forms, and all 1,813 unedited facts were unchanged.
+
+**What the numbers say:**
+1. **Single-hop real-world editing holds at 6B.** Every pre-registered line passed, with the subject and relation
+   found by the system.
+   - Caveat: the question form is the dataset's own question, which the memory saw when writing the fact. New
+     wordings are tested only by the multi-hop sub-questions.
+   - Caveat: batch editing was already weak on night 1 (79.3%) and lost only 1.6 points after that. Its gap to the
+     joint memory is mostly a worse fit, not forgetting; its anchor setting came from the 0.5B runs and was not
+     re-tuned for GPT-J.
+2. **The known-facts question is settled.** GPT-J answers 54 of the well-known facts correctly (it continues "The
+   capital of France is" with "a city of contrasts", so several capitals were left out). The memory changed 5 of
+   the 54:
+   - the capitals of Japan, Egypt and South Korea to Bondi Junction, Yungay and Chiavari;
+   - "Most people in Italy / Japan speak" to Walloon and Swedish.
+   Every one is an edit MQuAKE itself asks for; the last two are the same fact in other words (official language).
+   On the 36 known facts whose subject no case edits, **0 changed**.
+3. **Every locality failure of the memory is a name collision in the lookup, as recorded before the run.** All 14
+   changed unedited facts (1.3%) matched a stored name that is part of, or one character away from, the name in
+   the question:
+   - part of a longer name (10): Francis in "Francis II", Portal in "Portal 2", iPod in "iPod Classic", Xbox in
+     "Xbox Live Indie Games", Ford Sierra in "Ford Sierra RS Cosworth", World Judo Championships in "2011 World Judo
+     Championships" (three years), and others;
+   - one character away (3): ARM Cortex-A8 / A9, Gears of War 3 / 2, Power Mac G5 / G4.
+   The stored values and the solver caused none. Pasting the matched fact into the prompt suffers the same false
+   matches, but GPT-J often ignores an irrelevant pasted fact ("Who is the developer of Gears of War 2?" stays Epic
+   Games), which the memory cannot do.
+4. **Multi-hop is the open bottleneck, as Q3 defines it.** On MQuAKE-CF the memory's chain gave the new answer
+   9.4% of the time and the old, pre-edit answer 19.5%.
+   - An old final answer needs every other hop right and the edited hop answered from the model's own knowledge.
+     So in about two thirds of the chains that otherwise work, the memory did not override the edited step.
+   - Pasting the matched fact fails the same way (8.4% new, 19.3% old) and uses the same lookup. This points to the
+     lookup missing the edited fact when GPT-J words the sub-question itself, not to the stored values. This is an
+     inference: per-step lookups were not logged.
+   - The chain itself is weak. GPT-J often restates the whole question instead of splitting it, and answers steps
+     in full sentences ("The country is the United States of America"). The unedited model's chain reaches 23.4% on
+     the original answers, against 40.5% for GPT-J with direct few-shot prompting in the MQuAKE paper. MeLLo shows
+     the model examples at every step; this chain answers each step from a bare question, where GPT-J gets 55% of
+     unedited facts right.
+5. **On MQuAKE-T the memory's facts are used almost as well as the model's own (0.82).** The contrast with CF (0.40)
+   fits the lookup explanation:
+   - most T cases are two hops ending in an edited "head of state / government" fact, which GPT-J asks in close to
+     the template wording ("What is the name of the current head of state in South Korea?");
+   - CF edits sit at any of 2–4 hops across 37 relations, often about an intermediate entity named in the model's
+     own words.
+
+**What this run establishes and what it does not.**
+- **Established:** at 6B, on 2,764 real edits with nothing given at question time, the joint memory:
+  - answers 95.9% (written) and 95.7% (dataset question);
+  - keeps its earliest edits at 97.0%;
+  - leaves 98.7% of unedited facts and all 36 never-edited known facts untouched.
+  In multi-hop it beats the published weight editors on the same model and data (9.4% vs 5.4–6.1%; T: 18.8% vs
+  0.0–4.6%).
+- **Not established:** multi-hop at MeLLo's level (14.2% CF, 30.7% T). Using new facts in reasoning does not work
+  as well as using the model's own facts on CF (0.40).
+
+**Next, in order of cost:**
+1. **Lookup name collisions:** only accept a match when the span cannot be extended into a longer name, and treat
+   names differing in a digit or letter as different. This can be checked on the laptop.
+2. **Log every chain step:** was the lookup hit, was it the case's edited fact, and did the value take effect.
+   This decides between the lookup and value-transfer explanations. It needs another GPT-J run.
+3. **Few-shot prompts for each chain step**, as MeLLo uses, so the chain itself is not the ceiling.
 
 ## 5. Tests that decide it, in order
 
