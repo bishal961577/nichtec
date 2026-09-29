@@ -56,7 +56,7 @@ from memtest3 import pcg  # noqa: E402
 ROOT = M.ROOT
 URL = "https://raw.githubusercontent.com/princeton-nlp/MQuAKE/main/datasets/{}"
 
-# Decomposition examples: MeLLo's published prompt (MQuAKE repository, prompts/MeLLo-prompt.txt), first two
+# Decomposition examples: MeLLo's published prompt (MQuAKE repository, prompts/MeLLo-prompt.txt), all four
 # examples, with its retrieval lines removed because here each sub-question is answered by the method under test.
 FEWSHOT = """Question: What is the capital city of the country of citizenship of Ivanka Trump's spouse?
 Subquestion: Who is Ivanka Trump's spouse?
@@ -73,6 +73,24 @@ Answer: Croatia
 Subquestion: What is the name of the current head of state in Croatia?
 Answer: Kolinda Grabar-Kitarovic
 Final answer: Kolinda Grabar-Kitarovic
+
+Question: Who is the spouse of the head of state in United States of America?
+Subquestion: Who is the head of state in United States of America?
+Answer: Joe Biden
+Subquestion: Who is the spouse of Joe Biden?
+Answer: Jill Biden
+Final answer: Jill Biden
+
+Question: On which continent is the country of citizenship of the founder of the manufacturer of iPhone 5 situated?
+Subquestion: Which company is iPhone 5 produced by?
+Answer: Iveco
+Subquestion: Who is the founder of Iveco?
+Answer: Giovanni Agnelli
+Subquestion: What is the country of citizenship of Giovanni Agnelli?
+Answer: Niger
+Subquestion: On which continent is Niger situated?
+Answer: Africa
+Final answer: Africa
 
 """
 
@@ -183,8 +201,9 @@ class Runner4:
             stop.append(tok.eos_token_id)
         self.stop = torch.zeros(V, dtype=torch.bool, device=dev)
         self.stop[torch.tensor(sorted(set(stop)), dtype=torch.long, device=dev)] = True
-        for l in sorted(set(hook_layers)):
-            self.blocks[l].register_forward_hook(self._hook(l))
+        for h in getattr(model, "_memtest4_hooks", []):   # a model reused by a second run keeps no stale hooks
+            h.remove()
+        model._memtest4_hooks = [self.blocks[l].register_forward_hook(self._hook(l)) for l in sorted(set(hook_layers))]
 
     def _hook(self, l):
         def hook(module, args, output):
@@ -239,18 +258,36 @@ class Runner4:
         return torch.cat(outs) if outs else torch.zeros(0, self.d, device=self.dev)
 
     @torch.no_grad()
-    def generate(self, texts, max_new, layer=None, adds=None, grace=None, bs=None):
+    def prefix_cache(self, prefix):
+        """Key/value cache of a prompt prefix shared by every text of a call (the few-shot examples), computed once."""
+        if getattr(self, "_pc", (None,))[0] != prefix:
+            self.state = {"mode": None}
+            ids = self.tok(prefix, return_tensors="pt", add_special_tokens=False)["input_ids"].to(self.dev)
+            self._pc = (prefix, ids.shape[1], self.base(input_ids=ids, use_cache=True).past_key_values)
+        return self._pc[1], self._pc[2]
+
+    @torch.no_grad()
+    def generate(self, texts, max_new, layer=None, adds=None, grace=None, bs=None, prefix=None):
+        """Greedy continuation of prefix + text for each text; the prefix is encoded once and its cache reused
+        (padding then sits between prefix and text, masked, with the same positions as without the cache)."""
         bs = bs or self.gen_bs
         outs, fired = [], []
+        P, pc = self.prefix_cache(prefix) if prefix else (0, None)
         for i in range(0, len(texts), bs):
             ids, am, pos = self.encode(texts[i:i + bs])
+            past = None
+            if prefix:
+                past = copy.deepcopy(pc)
+                past.batch_repeat_interleave(ids.shape[0])
+                am = torch.cat([torch.ones(ids.shape[0], P, dtype=am.dtype, device=self.dev), am], 1)
+                pos = pos + P
             if adds is not None:
                 self.state = {"mode": "add_last", "layer": layer, "add": adds[i:i + bs]}
             elif grace is not None:
                 self.state = dict(grace, mode="grace", layer=layer, fired=fired)
             else:
                 self.state = {"mode": None}
-            o = self.base(input_ids=ids, attention_mask=am, position_ids=pos, use_cache=True)
+            o = self.base(input_ids=ids, attention_mask=am, position_ids=pos, past_key_values=past, use_cache=True)
             if not (adds is not None and self.inject == "all"):
                 self.state = {"mode": None}
             cache, p = o.past_key_values, pos[:, -1:]
@@ -412,8 +449,15 @@ def mask_subject(text, span):
 # experiment
 # ----------------------------------------------------------------------------------------------
 
+SAVE_HOOK = None   # called after every save (the Modal runner commits its volume here)
+_MODELS = {}       # loaded models, reused when main() runs again in the same process
+
+
 def load_model(args, extra_texts):
-    if not args.tiny:
+    if not args.tiny or os.path.isdir(args.model):
+        key = (args.model, args.dtype, args.device)
+        if key in _MODELS:
+            return _MODELS[key]
         from transformers import AutoModelForCausalLM, AutoTokenizer
         tok = AutoTokenizer.from_pretrained(args.model)
         dtype = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}[args.dtype]
@@ -443,10 +487,12 @@ def load_model(args, extra_texts):
     model.to(args.device).eval()
     for p in model.parameters():
         p.requires_grad_(False)
+    if not args.tiny or os.path.isdir(args.model):
+        _MODELS[(args.model, args.dtype, args.device)] = (model, tok)
     return model, tok
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="Qwen/Qwen2.5-0.5B")
     ap.add_argument("--dtype", default="bf16")
@@ -463,6 +509,7 @@ def main():
     ap.add_argument("--delta-steps", type=int, default=30)
     ap.add_argument("--delta-lr", type=float, default=0.2)
     ap.add_argument("--delta-wd", type=float, default=1e-3)
+    ap.add_argument("--delta-chunk", type=int, default=32, help="edits optimised together (independent per edit)")
     ap.add_argument("--retain-n", type=int, default=300, help="first-night edits re-checked every night")
     ap.add_argument("--eval-edits", type=int, default=0, help="edits scored at the end (0 = all)")
     ap.add_argument("--mh-cases", type=int, default=0, help="multi-hop cases scored (0 = all)")
@@ -470,11 +517,14 @@ def main():
     ap.add_argument("--methods", default="base,joint_ls,batch_ls,grace,rag")
     ap.add_argument("--mh-methods", default="base,joint_ls,batch_ls,grace,rag")
     ap.add_argument("--gen-bs", type=int, default=32)
+    ap.add_argument("--mh-chunk", type=int, default=250, help="multi-hop cases per chunk (every method scores each chunk)")
+    ap.add_argument("--budget-min", type=float, default=0, help="stop starting new multi-hop chunks after this (0 = no limit)")
+    ap.add_argument("--no-abort", action="store_true", help="testing only: continue even when the early checks fail")
     ap.add_argument("--out", default=None)
     ap.add_argument("--tiny", action="store_true")
     ap.add_argument("--quick", action="store_true", help="real model, 300 cases: checks the pipeline end to end in minutes")
     ap.add_argument("--seed", type=int, default=0)
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     if args.quick:
         args.out = args.out or os.path.join(ROOT, "results", "reallm4_quick")
     if args.tiny:
@@ -529,6 +579,21 @@ def main():
     R = {"config": dict(vars(args), model="tiny-random" if args.tiny else args.model), "n_layers": nl, "d": run.d,
          "edits": len(edits), "cases": len(cases), "calibration_cases": len(calib_cases), "nights": []}
     qa = lambda q: f"Q: {q}\nA:"
+    out_json = os.path.join(args.out, "result.json")
+
+    def save():
+        """Results so far, in full and as a summary: a run cut short keeps everything it finished."""
+        R["elapsed_s"] = round(time.time() - t0, 1)
+        json.dump(R, open(out_json, "w"), indent=1)
+        open(os.path.join(args.out, "summary.md"), "w", encoding="utf-8").write(report(R))
+        if SAVE_HOOK is not None:
+            SAVE_HOOK()
+
+    def abort(why):
+        R["aborted"] = why
+        log("ABORTED:", why)
+        save()
+        return R
 
     # ---- person key: names encoded alone, whitened on calibration entity names; threshold from them
     cal_names = sorted(({h["subject"] for h in calib_hops} | {e["subject"] for e in calib_edits} | {e["target"] for e in calib_edits}) - test_subj)
@@ -557,20 +622,46 @@ def main():
 
     # ---- memory layer: pick the block whose injected targets transfer best from cloze to question form
     cal = calib_edits[: (8 if args.tiny else 48)]
-    choice = {}
-    for L in Lc:
-        for inj in ("last", "all"):
-            run.inject = inj
-            T = run.optimize_deltas([[e["cloze"]] for e in cal], [e["target"] for e in cal], L, args.delta_steps, args.delta_lr, args.delta_wd)
-            g1 = run.generate([e["cloze"] for e in cal], 10, L, adds=T)
-            g2 = run.generate([qa(e["question"]) for e in cal], 10, L, adds=T)
-            choice[(L, inj)] = {"cloze": np.mean([correct(first_line(g), e["aliases"]) for g, e in zip(g1, cal)]),
-                                "question_transfer": np.mean([correct(first_line(g), e["aliases"]) for g, e in zip(g2, cal)])}
+
+    def choose_block():
+        choice = {}
+        for L in Lc:
+            for inj in ("last", "all"):
+                run.inject = inj
+                T = run.optimize_deltas([[e["cloze"]] for e in cal], [e["target"] for e in cal], L, args.delta_steps, args.delta_lr,
+                                        args.delta_wd, chunk=args.delta_chunk)
+                g1 = run.generate([e["cloze"] for e in cal], 10, L, adds=T)
+                g2 = run.generate([qa(e["question"]) for e in cal], 10, L, adds=T)
+                choice[(L, inj)] = {"cloze": np.mean([correct(first_line(g), e["aliases"]) for g, e in zip(g1, cal)]),
+                                    "question_transfer": np.mean([correct(first_line(g), e["aliases"]) for g, e in zip(g2, cal)])}
+        return choice
+
+    choice = choose_block()
+    best_cloze = max(float(v["cloze"]) for v in choice.values())
+    if best_cloze < 0.8 and not args.tiny and not args.no_abort:
+        # the target optimiser's settings were tuned on Qwen2.5-0.5B; a model with a different hidden-state scale can
+        # need longer, larger, less penalised steps. Decided on calibration edits only.
+        first = (args.delta_steps, args.delta_lr, args.delta_wd)
+        args.delta_steps, args.delta_lr, args.delta_wd = 2 * args.delta_steps, 2.5 * args.delta_lr, args.delta_wd / 10
+        log(f"memory block: best calibration cloze {best_cloze:.3f} < 0.8 with steps/lr/wd {first}; retrying with "
+            f"{(args.delta_steps, args.delta_lr, args.delta_wd)}")
+        choice2 = choose_block()
+        best2 = max(float(v["cloze"]) for v in choice2.values())
+        R["target_optimiser_retry"] = {"first": list(first), "first_best_cloze": round(best_cloze, 3),
+                                       "second": [args.delta_steps, args.delta_lr, args.delta_wd], "second_best_cloze": round(best2, 3)}
+        if best2 > best_cloze:
+            choice, best_cloze = choice2, best2
+        else:
+            args.delta_steps, args.delta_lr, args.delta_wd = first
     L, inj = max(choice, key=lambda k: (choice[k]["cloze"] + choice[k]["question_transfer"], k[1] == "last", -k[0]))
     run.inject = inj
     R["memory_block"] = {"block": L, "inject": inj,
                          "candidates": {f"{k[0]}/{k[1]}": {kk: round(float(vv), 3) for kk, vv in v.items()} for k, v in choice.items()}}
+    R["config"].update(delta_steps=args.delta_steps, delta_lr=args.delta_lr, delta_wd=args.delta_wd)
     log("memory block", json.dumps(R["memory_block"]))
+    if best_cloze < 0.5 and not args.tiny and not args.no_abort:
+        return abort(f"stored values reach the target on only {best_cloze:.0%} of calibration edits even when injected directly; "
+                     "every later number would measure the optimiser, not the memory")
 
     # ---- relation classifier on calibration single-hop facts (cloze and question, subject masked)
     rel_ids = sorted({h["rel"] for h in calib_hops})
@@ -692,7 +783,7 @@ def main():
         for k, f in enumerate(new_ids):
             facts[f]["idx"], facts[f]["w"] = ix[k], ww[k]
         Tn = run.optimize_deltas([[e["cloze"], qa(e["question"])] for e in new], [e["target"] for e in new], L,
-                                 args.delta_steps, args.delta_lr, args.delta_wd)
+                                 args.delta_steps, args.delta_lr, args.delta_wd, chunk=args.delta_chunk)
         T_all = torch.cat([T_all, Tn])
         t_targets = time.time() - tn
         if "grace" in methods:
@@ -741,10 +832,17 @@ def main():
         row["night_s"] = round(time.time() - tn, 1)
         R["nights"].append(row)
         log(json.dumps(row))
-        json.dump(R, open(os.path.join(args.out, "result.json"), "w"), indent=1)
+        save()
+        if len(R["nights"]) == 1:
+            left = -(-len(edits) // args.night) - 1
+            log(f"night 1 took {row['night_s']:.0f} s; the remaining {left} nights should end near "
+                f"{(time.time() - t0 + left * row['night_s']) / 60:.1f} min")
+        jn = row["methods"].get("joint_ls", {}).get("first_night_cloze")
+        if len(R["nights"]) == 1 and jn is not None and jn < 0.5 and not args.tiny and not args.no_abort:
+            return abort(f"after night 1 the joint memory answers only {jn:.0%} of that night's edits; the lookup or the "
+                         "stored values are broken, and the rest of the run would not measure the memory")
 
     Vd = {m: V[m].to(dev) for m in V}
-    out_json = os.path.join(args.out, "result.json")
     # ---- final: every edit, both forms
     es = edits if not args.eval_edits else rng.sample(edits, min(args.eval_edits, len(edits)))
     R["final_edits"] = {"n": len(es), **edit_scores(es, Vd, methods)}
@@ -752,7 +850,7 @@ def main():
     fids = lookup([e["question"] for e in es])
     R["final_edits"]["lookup_right_fact_question_form"] = round(float(np.mean([fid >= 0 and facts[fid]["edit"] is e for fid, e in zip(fids, es)])), 4)
     log("final edits", json.dumps(R["final_edits"]))
-    json.dump(R, open(out_json, "w"), indent=1)
+    save()
 
     # ---- locality: unedited facts in the test cases (incl. unedited relations of edited subjects), known facts.
     # MQuAKE applies all edits together, so a fact left unedited in one case but edited by another case is an
@@ -786,7 +884,7 @@ def main():
                      "lookup_matched_a_fact_unedited": round(float(np.mean([f >= 0 for f in fl])), 4),
                      "known_facts_subject_edited_by_mquake": len(known) - sum(kfree),
                      "lookup_matched_a_fact_known": round(float(np.mean([f >= 0 for f in fk])), 4) if known else None,
-                     "known_facts_base_correct_same_batches": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a, _) in zip(base_known, known)])), 4)}
+                     "known_facts_base_correct_same_batches": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a, _) in zip(base_known, known)])), 4) if known else None}
     R["locality_changes"] = {}
     for m in methods:
         if m == "base":
@@ -799,8 +897,8 @@ def main():
         same_k_free = [x for x, free in zip(same_k, kfree) if free]
         R["locality"][m] = {"unchanged": round(float(np.mean(same_out)), 4),
                             "unchanged_same_subject_other_relation": round(float(np.mean(same_sub)), 4) if same_sub else None,
-                            "known_facts_correct": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a, _) in zip(gk, known)])), 4),
-                            "known_facts_unchanged": round(float(np.mean(same_k)), 4),
+                            "known_facts_correct": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a, _) in zip(gk, known)])), 4) if known else None,
+                            "known_facts_unchanged": round(float(np.mean(same_k)), 4) if known else None,
                             "known_facts_unchanged_subject_never_edited": round(float(np.mean(same_k_free)), 4) if same_k_free else None}
         R["locality_changes"][m] = {
             "known": [dict(prompt=p, true=a, base=first_line(b), out=first_line(x), matched=matched(f),
@@ -811,44 +909,114 @@ def main():
                          for h, x, b, f, same in zip(loc, g, base_loc, fl, same_out) if not same]}
     R["locality"]["base_accuracy_on_unedited"] = round(float(np.mean([correct(first_line(x), h["aliases"]) for x, h in zip(base_loc, loc)])), 4)
     log("locality", json.dumps(R["locality"]))
-    json.dump(R, open(out_json, "w"), indent=1)
+    save()
 
-    # ---- multi-hop: direct question, and chained sub-questions answered by each method
-    mh = cases if not args.mh_cases else cases[: args.mh_cases]
-    Q = [(ci, q) for ci, c in enumerate(mh) for q in c["questions"][: args.mh_q]]
-    R["multihop"] = {"cases": len(mh), "questions_per_case": args.mh_q}
-    qs_of = {}
-    for k, (ci, _) in enumerate(Q):
-        qs_of.setdefault(ci, []).append(k)
-    for m in [x for x in args.mh_methods.split(",") if x in methods]:
-        g = answer(m, [qa(q) for _, q in Q], [q for _, q in Q], max_new=12, Vd=Vd)
-        direct = [correct(first_line(x), [mh[ci]["new_answer"]] + mh[ci]["new_answer_alias"]) for (ci, _), x in zip(Q, g)]
-        chains = chain(run, m, [q for _, q in Q], answer, Vd)
-        ok = [correct(a, [mh[ci]["new_answer"]] + mh[ci]["new_answer_alias"]) for (ci, _), a in zip(Q, chains)]
-        old = [correct(a, [mh[ci]["answer"]] + mh[ci]["answer_alias"]) for (ci, _), a in zip(Q, chains)]
-        by_case = lambda v: float(np.mean([any(v[k] for k in qs_of[c]) for c in range(len(mh))]))
-        R["multihop"][m] = {"chain_case_accuracy": round(by_case(ok), 4), "chain_question_accuracy": round(float(np.mean(ok)), 4),
-                            "chain_gave_old_answer": round(by_case(old), 4), "direct_case_accuracy": round(by_case(direct), 4)}
-        if m == "base":
-            R["multihop"]["base"]["chain_case_accuracy_on_ORIGINAL_answers"] = R["multihop"]["base"].pop("chain_gave_old_answer")
-        log("multi-hop", m, json.dumps(R["multihop"][m]))
-        json.dump(R, open(out_json, "w"), indent=1)
+    # ---- multi-hop: direct question, and chained sub-questions answered by each method. Cases go in a fixed random
+    # order and every method scores a chunk before the next chunk starts, so a run stopped by the time budget still
+    # compares all methods on the same random subset of cases.
+    mh_all = cases if not args.mh_cases else cases[: args.mh_cases]
+    order = list(range(len(mh_all)))
+    random.Random(args.seed + 7).shuffle(order)
+    mh_methods = [x for x in args.mh_methods.split(",") if x in methods]
+    hits = {m: {"new": [], "old": [], "direct": [], "q_new": []} for m in mh_methods}
+    hops_of = []
+    R["multihop"] = {"cases_planned": len(order), "questions_per_case": args.mh_q, "chunk_s": []}
+    R["multihop_examples"] = {}
+    last_chunk_s = 0.0
+    for c0 in range(0, len(order), args.mh_chunk):
+        if args.budget_min and time.time() - t0 + last_chunk_s > args.budget_min * 60:
+            R["multihop"]["stopped_by_time_budget_after_cases"] = c0
+            log(f"multi-hop: time budget reached after {c0} cases")
+            break
+        tc = time.time()
+        mh = [mh_all[i] for i in order[c0:c0 + args.mh_chunk]]
+        Q = [(ci, q) for ci, c in enumerate(mh) for q in c["questions"][: args.mh_q]]
+        qs_of = {}
+        for k, (ci, _) in enumerate(Q):
+            qs_of.setdefault(ci, []).append(k)
+        new_ans = lambda ci: [mh[ci]["new_answer"]] + mh[ci]["new_answer_alias"]
+        old_ans = lambda ci: [mh[ci]["answer"]] + mh[ci]["answer_alias"]
+        case = lambda v: [any(v[k] for k in qs_of[ci]) for ci in range(len(mh))]
+        for attempt in range(4):
+            try:
+                got = {}
+                for m in mh_methods:
+                    g = answer(m, [qa(q) for _, q in Q], [q for _, q in Q], max_new=12, Vd=Vd)
+                    got[m] = (g,) + chain(run, m, [q for _, q in Q], answer, Vd)
+                break
+            except torch.cuda.OutOfMemoryError:
+                # long few-shot prompts at a large batch: halve the batch and redo this chunk (results unchanged)
+                got = None
+                torch.cuda.empty_cache()
+                run.gen_bs = max(8, run.gen_bs // 2)
+                log(f"multi-hop: out of GPU memory, batch size now {run.gen_bs}; redoing the chunk")
+        if got is None:
+            return abort("out of GPU memory in multi-hop even at a small batch size")
+        for m, (g, finals, states) in got.items():
+            ok = [correct(a, new_ans(ci)) for (ci, _), a in zip(Q, finals)]
+            old = [correct(a, old_ans(ci)) for (ci, _), a in zip(Q, finals)]
+            direct = [correct(first_line(x), new_ans(ci)) for (ci, _), x in zip(Q, g)]
+            hits[m]["new"] += case(ok)
+            hits[m]["old"] += case(old)
+            hits[m]["direct"] += case(direct)
+            hits[m]["q_new"] += ok
+            if c0 == 0:
+                firsts = {qs_of[ci][0] for ci in range(min(8, len(mh)))}
+                R["multihop_examples"][m] = [dict(question=q, new_answer=mh[ci]["new_answer"], original_answer=mh[ci]["answer"],
+                                                  chain=states[k], final=finals[k]) for k, (ci, q) in enumerate(Q) if k in firsts]
+        hops_of += [len(c["orig"]["triples"]) for c in mh]
+        last_chunk_s = time.time() - tc
+        R["multihop"]["chunk_s"].append(round(last_chunk_s, 1))
+        R["multihop"].update(multihop_summary(hits, hops_of))
+        log("multi-hop", json.dumps({k: v for k, v in R["multihop"].items() if k != "chunk_s"}))
+        save()
     R["total_s"] = round(time.time() - t0, 1)
-    json.dump(R, open(out_json, "w"), indent=1)
-    open(os.path.join(args.out, "summary.md"), "w", encoding="utf-8").write(report(R))
+    save()
     log("done", out_json)
+    return R
 
 
-def chain(run, method, questions, answer, Vd, max_steps=5):
-    """Model-written sub-questions (few-shot), each answered by the method; returns final answers."""
-    state = [FEWSHOT + f"Question: {q}\n" for q in questions]
+def wilson(k, n, z=1.96):
+    """95% interval for a proportion k/n."""
+    if n == 0:
+        return None
+    p = k / n
+    c = (p + z * z / (2 * n)) / (1 + z * z / n)
+    h = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / (1 + z * z / n)
+    return [round(max(0.0, c - h), 4), round(min(1.0, c + h), 4)]
+
+
+def multihop_summary(hits, hops_of):
+    n = len(hops_of)
+    out = {"cases": n}
+    by_hops = lambda v: {str(h): round(float(np.mean([x for x, y in zip(v, hops_of) if y == h])), 4) for h in sorted(set(hops_of))}
+    for m, h in hits.items():
+        k, ko = sum(h["new"]), sum(h["old"])
+        r = {"chain_case_accuracy": round(k / n, 4), "chain_case_accuracy_95ci": wilson(k, n),
+             "chain_question_accuracy": round(float(np.mean(h["q_new"])), 4),
+             "direct_case_accuracy": round(float(np.mean(h["direct"])), 4), "chain_case_accuracy_by_hops": by_hops(h["new"])}
+        if m == "base":
+            r.update(chain_case_accuracy_on_ORIGINAL_answers=round(ko / n, 4), original_answers_95ci=wilson(ko, n),
+                     original_answers_by_hops=by_hops(h["old"]))
+        else:
+            r["chain_gave_old_answer"] = round(ko / n, 4)
+        out[m] = r
+    if "joint_ls" in hits and "base" in hits and sum(hits["base"]["old"]):
+        # new facts from the memory, used in reasoning, relative to the model's own facts in the same chain
+        out["joint_new_answers_over_base_original_answers"] = round(sum(hits["joint_ls"]["new"]) / sum(hits["base"]["old"]), 3)
+    return out
+
+
+def chain(run, method, questions, answer, Vd, max_steps=6):
+    """Model-written sub-questions (few-shot), each answered by the method; returns final answers and transcripts."""
+    state = [f"Question: {q}\n" for q in questions]
     last = [""] * len(questions)
     final = [None] * len(questions)
     for _ in range(max_steps):
         act = [i for i in range(len(questions)) if final[i] is None]
         if not act:
             break
-        lines = [first_line(x) for x in run.generate([state[i] for i in act], 32)]
+        lines = [first_line(x) for x in run.generate([state[i] for i in act], 32, prefix=FEWSHOT)]
         sub = []
         for i, line in zip(act, lines):
             if line.startswith("Final answer:"):
@@ -864,27 +1032,45 @@ def chain(run, method, questions, answer, Vd, max_steps=5):
                 a = first_line(a).rstrip(".")
                 last[i] = a
                 state[i] += f"Answer: {a}\n"
-    return [f if f is not None else l for f, l in zip(final, last)]
+    return [f if f is not None else l for f, l in zip(final, last)], state
+
+
+# Published multi-hop accuracy on the same data with GPT-J (Zhong et al., MQuAKE, arXiv v3 Table 5, which uses
+# MQuAKE-CF-3k-v2; a case counts if any of its three questions is answered with the new answer).
+PUBLISHED = {
+    "MQuAKE-CF-3k-v2.json": "3,000 edited instances: MeLLo 14.2%, MEND 6.1%, MEMIT 5.4%; the unedited GPT-J answers 40.5% "
+                            "with the original answers (Table 3)",
+    "MQuAKE-T.json": "1,868 edited instances: MeLLo 30.7%, MEND 4.6%, MEMIT 0.0%",
+}
 
 
 def report(R):
-    ms = list(R["final_edits"].keys() - {"n", "lookup_right_fact_question_form"})
-    order = [m for m in ("base", "joint_ls", "batch_ls", "grace", "rag") if m in ms]
-    L = [f"# Real-world test 4: MQuAKE lifelong editing — {R['config']['model']} ({R['config']['data']})", "",
-         f"{R['edits']:,} distinct edits from {R['cases']:,} cases, written {R['config']['night']} per night; "
-         f"memory after block {R['memory_block']['block']} of {R['n_layers']} (value added at: {R['memory_block']['inject']} position(s)); calibration on {R['calibration_cases']} disjoint cases.", "",
-         "At question time nothing is given: the subject is found by matching every word span, the relation by a classifier.", "",
-         "## Every edit after the last night (new answer generated; string match against answer + aliases)", "",
-         "| Method | Cloze (written form) | Question form |", "|---|---|---|"]
-    for m in order:
-        L.append(f"| {m} | {R['final_edits'][m]['cloze']:.3f} | {R['final_edits'][m]['question']:.3f} |")
-    L += ["", f"Lookup found the right fact from the question alone: {R['final_edits']['lookup_right_fact_question_form']:.3f}", "",
-          "## First night's edits after each night (cloze)", "", "| Edits | " + " | ".join(m for m in ("joint_ls", "batch_ls", "grace") if m in order) + " |",
-          "|---|" + "---|" * len([m for m in ("joint_ls", "batch_ls", "grace") if m in order])]
-    for n in R["nights"]:
-        L.append(f"| {n['edits']:,} | " + " | ".join(f"{n['methods'].get(m, {}).get('first_night_cloze', float('nan')):.3f}"
-                                                     for m in ("joint_ls", "batch_ls", "grace") if m in order) + " |")
-    L += ["", "## Locality (unedited facts; identical output to the unedited model)", "", "```", json.dumps(R["locality"], indent=1), "```", ""]
+    """Markdown summary of whatever the run has finished so far."""
+    c = R["config"]
+    mb = R.get("memory_block")
+    L = [f"# Real-world test 4: MQuAKE lifelong editing — {c['model']} ({c['data']})", ""]
+    if R.get("aborted"):
+        L += [f"**Run stopped early: {R['aborted']}**", ""]
+    L += [f"{R['edits']:,} distinct edits from {R['cases']:,} cases, written {c['night']} per night; "
+          + (f"memory after block {mb['block']} of {R['n_layers']} (value added at: {mb['inject']} position(s)); " if mb else "")
+          + f"calibration on {R['calibration_cases']} disjoint cases. Elapsed: {R.get('elapsed_s', 0) / 60:.1f} min.", "",
+          "At question time nothing is given: the subject is found by matching every word span, the relation by a classifier.", ""]
+    fe = R.get("final_edits")
+    if fe:
+        order = [m for m in ("base", "joint_ls", "batch_ls", "grace", "rag") if m in fe]
+        L += ["## Every edit after the last night (new answer generated; string match against answer + aliases)", "",
+              "| Method | Cloze (written form) | Question form |", "|---|---|---|"]
+        L += [f"| {m} | {fe[m]['cloze']:.3f} | {fe[m]['question']:.3f} |" for m in order]
+        L += ["", f"Lookup found the right fact from the question alone: {fe['lookup_right_fact_question_form']:.3f}", ""]
+    if R["nights"]:
+        rm = [m for m in ("joint_ls", "batch_ls", "grace") if m in R["nights"][0]["methods"]]
+        L += ["## First night's edits after each night (cloze)", "", "| Edits | " + " | ".join(rm) + " | Night (s) |",
+              "|---|" + "---|" * (len(rm) + 1)]
+        L += [f"| {n['edits']:,} | " + " | ".join(f"{n['methods'].get(m, {}).get('first_night_cloze', float('nan')):.3f}" for m in rm)
+              + f" | {n.get('night_s', 0):.0f} |" for n in R["nights"]]
+        L.append("")
+    if R.get("locality"):
+        L += ["## Locality (unedited facts; identical output to the unedited model)", "", "```", json.dumps(R["locality"], indent=1), "```", ""]
     for m, ch in R.get("locality_changes", {}).items():
         L += [f"### What {m} changed ({len(ch['known'])} known facts, {len(ch['unedited'])} unedited facts; first 40 shown)", "",
               "| Prompt / question | True | Base | Now | Lookup matched |", "|---|---|---|---|---|"]
@@ -896,12 +1082,42 @@ def report(R):
     if R.get("known_facts_base_wrong"):
         L += ["Known facts the unedited model got wrong (left out of the check): "
               + "; ".join(f"{p!r} → {g!r}" for p, g in R["known_facts_base_wrong"].items()), ""]
-    L += ["## Multi-hop (MQuAKE: a case counts if any of its questions is answered with the new answer)", "", "```",
-          json.dumps(R["multihop"], indent=1), "```", "",
-          "Published on GPT-J, MQuAKE-CF, 3,000 edits (Zhong et al. 2023): MeLLo 14.2%, MEMIT 5.4% multi-hop accuracy.", "",
-          "Setup: " + json.dumps({k: R[k] for k in ("person_key", "memory_block", "relation_classifier", "grace_theta", "known_facts_base_correct")}), "",
-          "First night, before editing / target injected directly: " + json.dumps(R["first_night_before_editing"]) + " / "
-          + json.dumps(R["first_night_target_injected_directly"]), "", f"Total time: {R.get('total_s', 0) / 60:.1f} min"]
+    mhr = R.get("multihop", {})
+    if mhr and not mhr.get("cases"):
+        L += ["## Multi-hop", "", "Not run: the time budget was used up before the first chunk.", ""]
+    if mhr.get("cases"):
+        pct = lambda x: f"{100 * x:.1f}%"
+        ci = lambda v: f" [{100 * v[0]:.1f}–{100 * v[1]:.1f}]" if v else ""
+        L += ["## Multi-hop (MQuAKE: a case counts if any of its questions is answered with the new answer)", "",
+              f"{mhr['cases']:,} of {mhr['cases_planned']:,} cases (random order), {mhr['questions_per_case']} question(s) each"
+              + (" — stopped by the time budget" if "stopped_by_time_budget_after_cases" in mhr else "") + ".", "",
+              "| Method | Chain: new answer [95% CI] | Direct question: new answer | Chain gave the old answer | Chain by hops (2 / 3 / 4) |",
+              "|---|---|---|---|---|"]
+        for m in ("joint_ls", "rag", "batch_ls", "grace", "base"):
+            r = mhr.get(m)
+            if r:
+                old = r.get("chain_gave_old_answer", r.get("chain_case_accuracy_on_ORIGINAL_answers", 0))
+                L.append(f"| {m} | {pct(r['chain_case_accuracy'])}{ci(r['chain_case_accuracy_95ci'])} | {pct(r['direct_case_accuracy'])} | "
+                         f"{pct(old)} | " + " / ".join(pct(v) for v in r["chain_case_accuracy_by_hops"].values()) + " |")
+        if "base" in mhr:
+            b = mhr["base"]
+            L += ["", f"Unedited model, same chain, ORIGINAL answers: {pct(b['chain_case_accuracy_on_ORIGINAL_answers'])}"
+                  f"{ci(b['original_answers_95ci'])}; by hops " + " / ".join(pct(v) for v in b["original_answers_by_hops"].values()) + "."]
+        if "joint_new_answers_over_base_original_answers" in mhr:
+            L += [f"Joint memory's new answers per original answer of the unedited model: {mhr['joint_new_answers_over_base_original_answers']:.2f}."]
+        L.append("")
+        if c["data"] in PUBLISHED:
+            L += [f"Published on GPT-J, same data ({c['data']}), {PUBLISHED[c['data']]}.", ""]
+        for x in R.get("multihop_examples", {}).get("joint_ls", [])[:4]:
+            L += [f"Example (joint_ls): new answer {x['new_answer']!r}, original {x['original_answer']!r}, final {x['final']!r}",
+                  "```", x["chain"].rstrip(), "```", ""]
+    setup = {k: R[k] for k in ("person_key", "memory_block", "relation_classifier", "grace_theta", "known_facts_base_correct",
+                               "target_optimiser_retry") if k in R}
+    L += ["Setup: " + json.dumps(setup), ""]
+    if "first_night_before_editing" in R:
+        L += ["First night, before editing / target injected directly: " + json.dumps(R["first_night_before_editing"]) + " / "
+              + json.dumps(R["first_night_target_injected_directly"]), ""]
+    L.append(f"Total time: {R.get('total_s', R.get('elapsed_s', 0)) / 60:.1f} min")
     return "\n".join(L) + "\n"
 
 

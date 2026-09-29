@@ -49,6 +49,9 @@ was run on each one.
     - The remaining question-form misses equal lookup misses (91.0%).
     - Multi-hop questions cannot be judged on the 0.5B model: even unedited, it answers only 2.7–3.0%
       of them.
+  - **Test 5, pre-registered and not yet run:** the same test on GPT-J-6B, the model of the published
+    MQuAKE results, against MeLLo 14.2%, MEND 6.1% and MEMIT 5.4% multi-hop accuracy. Pass lines and
+    predictions were fixed before the run.
   - **Open:**
     - Multi-hop use of new facts needs a larger model (GPT-J, as in the published results).
     - Test 3's capacity limit (a third of the slots reachable) is gone in test 4: the relation is bound
@@ -698,6 +701,86 @@ written wordings; 5.1% and 11.1% on unseen ones.
   - how often the lookup matches any fact;
   - damage on the known facts whose subject no case edits, so that figure cannot be caused by a
     correct edit.
+
+### Real-world test 5 (pre-registered, not yet run): GPT-J-6B on one H100
+
+(`reallm/modal_gptj.py` runs `reallm/memtest4.py` on a rented H100; results will go in
+`results/reallm4_gptj/` and `results/reallm4_gptj_t/`.) This section was written and committed before the run.
+The pass lines and predictions below are fixed and will not be moved after the results arrive.
+
+**Why GPT-J.** It is the model the MQuAKE authors used. The current version of their paper uses the same data
+file as this project (MQuAKE-CF-3k-v2; arXiv v3, Table 5). Their GPT-J results with all 3,000 cases edited at
+once are the reference; a case counts if any of its three questions gets the new answer:
+
+| Published, GPT-J, MQuAKE-CF-3k-v2, 3,000 edited cases | Multi-hop accuracy |
+|---|---|
+| MeLLo (explicit fact memory with retrieval and self-check) | 14.2% |
+| MEND | 6.1% |
+| MEMIT | 5.4% |
+| Unedited GPT-J on the original answers (Table 3) | 40.5% |
+
+On MQuAKE-T (1,868 cases built on 96 real-world changes): MeLLo 30.7%, MEND 4.6%, MEMIT 0.0%.
+
+**What is fixed in advance:**
+- GPT-J-6B, half-precision weights run in bf16. MQuAKE-CF-3k-v2, all 2,764 edits written 500 per night. All
+  3,000 cases with 3 questions each.
+- If the time budget stops multi-hop early, the cases done are a random subset (they run in a fixed random
+  order). Every method is scored on the same cases, and the report states how many.
+- Same code and settings as the 0.5B runs, with three changes:
+  - the decomposition prompt uses all four of MeLLo's published examples, not two;
+  - the few-shot prompt is encoded once and reused; tested to give identical outputs;
+  - if the stored values reach the target on fewer than 80% of calibration edits, the target optimiser is
+    retried once with longer, larger steps. This is decided on calibration data only.
+- Multi-hop methods: the joint memory, the unedited model, and the matched fact pasted into each
+  sub-question's prompt.
+
+**Q1. Does the single-hop result carry over from 0.5B to 6B?**
+- **Pass (all four):** written form ≥ 90%; question form ≥ 85%; first-night edits ≥ 95% after the last
+  night; unedited facts unchanged ≥ 95%.
+- **Prediction:** pass. The lookup and the stored values do not depend on model size, and the target was
+  reached 99.7% of the time on 0.5B.
+- **Main risk:** the target optimiser's settings were tuned on 0.5B; the retry is built in for this.
+
+**Q2. Multi-hop against the published GPT-J editors.** Joint memory, sub-question chain, 95% interval over cases:
+- **Beats MeLLo:** the interval's lower end is above 14.2%.
+- **Beats weight editing only:** the lower end is above 5.4%, but not above 14.2%.
+- **Fails:** the lower end is at or below 5.4%.
+- **Prediction:** beats MeLLo, with about 60% confidence.
+  - MeLLo falls from 38.9% (one case) to 14.2% (3,000 cases) because retrieval picks wrong facts once
+    thousands are stored.
+  - This lookup is keyed on subject and relation. At 0.5B it found the right fact 91% of the time with
+    2,764 stored.
+  - The main risk is GPT-J writing wrong sub-questions; Q3 separates that from the memory.
+
+**Q3. Are facts from the memory used in reasoning as well as the model's own facts?**
+- **Measure:** the joint memory's rate of new answers divided by the unedited model's rate of original
+  answers, on the same cases with the same chain.
+- **Pass: ≥ 0.8.** Facts read from the memory work nearly as well in multi-step reasoning as facts in the
+  weights (Fix 5).
+- **Fail: < 0.5.** Using new facts in reasoning is the open bottleneck.
+- **Validity check:** the unedited model's chain must reach at least 20% on the original answers. Below that,
+  the decomposition is too weak for Q2 to test the memory, and Q2 is reported as not decided.
+- **Prediction:** 0.6–0.9.
+
+**Q4. Memory vs pasting the fact into the prompt, at 6B.**
+- At 0.5B, pasting failed on questions (10.9% against 91.0%). A 6B model reads context better.
+- **Prediction:** the gap shrinks a lot; pasting reaches 50–85% on the question form.
+- **If pasting matches or beats the memory** on both the single-hop question form and multi-hop, the
+  accuracy advantage seen at 0.5B was a small-model effect. The case for the memory then rests on no
+  context, cost and scale, not accuracy.
+
+**Q5 (only if the budget leaves time).** The same questions on MQuAKE-T, against MeLLo 30.7% and MEMIT 0.0%.
+
+**A known lookup failure, recorded before the run.** A CPU rehearsal with a tiny random GPT-J matched "Which
+religion is Francis II affiliated with?" to the stored subject "Francis": a stored name that is part of a longer
+name matches exactly. This is a property of word-span matching, not of model size. The run's per-fact
+diagnostics will show how often it happens on GPT-J; the method is not changed before the run.
+
+**What this cannot prove, whatever the result:**
+- The relation classifier knows the 36 relations of its calibration data, a closed set.
+- Edits arrive in the dataset's own cloze and question form.
+- A 6B model on a datacentre GPU says nothing about power or speed on a phone.
+- Facts are keyed by named subjects; facts about unnamed things are out of scope.
 
 ## 5. Tests that decide it, in order
 
