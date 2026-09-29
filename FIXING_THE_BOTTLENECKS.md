@@ -42,7 +42,9 @@ was run on each one.
     - The system finds the subject itself and classifies the relation itself. Answers are open and
       multi-word.
     - With the fixed calibration, after all 2,764 edits: 97.3% on the written form, 91.0% on the
-      question form. Unedited facts: 96.9% unchanged.
+      question form. A third run reproduced every figure exactly.
+    - Unedited facts: 98.3% unchanged (1,071 facts), 92.3% for other facts about edited subjects.
+      Every change comes from the lookup matching a wrong fact, so locality depends only on the lookup.
     - The first night's edits held at 97.0%.
     - The remaining question-form misses equal lookup misses (91.0%).
     - Multi-hop questions cannot be judged on the 0.5B model: even unedited, it answers only 2.7–3.0%
@@ -291,10 +293,10 @@ This is design only, with no new result behind it.
 | Base model's knowledge untouched | **Guaranteed for the weights** (frozen) | Unrelated behaviour still has to be measured, because memory outputs can fire on unrelated questions |
 | Found under any wording | **Confirmed for known relations (test 3)** | Unseen wordings 96.5%, equal to the relation classifier's accuracy; 6% (test 1) → 44% (test 2) → 96.5% |
 | Better than pasting facts into the prompt | **Confirmed on a 0.5B model (tests 3 and 4)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83%. Real MQuAKE edits, question form: memory 80.4%, the matched fact pasted into the prompt 9.7% |
-| Real-world edits, subject and relation not given | **Works on a 0.5B model (test 4)** | 2,764 Wikidata edits: 97.3% written form, 91.0% question form; first night kept at 97.0%; unedited facts 96.9% unchanged; GRACE-style 64.0% / 54.7% |
+| Real-world edits, subject and relation not given | **Works on a 0.5B model (test 4)** | 2,764 Wikidata edits: 97.3% written form, 91.0% question form; first night kept at 97.0%; unedited facts 98.3% unchanged (GRACE-style 86.2%); GRACE-style editing 64.0% / 54.7%; reproduced exactly in a third run |
 | Multi-hop use of new facts | **Not measurable at 0.5B (test 4)** | The unedited model answers 2.7% of MQuAKE multi-hop questions; needs GPT-J-class |
 | Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
-| Base model's known facts untouched | **Confirmed with the novelty gate (tests 2 and 3)** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3 |
+| Base model's known facts untouched | **Confirmed with the novelty gate (tests 2 and 3); probable in test 4** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3. Test 4: 49 of 51 unchanged, but MQuAKE itself edits 5 of these prompts word for word (the capital of Japan, ...), so the 2 changes may be correct edits; per-fact outputs are now recorded to settle it |
 | Multi-step use of new facts | **Designed, untested** (Fix 5) | Chained recall: p² by arithmetic; multi-layer editing +15.5 points (prior) |
 | Overriding strong beliefs | **Designed, untested** (Fix 6) | Failure cause documented; margin writes are new |
 | Skills | **Open** | – |
@@ -652,6 +654,50 @@ written wordings; 5.1% and 11.1% on unseen ones.
   time and the original answer 3.0%. With the joint memory the chain gives the new answer 3.0% of the
   time. That is as often as the unedited model uses its own knowledge, but both are 6 cases out of
   200. It is floor-level evidence and settles nothing; that needs a GPT-J-class model.
+
+**Third run, with both locality measurements fixed** (`results/reallm4c/summary.md`; 27 minutes):
+- **Reproducible.** Every editing number and the multi-hop numbers are identical to the second run to
+  the last digit: 97.3% / 91.0%, first night 98.7% → 97.0%.
+- **Unedited facts.** 1,071 facts remain after removing 43 that another case edits.
+
+| Unedited facts, identical output | All 1,071 | Other relations of edited subjects (39) | Known facts (51) |
+|---|---|---|---|
+| **Joint memory** | **98.3%** | **92.3%** (36 of 39) | 96.1% (49 of 51) |
+| Nightly batch least squares | 98.3% | 92.3% | 96.1% |
+| GRACE-style codebook | 86.2% | 74.4% | 96.1% |
+| Matched fact pasted into the prompt | 94.4% | 89.7% | 84.3% |
+
+- **Joint and batch agree to four digits on every locality figure.** This follows from the design.
+  - When the lookup matches no fact, the memory adds nothing and the output is exactly the base
+    model's.
+  - So every change to an unedited fact comes from the lookup matching a wrong fact. The write rule
+    only decides what that wrong match adds.
+  - Locality is therefore a property of the lookup (subject matching and relation classifier), not of
+    the memory. Improving it means improving the lookup.
+  - The 3 of 39 changes on edited subjects fit the relation classifier sending an unedited relation of
+    that subject to its edited one.
+- **The known-facts check is contaminated by the benchmark itself.** MQuAKE edits some of the
+  well-known facts used as the damage check.
+  - Word for word: the capitals of Japan (to Bondi Junction), Italy (Duluth), Egypt (Yungay), Canada
+    (Königsberg) and South Korea (Chiavari).
+  - Same fact, other wording: the language of Germany, Italy and Japan ("Most people in Japan
+    speak"), the author of Romeo and Juliet and the creator of the Mona Lisa.
+  - Changing those answers is the edit working, not damage.
+- **What the two changed known facts probably are.** The evidence is consistent, but the run did not
+  save which facts changed, so this is not proven.
+  - Each memory method (joint, batch and GRACE) changed exactly 2 of the 51, and each turned exactly 2
+    right answers wrong (the base scored 50 of 51 in the same batches, each method 48).
+  - GRACE finds facts with a different mechanism, a similarity gate. That gate changes about 8 times
+    as many unedited facts (13.8% against 1.7%), yet on known facts it matches the joint memory exactly.
+    That is what an exact match to a stored edit produces, and not what false matches would produce.
+  - Unexplained: if all five word-for-word capitals were among the 51 the base answers correctly, the
+    memory should have changed five, not two. The base model's per-prompt answers were not saved
+    either.
+- **Fixed in the code for the next run.** Each run now records every changed fact, known or unedited,
+  with the base answer, the new answer and the fact the lookup matched. It also reports:
+  - how often the lookup matches any fact;
+  - damage on the known facts whose subject no case edits, so that figure cannot be caused by a
+    correct edit.
 
 ## 5. Tests that decide it, in order
 

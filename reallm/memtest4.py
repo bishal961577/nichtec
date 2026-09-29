@@ -608,9 +608,10 @@ def main():
     R["grace_theta"] = round(grace_theta, 4)
 
     # ---- known facts the base model answers correctly (damage check)
-    known = [(p, a) for p, a, _ in M2.KNOWN]
-    kg = run.generate([p for p, _ in known], 6)
-    known = [(p, a) for (p, a), g in zip(known, kg) if correct(first_line(g), [a])] if not args.tiny else known[:10]
+    known = list(M2.KNOWN)
+    kg = run.generate([p for p, _, _ in known], 6)
+    R["known_facts_base_wrong"] = {k[0]: first_line(g) for k, g in zip(known, kg) if not correct(first_line(g), [k[1]])}
+    known = [k for k, g in zip(known, kg) if correct(first_line(g), [k[1]])] if not args.tiny else known[:10]
     R["known_facts_base_correct"] = len(known)
 
     # ---- the stream
@@ -771,21 +772,43 @@ def main():
     edited_subjects = {e["subject"] for e in edits}
     base_loc = answer("base", [qa(h["question"]) for h in loc], [h["question"] for h in loc])
     # base outputs regenerated on exactly the same list and batches as each method (padding changes bf16 rounding)
-    base_known = answer("base", [p for p, _ in known], [p for p, _ in known], max_new=6)
+    kp = [p for p, _, _ in known]
+    base_known = answer("base", kp, kp, max_new=6)
+    # joint_ls and batch_ls add nothing when the lookup matches no fact, so each change they make to an unedited
+    # fact comes from a wrong match; the write rule only decides what that match adds
+    fl, fk = lookup([h["question"] for h in loc]), lookup(kp)
+    matched = lambda f: None if f < 0 else facts[f]["edit"]["cloze"] + " -> " + facts[f]["edit"]["target"]
+    # MQuAKE itself edits some known facts (the capital of Japan becomes Bondi Junction, ...): a change there can
+    # be the edit working, so damage is read on the known facts whose subject no case edits
+    kfree = [s not in edited_subjects for _, _, s in known]
     R["locality"] = {"unedited_facts": len(loc), "of_which_about_edited_subjects": sum(h["subject"] in edited_subjects for h in loc),
                      "excluded_edited_by_another_case": len(all_unedited) - len(hops),
-                     "known_facts_base_correct_same_batches": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a) in zip(base_known, known)])), 4)}
+                     "lookup_matched_a_fact_unedited": round(float(np.mean([f >= 0 for f in fl])), 4),
+                     "known_facts_subject_edited_by_mquake": len(known) - sum(kfree),
+                     "lookup_matched_a_fact_known": round(float(np.mean([f >= 0 for f in fk])), 4) if known else None,
+                     "known_facts_base_correct_same_batches": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a, _) in zip(base_known, known)])), 4)}
+    R["locality_changes"] = {}
     for m in methods:
         if m == "base":
             continue
         g = answer(m, [qa(h["question"]) for h in loc], [h["question"] for h in loc], Vd=Vd)
         same_out = [first_line(a) == first_line(b) for a, b in zip(g, base_loc)]
         same_sub = [x for x, h in zip(same_out, loc) if h["subject"] in edited_subjects]
-        gk = answer(m, [p for p, _ in known], [p for p, _ in known], max_new=6, Vd=Vd)
+        gk = answer(m, kp, kp, max_new=6, Vd=Vd)
+        same_k = [first_line(a) == first_line(b) for a, b in zip(gk, base_known)]
+        same_k_free = [x for x, free in zip(same_k, kfree) if free]
         R["locality"][m] = {"unchanged": round(float(np.mean(same_out)), 4),
                             "unchanged_same_subject_other_relation": round(float(np.mean(same_sub)), 4) if same_sub else None,
-                            "known_facts_correct": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a) in zip(gk, known)])), 4),
-                            "known_facts_unchanged": round(float(np.mean([first_line(a) == first_line(b) for a, b in zip(gk, base_known)])), 4)}
+                            "known_facts_correct": round(float(np.mean([correct(first_line(x), [a]) for x, (_, a, _) in zip(gk, known)])), 4),
+                            "known_facts_unchanged": round(float(np.mean(same_k)), 4),
+                            "known_facts_unchanged_subject_never_edited": round(float(np.mean(same_k_free)), 4) if same_k_free else None}
+        R["locality_changes"][m] = {
+            "known": [dict(prompt=p, true=a, base=first_line(b), out=first_line(x), matched=matched(f),
+                           subject_edited_by_mquake=s in edited_subjects)
+                      for (p, a, s), x, b, f, same in zip(known, gk, base_known, fk, same_k) if not same],
+            "unedited": [dict(question=h["question"], true=h["answer"], base=first_line(b), out=first_line(x), matched=matched(f),
+                              same_subject_edited=h["subject"] in edited_subjects)
+                         for h, x, b, f, same in zip(loc, g, base_loc, fl, same_out) if not same]}
     R["locality"]["base_accuracy_on_unedited"] = round(float(np.mean([correct(first_line(x), h["aliases"]) for x, h in zip(base_loc, loc)])), 4)
     log("locality", json.dumps(R["locality"]))
     json.dump(R, open(out_json, "w"), indent=1)
@@ -861,8 +884,19 @@ def report(R):
     for n in R["nights"]:
         L.append(f"| {n['edits']:,} | " + " | ".join(f"{n['methods'].get(m, {}).get('first_night_cloze', float('nan')):.3f}"
                                                      for m in ("joint_ls", "batch_ls", "grace") if m in order) + " |")
-    L += ["", "## Locality (unedited facts; identical output to the unedited model)", "", "```", json.dumps(R["locality"], indent=1), "```", "",
-          "## Multi-hop (MQuAKE: a case counts if any of its questions is answered with the new answer)", "", "```",
+    L += ["", "## Locality (unedited facts; identical output to the unedited model)", "", "```", json.dumps(R["locality"], indent=1), "```", ""]
+    for m, ch in R.get("locality_changes", {}).items():
+        L += [f"### What {m} changed ({len(ch['known'])} known facts, {len(ch['unedited'])} unedited facts; first 40 shown)", "",
+              "| Prompt / question | True | Base | Now | Lookup matched |", "|---|---|---|---|---|"]
+        for x in (ch["known"] + ch["unedited"])[:40]:
+            tag = " (subject edited)" if x.get("subject_edited_by_mquake") or x.get("same_subject_edited") else ""
+            cell = lambda s: (s or "—").replace("|", "/")[:60]
+            L.append(f"| {cell(x.get('prompt') or x.get('question'))}{tag} | {cell(x['true'])} | {cell(x['base'])} | {cell(x['out'])} | {cell(x['matched'])} |")
+        L.append("")
+    if R.get("known_facts_base_wrong"):
+        L += ["Known facts the unedited model got wrong (left out of the check): "
+              + "; ".join(f"{p!r} → {g!r}" for p, g in R["known_facts_base_wrong"].items()), ""]
+    L += ["## Multi-hop (MQuAKE: a case counts if any of its questions is answered with the new answer)", "", "```",
           json.dumps(R["multihop"], indent=1), "```", "",
           "Published on GPT-J, MQuAKE-CF, 3,000 edits (Zhong et al. 2023): MeLLo 14.2%, MEMIT 5.4% multi-hop accuracy.", "",
           "Setup: " + json.dumps({k: R[k] for k in ("person_key", "memory_block", "relation_classifier", "grace_theta", "known_facts_base_correct")}), "",
