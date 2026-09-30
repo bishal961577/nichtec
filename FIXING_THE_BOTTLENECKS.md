@@ -58,6 +58,14 @@ was run on each one.
       MeLLo 30.7%.
     - Using new facts in reasoning, relative to the model's own facts: 0.40 on MQuAKE-CF (fail), 0.82 on
       MQuAKE-T (pass). Two of my predictions (beating MeLLo; 0.6–0.9) were wrong.
+  - **Test 6: the model's own states do not address the memory reliably.**
+    - Every token querying the memory finds 62.8% (0.5B, closed) and 78.4% (1.5B, in between) of stored names in
+      unseen sentences, against a 90% line.
+    - With the name's position given, 98–99%, but only as a lexical fingerprint of its tokens.
+    - The middle entity of two-hop questions is not readable from the question's last token (2.8–4.0%; line 20%),
+      though the probe's own control is weak in the middle layers.
+    - The pre-registered next step (a trained canonicaliser) and the lexical-table route the results point to are
+      published 2026 work: Engram, NGM, TF-Engram, User as Engram, ENGRAFT.
   - **Open:**
     - Multi-hop use of new facts: the memory is missed when the model words the step itself.
     - Test 3's capacity limit (a third of the slots reachable) is gone in test 4: the relation is bound
@@ -303,6 +311,7 @@ This is design only, with no new result behind it.
 | Found under any wording | **Confirmed for known relations (test 3)** | Unseen wordings 96.5%, equal to the relation classifier's accuracy; 6% (test 1) → 44% (test 2) → 96.5% |
 | Better than pasting facts into the prompt | **Confirmed on a 0.5B model (tests 3 and 4)** | Same questions: 10 / 100 / 1,000 facts in the prompt 43% / 27% / 13%; one selected fact 92%; memory with 24K facts 83%. Real MQuAKE edits, question form: memory 80.4%, the matched fact pasted into the prompt 9.7% |
 | Real-world edits, subject and relation not given | **Works on 0.5B (test 4) and 6B (test 5)** | 2,764 Wikidata edits. Qwen-0.5B: 97.3% written form, 91.0% question form, first night kept at 97.0%, unedited 98.3% unchanged. GPT-J-6B: 95.9% / 95.7%, 97.0%, 98.7%; GRACE-style 57.5% / 50.9%, unedited 72.3% |
+| Model finds the memory itself | **Not from frozen states (test 6)** | Every token querying: 62.8% (0.5B) / 78.4% (1.5B) of stored names in unseen sentences, line 90%; position given: 98–99%, lexical only; longer names containing a stored one fire 30–58% |
 | Multi-hop use of new facts | **Beats weight editing, not MeLLo (test 5, GPT-J)** | MQuAKE-CF, 3,000 edited cases: 9.4% vs MEMIT 5.4%, MEND 6.1%, MeLLo 14.2%; 0.40 of the model's own multi-hop rate. MQuAKE-T: 18.8% vs MEMIT 0.0%, MeLLo 30.7%; 0.82 |
 | Learning without a backward pass | **Works for closed-vocabulary answers (test 2)** | An offline per-answer codebook gives 96.0% recall vs 96.2% for per-fact gradient targets; in-context differences (7.7%) and output-embedding directions (22%) fail |
 | Base model's known facts untouched | **Confirmed (tests 2, 3 and 5)** | 44 of 44 known facts kept at every night; never-written people: 0% false reads in test 3. Test 5 (GPT-J): 0 of 36 known facts about never-edited subjects changed; the 5 that changed are all edits MQuAKE itself asks for (the capital of Japan becomes Bondi Junction, ...) |
@@ -876,7 +885,7 @@ changes) the joint memory scored 95.8% on both forms, and all 1,813 unedited fac
    This decides between the lookup and value-transfer explanations. It needs another GPT-J run.
 3. **Few-shot prompts for each chain step**, as MeLLo uses, so the chain itself is not the ceiling.
 
-### Real-world test 6 (pre-registered, not yet run): can the model's own states address the memory?
+### Real-world test 6 (pre-registered; results below): can the model's own states address the memory?
 
 (`reallm/keytest.py`; `reallm/remastered_check.py`; results will go in `results/keytest_*` and
 `results/remastered_check/`.) This section was written and committed before the run.
@@ -931,6 +940,93 @@ tests 4 and 5 used.
 - **Closed:** the in-weights route to continual learning is closed for this design. The project then either becomes
   a retrieval-style memory or moves to the retrofitted memory-layer route, where a model is trained to address its
   own memory.
+
+
+### Real-world test 6 results (Qwen2.5-0.5B and 1.5B, laptop RTX 3050, 30 Sep 2026)
+
+(`results/keytest_Qwen2.5-0.5B_v2/`, `results/keytest_Qwen2.5-1.5B_v2/`; 29 and 31 minutes.)
+
+**One deviation from the plan: the data.** The runs used MQuAKE-CF-3k-v2 (with MQuAKE-CF for calibration), not
+Remastered. The Remastered loader failed on the dataset's real layout: each edit stores `target_new_str` flat, not
+the nested `target_new` its README shows. The pre-agreed fallback to v2 was used. This does not change the
+conclusions below:
+- The name measurements use only subject names and sentences that contain them; no answer label is involved.
+- The two-hop measurement uses the middle entity of each fact chain. Even if half of those labels were wrong, a
+  true 50% would show as 25% or more, not 2–4%.
+
+The loader is fixed (checked on a parquet built in the real layout); the Remastered comparison itself is still to run.
+
+| Pre-registered measure (line) | 0.5B | 1.5B | Verdict |
+|---|---|---|---|
+| Native scan hit, best variant, layer chosen on calibration (viable ≥ 90% with ≤ 2% false fires; closed < 70%) | 62.8% (false fires 2.9%) | 78.4% (false fires 3.6%) | 0.5B **closed**; 1.5B **in between** |
+| Longer names containing a stored one ("Francis II"), fired | 35–54% | 30–58% | – |
+| Name position given, name's tokens averaged at layer 1 | 99.3% (false fires 3.1%) | 98.2% (2.3%) | – |
+| Name position given, last token only | 59–78% | 68–86% | – |
+| Middle entity of two-hop questions, top-1 where the first hop is known (hook ≥ 50%; none < 20%) | 2.8% (chance 0.06%) | 4.0% | **none** |
+
+**Predictions against outcomes:**
+- **Position given, 80–95% at an early layer:** 98–99%. Right direction, too low, and the high number is lexical
+  (below).
+- **Native scan 60–85%, "not viable as is":** 62.8% and 78.4%. Right.
+- **Middle entity 20–50% at 0.5B, higher at 1.5B:** 2.8% and 4.0%. Wrong.
+
+**What the numbers say:**
+1. **A name's identity survives only where the representation is still lexical.**
+   - Compare the name inside a sentence with the same name encoded alone. The two are 0.97–0.98 similar at
+     layers 2–4, falling to 0.41 at the last layer.
+   - From layer 22 (0.5B) and layer 26 (1.5B) on, a name inside a sentence is closer to some *other* name than to
+     itself.
+   - The deep layers, where the model's meaning is, carry the sentence's next-word prediction, not the name.
+2. **The 99% with the position given is a lexical fingerprint.**
+   - Averaging the layer-0/1 states over a name's tokens gives nearly the sum of its token embeddings.
+   - It works because the query sentences contain the name verbatim. It would not find "the French president" for
+     "Emmanuel Macron".
+   - It needs the name's position marked, which means an external name finder: what tests 3–5 already use.
+3. **Most of the loss is one token not identifying a multi-token name.**
+   - Without a marked position, the scan must use single-token states. With the position given but only the
+     last token, the hit rate is already down to 59–86%; scanning loses another 2–15 points.
+   - The right name is usually the nearest one (top-1 90–97%). But with 2,580 stored names, a never-stored name
+     lands close enough to some stored key that a 2%-false-fire threshold rejects many true matches (hit 59–86%).
+   - Longer names containing a stored name fire 30–58% of the time. This is the name-collision failure behind
+     every unwanted change in test 5, now seen in the representations.
+   - Scale helped (62.8% → 78.4%). But two sizes make no trend, and collisions and false fires come from the
+     keys being lexical, not from model size.
+4. **Multi-hop: the probe found nothing, and the probe is partly to blame.**
+   - Its control is reading the first subject, which is written in the question. It reaches 49–85% at the
+     first or last layers but only 4–16% in the middle layers, which is where a hidden middle entity would be.
+   - So "none" means that a linear map from the question's last token onto name keys does not find the middle
+     entity. It does not show that the model never computes it.
+   - Work with better probes already covers this: "Do Large Language Models Latently Perform Multi-Hop
+     Reasoning?" (Yang et al., 2024) and "Hopping Too Late" (Biran et al., 2024) find partial hidden first hops
+     and a late or failed second hop (B5).
+   - My design error: a "none" verdict should have required the control to pass at the same layer.
+
+**Decision.** By the pre-registered lines, 0.5B is closed and 1.5B is in between, whose next step was "train a
+canonicaliser, retest". A prior-art check (30 Sep 2026) came first. That step, and the route these results point
+to (the only reliable native key is lexical and close to the input), are already published:
+- **Engram** (DeepSeek, arXiv 2601.07372, Jan 2026): hashed n-gram lookup tables inside the model, learned in
+  pretraining.
+- **NGM** (2605.16893, May 2026): training-free n-gram memory from averaged token embeddings. This is the same
+  construction as the 99% key above.
+- **TF-Engram** (2607.07388, Jul 2026): phrase memory built offline without training, to add knowledge.
+- **Lngram** (2605.24869, May 2026): n-gram keys learned from hidden states; also injects knowledge after
+  pretraining.
+- **User as Engram** (2606.19172, Jun 2026): each user's facts written as edits to Engram rows. It reports about
+  5.6× the indirect-reasoning accuracy of per-user LoRA, with about 33,000× less disruption to unrelated text.
+- **ENGRAFT** (github.com/fulvian/engraft-ngram, Sep 2026): gradient writes to the n-gram table of
+  Qwen3.8-Flash-Next.
+  - 84.1% exact recall on 100 facts.
+  - Paraphrases in another template fail.
+  - Two-fact composition: both answers right in 4 of 83 probes.
+  - 32 of 37 failures come from facts that share a subject.
+- **Trained entity finder plus fact memory:** Entities as Experts (2020), Facts as Experts (2021) and KBLaM
+  (ICLR 2025).
+
+So the canonicaliser would reproduce published work, not produce a result. The problems that these systems and
+tests 3–6 share, still unsolved, are:
+- **other names for the same thing:** aliases and descriptions, because the keys are lexical;
+- **name collisions:** ENGRAFT 32 of 37 failures; test 5's every unwanted change; 30–58% here;
+- **using written facts together in reasoning:** ENGRAFT 4 of 83; test 5 9.4%; no readable middle entity here.
 
 ## 5. Tests that decide it, in order
 

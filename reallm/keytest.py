@@ -72,7 +72,7 @@ def subject_texts(cases):
         for r in c["requested_rewrite"]:
             s = r["subject"]
             write.setdefault(s, r["prompt"].format(s))
-            other.setdefault(s, []).append(r["question"])
+            other.setdefault(s, []).extend([r["question"]] if r.get("question") else [])
     for c in cases:
         subj_of_case = {r["subject"] for r in c["requested_rewrite"]}
         for s in subj_of_case:

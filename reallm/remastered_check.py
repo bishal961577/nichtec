@@ -44,6 +44,11 @@ def normalise(row):
                 orig[t] = _maybe_json(row.pop(k))
     if orig:
         row["orig"] = orig
+    # the released parquet stores each edit's targets flat (target_new_str, target_true_str), unlike its README
+    for r in row.get("requested_rewrite") or []:
+        for side in ("target_new", "target_true"):
+            if not isinstance(r.get(side), dict) and f"{side}_str" in r:
+                r[side] = {"str": r[f"{side}_str"], "id": r.get(f"{side}_id")}
     for k in ("answer_alias", "new_answer_alias"):
         if row.get(k) is None:
             row[k] = []
@@ -81,9 +86,12 @@ def load_remastered(split):
     rows = [normalise(r) for r in raw]
     missing = [k for k in REQUIRED if k not in rows[0]]
     orig_missing = [k for k in ORIG_KEYS[:3] if k not in rows[0].get("orig", {})]
+    rw = (rows[0].get("requested_rewrite") or [{}])[0]
+    missing += [f"requested_rewrite.{k}" for k in ("subject", "prompt", "relation_id", "target_new", "target_true")
+                if k not in rw]
     if missing or orig_missing:
         raise KeyError(f"Remastered {split}: fields {missing + ['orig.' + k for k in orig_missing]} not found; "
-                       f"columns are {sorted(raw[0])}. See {schema_path}")
+                       f"columns are {sorted(raw[0])}; edit fields are {sorted(rw)}. See {schema_path}")
     return rows
 
 
