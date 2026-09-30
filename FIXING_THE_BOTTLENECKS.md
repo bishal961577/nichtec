@@ -1046,7 +1046,11 @@ to (the only reliable native key is lexical and close to the input), are already
 - **Trained entity finder plus fact memory:** Entities as Experts (2020), Facts as Experts (2021) and KBLaM
   (ICLR 2025).
 
-So the canonicaliser would reproduce published work, not produce a result. The problems that these systems and
+So the canonicaliser would reproduce published work, not produce a result. A follow-up prior-art pass on using
+new facts in reasoning, the last open problem (`reports/Using learned knowledge in reasoning 2026.md`), found:
+- with step-by-step reasoning, one new fact at a time is largely solved by self-distillation (CODE, 83.5%);
+- without it, the barrier is structural and needs pretraining-scale fixes;
+- no opening of breakthrough size is left for this fact memory. The problems that these systems and
 tests 3–6 share, still unsolved, are:
 - **other names for the same thing:** aliases and descriptions, because the keys are lexical;
 - **name collisions:** ENGRAFT 32 of 37 failures; test 5's every unwanted change; 30–58% here;
