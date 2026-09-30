@@ -876,6 +876,62 @@ changes) the joint memory scored 95.8% on both forms, and all 1,813 unedited fac
    This decides between the lookup and value-transfer explanations. It needs another GPT-J run.
 3. **Few-shot prompts for each chain step**, as MeLLo uses, so the chain itself is not the ceiling.
 
+### Real-world test 6 (pre-registered, not yet run): can the model's own states address the memory?
+
+(`reallm/keytest.py`; `reallm/remastered_check.py`; results will go in `results/keytest_*` and
+`results/remastered_check/`.) This section was written and committed before the run.
+
+**Why this test, before anything else.** Tests 1–5 trace the known triangle of lifelong editing: reliability,
+generalisation and locality cannot all be had at once. They also add a fourth column, whether the model finds the
+memory itself:
+
+| Test | Reliable | New wordings | Local | Model finds it itself |
+|---|---|---|---|---|
+| 1: key from the question's last position | 36% | – | – | yes |
+| 2: key from the person's words in the sentence | 96% | 44% | yes | yes |
+| 3–5: name encoded alone, snapped, external lookup | 96% | 96.5% | 98.7% | no (two-hop, asked directly: 2.5%) |
+
+Any design that makes new knowledge part of the model's own reasoning (consolidation, "one brain", continual
+learning in weights) needs the last column and the middle ones together. The consolidation papers of 2026 (SCoL,
+"Language Models Need Sleep", Cartridges) do not test this. So this is measured first, with forward passes only.
+
+**Data.** The corrected MQuAKE-Remastered CF-3k, because the MQuAKE-Remastered audit (ICLR 2025) found 33–76% of
+MQuAKE's questions and labels corrupted. `remastered_check.py` reports exactly what differs from the v2 file that
+tests 4 and 5 used.
+
+**What is measured** (Qwen2.5-0.5B, then Qwen2.5-1.5B, on the laptop):
+- Each stored name gets a key; the queries are sentences about the same names that were never used for the keys.
+- **Keys come in two kinds:** the name encoded on its own, or the name's state inside its write-time sentence.
+- **The name's position:** first given, then not given. The native scan: every token queries the memory, and it fires
+  where the best match passes a threshold.
+- **Negatives:** names never stored, and longer names that contain a stored one ("Francis II" for "Francis").
+- **Two-hop questions:** can a linear map fitted on calibration questions read the hidden middle entity (the country
+  in "the capital of the country of citizenship of X") from the question's last position?
+- **No leakage from the test set:** thresholds, layers and map settings are chosen on calibration names that share no
+  subject with the test set. The calibration memory is padded with distractor names to the test memory's size.
+
+**Pass lines:**
+- **Native addressing viable:** native-scan hit ≥ 90% on unseen sentences, with ≤ 2% false fires on never-stored
+  names.
+- **Closed:** below 70%.
+- **In between:** not viable as is; a learned canonicaliser is the next experiment.
+- **Multi-hop hook exists:** middle-entity top-1 ≥ 50% on two-hop questions whose first hop the model answers
+  correctly. None if below 20%.
+
+**My predictions, stated before the run:**
+- With the position given, a name inside a sentence stays close to the name encoded alone in the early layers. Hit
+  80–95% at some early layer.
+- The native scan will fall below 90%. The difficulty is not finding the name but staying silent on the other tokens,
+  where words like "capital" may land near stored keys. Hit 60–85%, meaning "not viable as is".
+- The middle entity will be weakly readable: 20–50% at 0.5B, higher at 1.5B.
+
+**What each outcome means:**
+- **Viable:** build consolidation on native keys, the SQuAD-stream experiment.
+- **In between:** train a small canonicaliser on calibration names, then retest.
+- **Closed:** the in-weights route to continual learning is closed for this design. The project then either becomes
+  a retrieval-style memory or moves to the retrofitted memory-layer route, where a model is trained to address its
+  own memory.
+
 ## 5. Tests that decide it, in order
 
 | # | Test | Pass criterion |
