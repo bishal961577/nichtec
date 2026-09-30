@@ -106,6 +106,19 @@ def contains_word_span(big, small):
     return big != small and re.search(r"(?<!\w)" + re.escape(small) + r"(?!\w)", big) is not None
 
 
+def contained_names(big, names):
+    """Stored names that occur in `big` as a proper span starting and ending on word boundaries (set lookups over the
+    name's word spans; the same test as contains_word_span, without a regex per pair)."""
+    words = list(re.finditer(r"\w+", big))
+    found = []
+    for i, a in enumerate(words):
+        for b in words[i:]:
+            sub = big[a.start():b.end()]
+            if sub != big and sub in names:
+                found.append(sub)
+    return found
+
+
 # ----------------------------------------------------------------------------------------------
 # model plumbing
 # ----------------------------------------------------------------------------------------------
@@ -144,9 +157,10 @@ class States:
             ids, am = enc["input_ids"].to(self.dev), enc["attention_mask"].to(self.dev)
             hs = self.base(input_ids=ids, attention_mask=am, output_hidden_states=True).hidden_states
             H = torch.stack(hs, 1).float()                                  # B, layers, T, d
+            am_l, off_l = enc["attention_mask"].tolist(), off.tolist()      # CPU copies: no per-element GPU reads
             for b, (cs, ce) in enumerate(spans[i:i + self.bs]):
-                o = off[b]
-                toks = [t for t in range(o.shape[0]) if am[b, t] and o[t, 1] > cs and o[t, 0] < ce and o[t, 1] > o[t, 0]]
+                o = off_l[b]
+                toks = [t for t in range(len(o)) if am_l[b][t] and o[t][1] > cs and o[t][0] < ce and o[t][1] > o[t][0]]
                 for p in positions:
                     if not toks:
                         out[p].append(torch.full((self.nl, H.shape[-1]), float("nan")))
@@ -303,12 +317,13 @@ def main(argv=None):
     # names that contain a stored test subject as a proper word span ("Francis II" for "Francis")
     pool_names = set().union(*(entities(c) for c in pool)) | test_ents
     tnames = sorted(test)
+    tset = set(tnames)
     coll = []
     for big in sorted(pool_names):
-        for small in tnames:
-            if big not in test and contains_word_span(big, small):
-                coll.append((small, big))
-                break
+        if big not in tset:
+            inside = contained_names(big, tset)
+            if inside:
+                coll.append((inside[0], big))
     coll_texts = [(small, big, t) for small, big in coll for t in (never.get(big, []) + [f"{big} is"])[:2]]
     R = {"config": dict(vars(args)), "test_subjects": len(test), "calibration_cases": len(calib_cases),
          "calib_stored": len(c_store), "calib_distractor_keys": len(pad), "neg_fit_texts": len(neg_fit), "neg_eval_texts": len(neg_eval),
