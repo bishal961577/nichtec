@@ -1,15 +1,17 @@
-"""What changed between MQuAKE-CF-3k-v2 (used in tests 4 and 5) and MQuAKE-Remastered CF-3k (Zhong et al., ICLR 2025).
+"""Are MQuAKE's labels right when every edit is applied at once, as tests 4 and 5 do?
 
-The Remastered audit reports that 33-76% of MQuAKE's questions and labels were corrupted (edit contamination, missing
-information in questions, conflicting edits, duplicates). This script downloads the corrected data from Hugging Face
-and counts, case by case, what differs from the file our runs used.
+The MQuAKE-Remastered audit (Zhong et al., ICLR 2025) reports that 33-76% of MQuAKE's questions and labels are
+corrupted (edit contamination, conflicting edits, missing information in questions, duplicates). This script checks
+the two label errors that matter for an all-edits memory, contamination and conflicts, in the original MQuAKE-CF-3k,
+the v2 file tests 4 and 5 used, MQuAKE-CF, MQuAKE-T and (if Hugging Face is reachable) MQuAKE-Remastered, and
+compares v2 with Remastered CF-3k by fact chain.
 
-  python reallm/remastered_check.py            # needs internet and pyarrow (pip install pyarrow)
+  python reallm/remastered_check.py            # Remastered part needs Hugging Face access and pyarrow
 """
 import json
 import os
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import memtest4 as M4  # noqa: E402
@@ -95,76 +97,95 @@ def load_remastered(split):
     return rows
 
 
-def rewrites(c):
-    return [(r["subject"], r["prompt"], r["target_new"]["str"], r["target_true"]["str"]) for r in c["requested_rewrite"]]
+def chain(c):
+    """A case's identity: its fact chain as Wikidata ids. Case numbers differ between the MQuAKE files."""
+    return tuple(tuple(t) for t in c["orig"]["triples"])
 
 
-def hops(c, key):
-    return [(h["question"], h["cloze"], h["answer"]) for h in c[key]]
+def edit_ids(c):
+    """The case's edits as Wikidata (subject, relation, new object) ids."""
+    o = c["orig"]
+    if o.get("edit_triples"):
+        return [tuple(t) for t in o["edit_triples"]]
+    out = []                                    # otherwise find each requested edit in the edited chain
+    for r in c["requested_rewrite"]:
+        for t, tl in zip(o["new_triples"], o["new_triples_labeled"]):
+            if t[1] == r["relation_id"] and tl[0] == r["subject"] and tl[2] == r["target_new"]["str"]:
+                out.append(tuple(t))
+                break
+    return out
 
 
-FIELDS = {
-    "requested edits (subject, prompt, new, old)": rewrites,
-    "multi-hop questions": lambda c: list(c["questions"]),
-    "original answer": lambda c: c["answer"],
-    "new answer": lambda c: c["new_answer"],
-    "new answer aliases": lambda c: sorted(c.get("new_answer_alias") or []),
-    "single hops (before edit)": lambda c: hops(c, "single_hops"),
-    "single hops (after edit)": lambda c: hops(c, "new_single_hops"),
-    "fact chain (triples)": lambda c: [tuple(t) for t in c["orig"]["triples"]],
-    "edited chain (new triples)": lambda c: [tuple(t) for t in c["orig"]["new_triples"]],
-}
+def audit(cases):
+    """Apply every case's edits together, as tests 4 and 5 do, and check each case's labelled edited chain.
+    contaminated: a step the case does not edit is edited by another case, so the labelled answer is wrong;
+    conflicting: two cases edit the same step to different objects."""
+    G = defaultdict(set)
+    for c in cases:
+        for s, r, o in edit_ids(c):
+            G[(s, r)].add(o)
+    status = Counter()
+    for c in cases:
+        st = "clean"
+        for s, r, o in c["orig"]["new_triples"]:
+            if (s, r) in G:
+                if o not in G[(s, r)]:
+                    st = "contaminated"
+                    break
+                if len(G[(s, r)]) > 1:
+                    st = "conflicting"
+        status[st] += 1
+    dup = Counter((chain(c), tuple(sorted(edit_ids(c)))) for c in cases)
+    return {"cases": len(cases), "distinct_edits": sum(len(v) for v in G.values()), "clean": status["clean"],
+            "conflicting": status["conflicting"], "contaminated": status["contaminated"],
+            "duplicate_cases": sum(v - 1 for v in dup.values() if v > 1)}
 
 
 def main():
-    out = os.path.join(M4.ROOT, "results", "remastered_check")
+    out = os.path.join(M4.ROOT, "results", "mquake_audit")
     os.makedirs(out, exist_ok=True)
-    v2 = {c["case_id"]: c for c in M4.fetch("MQuAKE-CF-3k-v2.json")}
-    rm_list = load_remastered("CF3k")
-    rm = {c["case_id"]: c for c in rm_list}
-    common = sorted(set(v2) & set(rm))
-    R = {"v2_cases": len(v2), "remastered_cases": len(rm), "same_case_ids": len(common),
-         "only_in_v2": len(set(v2) - set(rm)), "only_in_remastered": len(set(rm) - set(v2)), "fields": {}, "examples": {}}
-    changed_any = set()
-    for name, f in FIELDS.items():
-        diff = [i for i in common if f(v2[i]) != f(rm[i])]
-        changed_any.update(diff)
-        R["fields"][name] = len(diff)
-        R["examples"][name] = [{"case_id": i, "v2": str(f(v2[i]))[:300], "remastered": str(f(rm[i]))[:300]} for i in diff[:3]]
-    R["cases_with_any_change"] = len(changed_any)
-    # Remastered's own edited/unedited split per batch size, if present
-    splits = Counter()
-    for c in rm_list:
-        sp = c.get("split")
-        if isinstance(sp, dict):
-            for k, v in sp.items():
-                if v is not None:
-                    splits[f"{k}: {','.join(v) if isinstance(v, list) else v}"] += 1
-    R["remastered_split_labels"] = dict(sorted(splits.items()))
-    # edits our runs wrote that no Remastered case requests (distinct (subject, prompt) pairs)
-    e_v2 = {(r["subject"], r["prompt"], r["target_new"]["str"]) for c in v2.values() for r in c["requested_rewrite"]}
-    e_rm = {(r["subject"], r["prompt"], r["target_new"]["str"]) for c in rm.values() for r in c["requested_rewrite"]}
-    R["distinct_edits_v2"], R["distinct_edits_remastered"] = len(e_v2), len(e_rm)
-    R["edits_only_in_v2"], R["edits_only_in_remastered"] = len(e_v2 - e_rm), len(e_rm - e_v2)
+    sets = {"MQuAKE-CF-3k (original)": M4.fetch("MQuAKE-CF-3k.json"),
+            "MQuAKE-CF-3k-v2 (tests 4 and 5)": M4.fetch("MQuAKE-CF-3k-v2.json"),
+            "MQuAKE-CF (9,218 cases)": M4.fetch("MQuAKE-CF.json"),
+            "MQuAKE-T": M4.fetch("MQuAKE-T.json")}
+    R = {}
+    for split in ("CF3k", "T"):
+        try:
+            sets[f"MQuAKE-Remastered {split}"] = load_remastered(split)
+        except Exception as e:                  # e.g. Hugging Face unreachable: the MQuAKE files are still audited
+            R[f"remastered_{split}_error"] = f"{type(e).__name__}: {e}"
+            print(f"Remastered {split} not loaded: {R[f'remastered_{split}_error']}", flush=True)
+    R["audit"] = {k: audit(v) for k, v in sets.items()}
+    if "MQuAKE-Remastered CF3k" in sets:
+        v2 = {chain(c): c for c in sets["MQuAKE-CF-3k-v2 (tests 4 and 5)"]}
+        rm = {chain(c): c for c in sets["MQuAKE-Remastered CF3k"]}
+        shared = sorted(set(v2) & set(rm))
+        R["v2_vs_remastered_cf3k"] = {
+            "fact_chains_v2": len(v2), "fact_chains_remastered": len(rm), "shared_fact_chains": len(shared),
+            "shared_with_same_edits": sum(set(edit_ids(v2[k])) == set(edit_ids(rm[k])) for k in shared),
+            "shared_with_same_new_answer": sum(M4.norm(v2[k]["new_answer"]) == M4.norm(rm[k]["new_answer"]) for k in shared),
+            "shared_with_same_questions": sum(v2[k]["questions"] == rm[k]["questions"] for k in shared)}
     json.dump(R, open(os.path.join(out, "result.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
-    L = ["# MQuAKE-CF-3k-v2 vs MQuAKE-Remastered CF-3k", "",
-         f"Cases: v2 {R['v2_cases']:,}, Remastered {R['remastered_cases']:,}; same case ids {R['same_case_ids']:,}; "
-         f"only in v2 {R['only_in_v2']:,}; only in Remastered {R['only_in_remastered']:,}.", "",
-         f"Cases with any difference (of the shared ids): **{R['cases_with_any_change']:,}** "
-         f"({100 * R['cases_with_any_change'] / max(1, len(common)):.1f}%).", "",
-         f"Distinct edits: v2 {R['distinct_edits_v2']:,}, Remastered {R['distinct_edits_remastered']:,}; "
-         f"only in v2 {R['edits_only_in_v2']:,}, only in Remastered {R['edits_only_in_remastered']:,}.", "",
-         "| Field | Cases that differ |", "|---|---|"]
-    L += [f"| {k} | {v:,} |" for k, v in R["fields"].items()]
-    L += ["", "Remastered split labels (edited/unedited by batch size): " + json.dumps(R["remastered_split_labels"], ensure_ascii=False), ""]
-    for k, ex in R["examples"].items():
-        if ex:
-            L += [f"## {k}: examples", ""]
-            for x in ex:
-                L += [f"- case {x['case_id']}", f"  - v2: `{x['v2']}`", f"  - Remastered: `{x['remastered']}`"]
-            L.append("")
+    L = ["# MQuAKE label audit: are the labels right when every edit is applied at once?", "",
+         "Tests 4 and 5 write all of a file's edits into one memory and score every case against its new answer. A",
+         "case's label is then wrong if another case edits a step of its chain that it does not edit itself",
+         "(contaminated), or two cases edit the same step to different answers (conflicting). Cases are matched by",
+         "their Wikidata fact chain, since case numbers differ between the files.", "",
+         "| Data | Cases | Distinct edits | Clean | Conflicting | Contaminated | Duplicate cases |",
+         "|---|---|---|---|---|---|---|"]
+    for k, a in R["audit"].items():
+        L.append(f"| {k} | {a['cases']:,} | {a['distinct_edits']:,} | {a['clean']:,} | {a['conflicting']:,} | "
+                 f"{a['contaminated']:,} ({100 * a['contaminated'] / max(1, a['cases']):.1f}%) | {a['duplicate_cases']:,} |")
+    for k in ("remastered_CF3k_error", "remastered_T_error"):
+        if k in R:
+            L += ["", f"{k}: {R[k]}"]
+    if "v2_vs_remastered_cf3k" in R:
+        x = R["v2_vs_remastered_cf3k"]
+        L += ["", f"v2 against Remastered CF-3k: {x['shared_fact_chains']:,} shared fact chains (of {x['fact_chains_v2']:,} "
+              f"and {x['fact_chains_remastered']:,}); among them same edits {x['shared_with_same_edits']:,}, same new "
+              f"answer {x['shared_with_same_new_answer']:,}, same questions {x['shared_with_same_questions']:,}."]
     open(os.path.join(out, "summary.md"), "w", encoding="utf-8").write("\n".join(L) + "\n")
-    print("\n".join(L[:14]), flush=True)
+    print("\n".join(L), flush=True)
     print("wrote", out, flush=True)
 
 

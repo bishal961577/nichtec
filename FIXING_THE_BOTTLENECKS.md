@@ -954,7 +954,31 @@ conclusions below:
 - The two-hop measurement uses the middle entity of each fact chain. Even if half of those labels were wrong, a
   true 50% would show as 25% or more, not 2–4%.
 
-The loader is fixed (checked on a parquet built in the real layout); the Remastered comparison itself is still to run.
+The loader is fixed (checked on a parquet built in the real layout).
+
+**Were tests 4 and 5 scored on corrupted labels? No, for the errors that matter to an all-edits memory**
+(`reallm/remastered_check.py`, `results/mquake_audit/`). Tests 4 and 5 write every edit into one memory and score
+each case against its new answer. A label is then wrong if another case edits a step of the case's chain that the
+case itself does not edit ("contamination"). Counting this from the Wikidata ids in each file:
+
+| Data | Cases | Contaminated | Duplicate cases |
+|---|---|---|---|
+| MQuAKE-CF-3k, original | 3,000 | 998 (33.3%) | 4 |
+| MQuAKE-CF-3k-v2, used by tests 4 and 5 | 3,000 | 0 | 16 |
+| MQuAKE-CF, 9,218 cases | 9,218 | 2,848 (30.9%) | 41 |
+| MQuAKE-T | 1,868 | 1 | 0 |
+
+- The original CF-3k reproduces the audit's 33% exactly. v2 was released by the MQuAKE authors to fix this
+  "knowledge conflict", and has none.
+- The published GPT-J baselines that test 5 compares with (MeLLo, MEMIT, MEND) are the MQuAKE authors' numbers on v2,
+  so the comparison was on the same labels.
+- What remains in v2 is what the Remastered audit also lists: 16–17 duplicate cases and questions missing
+  information. For example, 558 of 657 head-of-state questions do not say "current". These make questions
+  ambiguous for every method alike; they do not make labels wrong.
+- The laptop's first comparison reported "3,000 of 3,000 cases differ". That was my error: it matched cases by case
+  number, and the files number cases differently. Remastered CF-3k is also not a corrected copy of v2. It is a new
+  sample from CF-9k with regenerated edits: its case 1 edits Ellie Kemper's citizenship to Croatia, where v2 and
+  MQuAKE-CF edit it to Ireland. The script now matches cases by fact chain.
 
 | Pre-registered measure (line) | 0.5B | 1.5B | Verdict |
 |---|---|---|---|

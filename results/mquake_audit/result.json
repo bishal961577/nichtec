@@ -1,0 +1,38 @@
+{
+ "remastered_CF3k_error": "ProxyError: 403 Forbidden",
+ "remastered_T_error": "ProxyError: 403 Forbidden",
+ "audit": {
+  "MQuAKE-CF-3k (original)": {
+   "cases": 3000,
+   "distinct_edits": 2786,
+   "clean": 2002,
+   "conflicting": 0,
+   "contaminated": 998,
+   "duplicate_cases": 4
+  },
+  "MQuAKE-CF-3k-v2 (tests 4 and 5)": {
+   "cases": 3000,
+   "distinct_edits": 2764,
+   "clean": 3000,
+   "conflicting": 0,
+   "contaminated": 0,
+   "duplicate_cases": 16
+  },
+  "MQuAKE-CF (9,218 cases)": {
+   "cases": 9218,
+   "distinct_edits": 7253,
+   "clean": 6370,
+   "conflicting": 0,
+   "contaminated": 2848,
+   "duplicate_cases": 41
+  },
+  "MQuAKE-T": {
+   "cases": 1868,
+   "distinct_edits": 96,
+   "clean": 1867,
+   "conflicting": 0,
+   "contaminated": 1,
+   "duplicate_cases": 0
+  }
+ }
+}
