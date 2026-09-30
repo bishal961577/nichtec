@@ -19,17 +19,71 @@ FILES = {"CF3k": "data/CF3k-00000-of-00001.parquet", "CF9k": "data/CF9k-00000-of
          "CF6334": "data/CF6334-00000-of-00001.parquet", "T": "data/T-00000-of-00001.parquet"}
 
 
+ORIG_KEYS = ("triples", "triples_labeled", "new_triples", "new_triples_labeled", "edit_triples")
+REQUIRED = ("case_id", "requested_rewrite", "questions", "answer", "new_answer", "single_hops", "new_single_hops", "orig")
+
+
+def _maybe_json(v):
+    """Nested fields stored as JSON text become Python objects."""
+    if isinstance(v, str) and v[:1] in "[{":
+        try:
+            return json.loads(v)
+        except ValueError:
+            return v
+    return v
+
+
+def normalise(row):
+    """Map one Remastered row to the MQuAKE json layout the tests read: 'orig' nested (it may be stored as flat
+    columns such as 'triples' or 'orig.triples'), JSON-text fields parsed, missing alias lists empty."""
+    row = {k: _maybe_json(v) for k, v in row.items()}
+    orig = _maybe_json(row.get("orig")) if isinstance(row.get("orig"), (dict, str)) else {}
+    for k in list(row):
+        for t in ORIG_KEYS:
+            if k in (t, f"orig.{t}", f"orig_{t}", f"orig/{t}"):
+                orig[t] = _maybe_json(row.pop(k))
+    if orig:
+        row["orig"] = orig
+    for k in ("answer_alias", "new_answer_alias"):
+        if row.get(k) is None:
+            row[k] = []
+    for key in ("single_hops", "new_single_hops"):
+        for h in row.get(key) or []:
+            if h.get("answer_alias") is None:
+                h["answer_alias"] = []
+    return row
+
+
 def load_remastered(split):
-    """Cases of one Remastered split as a list of dicts (same fields as the MQuAKE json files, plus 'split')."""
-    cache = os.path.join(M4.ROOT, "data", "mquake_remastered", split + ".json")
-    if os.path.exists(cache):
-        return json.load(open(cache, encoding="utf-8"))
-    from huggingface_hub import hf_hub_download
-    import pyarrow.parquet as pq
-    path = hf_hub_download(REPO, FILES[split], repo_type="dataset")
-    rows = pq.read_table(path).to_pylist()
-    os.makedirs(os.path.dirname(cache), exist_ok=True)
-    json.dump(rows, open(cache, "w", encoding="utf-8"))
+    """Cases of one Remastered split as a list of dicts in the MQuAKE json layout (plus 'split'). The raw columns and
+    a sample row are written to data/mquake_remastered/<split>_schema.json first, so a layout mismatch is visible."""
+    folder = os.path.join(M4.ROOT, "data", "mquake_remastered")
+    cache = os.path.join(folder, split + ".json")
+    schema_path = os.path.join(folder, split + "_schema.json")
+    os.makedirs(folder, exist_ok=True)
+    raw = None
+    if os.path.exists(cache) and os.path.exists(schema_path):   # a cache without its schema file is from an older run
+        try:
+            raw = json.load(open(cache, encoding="utf-8"))
+        except ValueError:
+            raw = None
+    if raw is None:
+        from huggingface_hub import hf_hub_download
+        import pyarrow.parquet as pq
+        path = hf_hub_download(REPO, FILES[split], repo_type="dataset")
+        table = pq.read_table(path)
+        schema = {"columns": {n: str(t) for n, t in zip(table.schema.names, table.schema.types)},
+                  "first_row": {k: str(v)[:600] for k, v in table.slice(0, 1).to_pylist()[0].items()}}
+        json.dump(schema, open(schema_path, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+        print(f"Remastered {split} columns:", list(schema["columns"]), flush=True)
+        raw = table.to_pylist()
+        json.dump(raw, open(cache, "w", encoding="utf-8"), default=str)
+    rows = [normalise(r) for r in raw]
+    missing = [k for k in REQUIRED if k not in rows[0]]
+    orig_missing = [k for k in ORIG_KEYS[:3] if k not in rows[0].get("orig", {})]
+    if missing or orig_missing:
+        raise KeyError(f"Remastered {split}: fields {missing + ['orig.' + k for k in orig_missing]} not found; "
+                       f"columns are {sorted(raw[0])}. See {schema_path}")
     return rows
 
 
