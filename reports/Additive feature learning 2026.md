@@ -110,7 +110,7 @@ For convolutional features with pooling, the same holds with one G per pooling r
 - How much one RFM round adds on CIFAR-10 is not known to me; the paper's tables were not reachable from here. Step 1
   measures it.
 
-## 4. Step 1, pre-registered (nothing has been run)
+## 4. Step 1, pre-registered before it was run
 
 **Setup:**
 - **Data:** CIFAR-10, 50,000 training and 10,000 test images; 5,000 training images held out to choose the ridge
@@ -168,6 +168,36 @@ route deserves a scaled attempt.
 - B0 roughly 70–78% at D = 2,048;
 - B1 − B0 between +1 and +6 points;
 - E2's order gap above 2 points, because supervised features learned from the first classes are biased.
+
+## 5. Step 1 result (laptop RTX 3050, 15 October 2026): stop
+
+| | Result |
+|---|---|
+| Identity check, 500 CIFAR-10 images | Relative difference 2.53×10⁻¹⁵ (float32 counts as used in the runs: 3.38×10⁻⁷). Pass |
+| B0, random features, D = 2,048 | **71.16%** test (validation 71.98%) |
+| B1, one round of feature learning from counts | **70.72%** (validation 71.98%), **−0.44 points** |
+| B2, two rounds | **70.58%** (validation 71.40%), **−0.58 points** |
+| **Verdict, pre-registered lines** | **Stop**: B1 − B0 is below +1.0. E2 does not run. |
+
+The D = 1,024 and 4,096 rows and the CNN context did not run. The script crashed while writing `summary.md`: on
+Windows, Python writes text files as cp1252, which cannot encode the "−" sign. That was my bug; the script now writes
+UTF-8. Those rows are context only and cannot change the verdict.
+
+**Predictions:**
+- B0 at 70–78%: right (71.16%).
+- B1 − B0 between +1 and +6 points: wrong (−0.44). That makes five wrong or overstated predictions out of five in
+  this project's pre-registered experiments.
+
+**What the result says** (an explanation, not a measured claim):
+- One round of AGOP feature learning only changes the *metric of a single 5×5 patch*.
+- With enough random filters, any full-rank change of that metric leaves the same family of functions available, so
+  the learner can be no more than reweighted.
+- The 71% ceiling of a one-layer random-feature model is set by depth (no composition of features across layers),
+  not by the patch metric. The fixed kernels that reach 90–91% are deep compositions.
+- The test therefore showed that this mechanism, applied at one layer, does not add concepts. The deep version is
+  exactly where section 2 shows additivity breaks.
+
+**Decision:** as fixed before the run, the stop ends this route. No further variants of it will be tried.
 
 ## Sources
 

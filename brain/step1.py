@@ -338,8 +338,8 @@ def main(argv=None):
     R = {"config": vars(args), "device": str(dev), "E1": {}, "notes": []}
 
     def save():
-        json.dump(R, open(os.path.join(out, "result.json"), "w"), indent=1)
-        open(os.path.join(out, "summary.md"), "w").write(report(R))
+        json.dump(R, open(os.path.join(out, "result.json"), "w", encoding="utf-8"), indent=1)
+        open(os.path.join(out, "summary.md"), "w", encoding="utf-8").write(report(R))
 
     if args.fake:
         Xall, Yall, Xte, Yte = fake_data()
