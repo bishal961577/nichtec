@@ -143,6 +143,23 @@ images.
 - **Stop:** gap above 10 points. Supervised stage features then lock in early classes, and stages need unlabeled
   or developmental data instead.
 
+**Clarifications made before any CIFAR-10 run** (14 October, after a smoke test on synthetic images; E1 unchanged):
+- **E2 as written could not be run as described.** When a learner's features change halfway through a single pass,
+  it has no statistics for the earlier images under the new features unless it stores them, which the design
+  forbids. E2 therefore isolates what the order of experience does to the *learned features*.
+  - The AGOP round uses B0's random filters and ridge strength, with its statistics taken from the first half of the
+    45,000 training images: in class order (classes 0–4) or shuffled.
+  - A readout is then fitted on all 45,000 images under each resulting set of features, from additive statistics.
+  - The pass and stop lines are unchanged.
+- **The identity check compares the algebra in float64** (counts and gradients both from float64 activations) and
+  separately reports the float32 counts the runs use. The explicit-gradient side runs on the CPU, because consumer
+  GPUs are slow in float64.
+- **Context:** a small backprop CNN (three conv layers), trained for 10 shuffled epochs, one shuffled pass, and one
+  class-ordered pass.
+- **Smoke test:** the code ran end to end on synthetic gratings (2,000 images, D = 64 and 32). There, one round of
+  feature learning lowered accuracy (−0.8 and −2.7 points). The synthetic data says nothing about CIFAR-10, and
+  nothing was tuned on it.
+
 **What would count as a real result:** beating 91.2%, the best published additive method, with learned features and
 order-invariance at least within stages. E1 and E2 cannot reach that at D = 2,048. They only decide whether the
 route deserves a scaled attempt.
