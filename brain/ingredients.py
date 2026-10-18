@@ -325,6 +325,8 @@ def main():
     p.add_argument("--workers", type=int, default=32)
     p.add_argument("--test", type=int, choices=[1, 2], default=None, help="default: 2 for a 4B model, else 1")
     p.add_argument("--check", action="store_true")
+    p.add_argument("--probe-reading", action="store_true",
+                   help="stop only if a trait-reading answer does not start with yes/no; check 3 governs A's answers")
     p.add_argument("--stub", action="store_true")
     p.add_argument("--out", default=None)
     args = p.parse_args()
@@ -356,6 +358,12 @@ def main():
     first = (top[0]["token"] if top else "")
     R["check"] = {"first_token": first, "answers_yes_no": (not top) or first.strip().lower() in ("yes", "no"),
                   "margin": round(m, 3), "questions_named": names[:8]}
+    if args.probe_reading:
+        _, rtop = llm.answer(read_prompt(t0["test"][0], QUESTIONS["hair"]))
+        rfirst = rtop[0]["token"] if rtop else ""
+        R["check"].update({"probe": "reading", "history_answers_yes_no_first": R["check"]["answers_yes_no"],
+                           "reading_first_token": rfirst,
+                           "answers_yes_no": (not rtop) or rfirst.strip().lower() in ("yes", "no")})
     log(f"check: {json.dumps(R['check'], ensure_ascii=True)}")
     if not R["check"]["answers_yes_no"] or not names:
         raise SystemExit("the model does not answer yes/no first or names no questions: stopping")
