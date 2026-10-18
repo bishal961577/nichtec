@@ -1,0 +1,2951 @@
+{
+ "model": "Qwen3.5-27B-FP8",
+ "test": 1,
+ "zoo_sha256": "cddc71c26ab9bc82795b8f4ff114cade41885d92720c6af29ffb69bcf73f0315",
+ "settings": {
+  "samples": 4,
+  "max_questions": 16,
+  "gen": {
+   "temperature": 0.8,
+   "top_p": 0.95,
+   "top_k": 50
+  },
+  "err_nats": 2.9444389791664403,
+  "half": 20
+ },
+ "tasks": [
+  {
+   "id": "rule1_draw1",
+   "rule": "airborne or aquatic",
+   "w_rules": [
+    "The animal is classified as \"yes\" if and only if it can live or swim in water.",
+    "The animal is classified as \"yes\" if it can fly or live in water, and \"no\" otherwise.",
+    "The animal can swim.",
+    "The animal is classified as \"yes\" if it lives in or primarily in water, and \"no\" if it lives on land."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if and only if it can live or swim in water.",
+    "The animal is classified as \"yes\" if it can fly or live in water, and \"no\" otherwise.",
+    "The animal can swim.",
+    "The animal is classified as \"yes\" if it lives in or primarily in water, and \"no\" if it lives on land."
+   ],
+   "e_questions": [
+    "Can it fly?",
+    "Does it live in water?",
+    "Is it a bird?",
+    "Is it a fish?",
+    "Is it a mammal?",
+    "Is it an insect?",
+    "Is it a reptile?",
+    "Is it a crustacean?",
+    "Does the animal live in water?",
+    "Is the animal an insect?",
+    "Does the animal have wings?",
+    "Is the animal a bird?",
+    "Is the animal a mammal?",
+    "Is the animal a reptile?",
+    "Is the animal an arthropod?",
+    "Does the animal breathe through gills?"
+   ],
+   "e_replies": [
+    "Can it fly?\nDoes it live in water?\nIs it a bird?\nIs it a fish?\nIs it a mammal?\nIs it an insect?\nIs it a reptile?\nIs it a crustacean?",
+    "Does the animal live in water?\nIs the animal an insect?\nDoes the animal have wings?\nIs the animal a bird?\nIs the animal a mammal?\nIs the animal a reptile?\nIs the animal an arthropod?\nDoes the animal breathe through gills?",
+    "Can it swim in water?\nIs it a fish?\nIs it a bird?\nIs it a mammal that lives in the ocean?\nDoes it have fins?\nIs it a crustacean?\nIs it an insect that can fly?\nDoes it lay eggs in water?",
+    "Is the animal a fish?\nIs the animal a bird?\nIs the animal an insect?\nIs the animal a crustacean?\nIs the animal a mammal?\nDoes the animal live in water?\nDoes the animal have feathers?\nIs the animal a reptile?"
+   ],
+   "A": {
+    "test_acc": 95.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it can fly or live in water, and \"no\" otherwise.",
+    "stream_errors": 2,
+    "test_acc": 95.0
+   },
+   "E": {
+    "rule": "[Can it fly?] or [Does it live in water?]",
+    "cost": 10.57,
+    "test_acc": 90.0,
+    "questions": [
+     "Can it fly?",
+     "Does it live in water?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Can it fly?] or [Does it live in water?]",
+    "cost": 9.99,
+    "test_acc": 90.0,
+    "questions": [
+     "Can it fly?",
+     "Does it live in water?"
+    ]
+   },
+   "oracle": {
+    "rule": "[airborne] or [aquatic]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "aquatic"
+    ]
+   },
+   "question_traits": {
+    "Can it fly?": [
+     "airborne"
+    ],
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is it an insect?": [],
+    "Is it a reptile?": [
+     "venomous"
+    ],
+    "Is it a crustacean?": [],
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Is the animal an insect?": [],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal an arthropod?": [
+     "backbone"
+    ],
+    "Does the animal breathe through gills?": [
+     "breathes"
+    ]
+   }
+  },
+  {
+   "id": "rule1_draw2",
+   "rule": "airborne or aquatic",
+   "w_rules": [
+    "The animal is classified as \"yes\" if it can fly or live in water.",
+    "The animal must be capable of flying or swimming.",
+    "The animal is classified as yes if it can swim, fly, or is an insect, and no otherwise.",
+    "The animal is classified as \"yes\" if it can fly, swim, or crawl, but not if it walks or runs on land."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if it can fly or live in water.",
+    "The animal must be capable of flying or swimming.",
+    "The animal is classified as yes if it can swim, fly, or is an insect, and no otherwise.",
+    "The animal is classified as \"yes\" if it can fly, swim, or crawl, but not if it walks or runs on land."
+   ],
+   "e_questions": [
+    "Can it fly?",
+    "Can it swim?",
+    "Is it a vertebrate?",
+    "Is it cold-blooded?",
+    "Does it have wings?",
+    "Is it an insect?",
+    "Is it a bird?",
+    "Is it a mammal?",
+    "Does the animal have feathers?",
+    "Does the animal lay eggs?",
+    "Does the animal live in water?",
+    "Does the animal have wings?",
+    "Does the animal have an exoskeleton?",
+    "Does the animal have a backbone?",
+    "Does the animal eat insects?",
+    "Does the animal migrate?"
+   ],
+   "e_replies": [
+    "Can it fly?\nCan it swim?\nIs it a vertebrate?\nIs it cold-blooded?\nDoes it have wings?\nIs it an insect?\nIs it a bird?\nIs it a mammal?",
+    "Does the animal have feathers?\nDoes the animal lay eggs?\nDoes the animal live in water?\nDoes the animal have wings?\nDoes the animal have an exoskeleton?\nDoes the animal have a backbone?\nDoes the animal eat insects?\nDoes the animal migrate?",
+    "Does the animal live in water?\nDoes the animal have wings?\nDoes the animal have a vertebral column?\nDoes the animal lay eggs?\nDoes the animal have fins?\nDoes the animal breathe with gills?\nDoes the animal have an exoskeleton?\nIs the animal an invertebrate?",
+    "Does the animal live in water?\nDoes the animal fly?\nIs the animal a bird?\nIs the animal an insect?\nIs the animal a fish?\nDoes the animal have scales?\nIs the animal an arthropod?\nIs the animal a mammal?"
+   ],
+   "A": {
+    "test_acc": 90.0
+   },
+   "W": {
+    "rule": "The animal must be capable of flying or swimming.",
+    "stream_errors": 4,
+    "test_acc": 95.0
+   },
+   "E": {
+    "rule": "[Does it have wings?] or [Does the animal live in water?]",
+    "cost": 19.4,
+    "test_acc": 92.5,
+    "questions": [
+     "Does it have wings?",
+     "Does the animal live in water?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Can it fly?] or [Does it live in water?]",
+    "cost": 21.77,
+    "test_acc": 100.0,
+    "questions": [
+     "Can it fly?",
+     "Does it live in water?"
+    ]
+   },
+   "oracle": {
+    "rule": "[airborne] or [aquatic]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "aquatic"
+    ]
+   },
+   "question_traits": {
+    "Can it fly?": [
+     "airborne"
+    ],
+    "Can it swim?": [],
+    "Is it a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Is it cold-blooded?": [],
+    "Does it have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is it an insect?": [],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Does the animal lay eggs?": [
+     "eggs",
+     "milk"
+    ],
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal have an exoskeleton?": [
+     "backbone"
+    ],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal eat insects?": [],
+    "Does the animal migrate?": []
+   }
+  },
+  {
+   "id": "rule2_draw1",
+   "rule": "eggs and backbone",
+   "w_rules": [
+    "Yes is assigned to animals that live in or near water, while no is assigned to animals that live exclusively on land.",
+    "The animal is classified as yes if it is capable of swimming or lives in water.",
+    "The animal is a vertebrate that breathes with gills at some stage of its life or lives in water as an adult.",
+    "The rule is that the animal is a vertebrate capable of living in water at some stage of its life cycle."
+   ],
+   "w_replies": [
+    "Yes is assigned to animals that live in or near water, while no is assigned to animals that live exclusively on land.",
+    "The animal is classified as yes if it is capable of swimming or lives in water.",
+    "The animal is a vertebrate that breathes with gills at some stage of its life or lives in water as an adult.",
+    "The rule is that the animal is a vertebrate capable of living in water at some stage of its life cycle."
+   ],
+   "e_questions": [
+    "Is it a vertebrate?",
+    "Does it live in water (at least part of its life)?",
+    "Is it an amphibian?",
+    "Is it a bird?",
+    "Is it a fish?",
+    "Is it a reptile?",
+    "Does it have scales?",
+    "Is it a mammal?",
+    "Is the animal a vertebrate?",
+    "Does the animal have a backbone?",
+    "Is the animal a mammal?",
+    "Is the animal a bird?",
+    "Is the animal a reptile?",
+    "Is the animal an amphibian?",
+    "Is the animal a fish?",
+    "Does the animal have gills at any stage of life?"
+   ],
+   "e_replies": [
+    "Is it a vertebrate?\nDoes it live in water (at least part of its life)?\nIs it an amphibian?\nIs it a bird?\nIs it a fish?\nIs it a reptile?\nDoes it have scales?\nIs it a mammal?",
+    "Is the animal a vertebrate?\nDoes the animal have a backbone?\nIs the animal a mammal?\nIs the animal a bird?\nIs the animal a reptile?\nIs the animal an amphibian?\nIs the animal a fish?\nDoes the animal have gills at any stage of life?",
+    "Does the animal lay eggs?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal a reptile?\nIs the animal an amphibian?\nIs the animal a mammal?\nDoes the animal have gills?\nDoes the animal have feathers?",
+    "Does the animal live primarily in water?\nIs the animal a bird?\nIs the animal an amphibian?\nIs the animal a reptile?\nIs the animal a fish?\nIs the animal a mammal?\nIs the animal an insect or arachnid?\nIs the animal a human or mythical creature?"
+   ],
+   "A": {
+    "test_acc": 95.0
+   },
+   "W": {
+    "rule": "The animal is a vertebrate that breathes with gills at some stage of its life or lives in water as an adult.",
+    "stream_errors": 10,
+    "test_acc": 65.0
+   },
+   "E": {
+    "rule": "[Does the animal have a backbone?] and not [Is it a mammal?]",
+    "cost": 10.57,
+    "test_acc": 97.5,
+    "questions": [
+     "Does the animal have a backbone?",
+     "Is it a mammal?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Does it have a backbone?] and [Does it lay eggs?]",
+    "cost": 9.99,
+    "test_acc": 92.5,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it lay eggs?"
+    ]
+   },
+   "oracle": {
+    "rule": "[backbone] and [eggs]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "backbone",
+     "eggs"
+    ]
+   },
+   "question_traits": {
+    "Is it a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does it live in water (at least part of its life)?": [
+     "aquatic"
+    ],
+    "Is it an amphibian?": [],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is it a reptile?": [
+     "venomous"
+    ],
+    "Does it have scales?": [],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal an amphibian?": [],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does the animal have gills at any stage of life?": [
+     "breathes",
+     "fins"
+    ]
+   }
+  },
+  {
+   "id": "rule2_draw2",
+   "rule": "eggs and backbone",
+   "w_rules": [
+    "The animal is classified as \"yes\" if and only if it has feathers.",
+    "The animal is classified as \"yes\" if it is capable of flight or lives primarily in water, and \"no\" otherwise.",
+    "The rule is that the animal must be an animal that swims in water or flies in the air.",
+    "The animal is classified as \"yes\" if it is a bird or a fish."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if and only if it has feathers.",
+    "The animal is classified as \"yes\" if it is capable of flight or lives primarily in water, and \"no\" otherwise.",
+    "The rule is that the animal must be an animal that swims in water or flies in the air.",
+    "The animal is classified as \"yes\" if it is a bird or a fish."
+   ],
+   "e_questions": [
+    "Does it live in water?",
+    "Does it have feathers?",
+    "Is it a fish?",
+    "Is it a bird?",
+    "Does it have a backbone?",
+    "Does it have fins?",
+    "Does it have a beak?",
+    "Is it an amphibian?",
+    "Does the animal live in water?",
+    "Does the animal have feathers?",
+    "Does the animal lay eggs?",
+    "Does the animal have scales?",
+    "Is the animal a bird or a fish?",
+    "Does the animal breathe with gills?",
+    "Is the animal a vertebrate?",
+    "Does the animal fly?"
+   ],
+   "e_replies": [
+    "Does it live in water?\nDoes it have feathers?\nIs it a fish?\nIs it a bird?\nDoes it have a backbone?\nDoes it have fins?\nDoes it have a beak?\nIs it an amphibian?",
+    "Does the animal live in water?\nDoes the animal have feathers?\nDoes the animal lay eggs?\nDoes the animal have scales?\nIs the animal a bird or a fish?\nDoes the animal breathe with gills?\nIs the animal a vertebrate?\nDoes the animal fly?",
+    "Does the animal live in water?\nDoes the animal have feathers?\nIs the animal a fish?\nIs the animal a mammal?\nIs the animal a reptile?\nIs the animal an insect?\nIs the animal a crustacean?\nDoes the animal breathe with gills?",
+    "Is it a bird?\nIs it a fish?\nDoes it have gills?\nDoes it have feathers?\nIs it a mammal?\nIs it a reptile?\nIs it an amphibian?\nIs it an arthropod?"
+   ],
+   "A": {
+    "test_acc": 85.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it is a bird or a fish.",
+    "stream_errors": 3,
+    "test_acc": 90.0
+   },
+   "E": {
+    "rule": "[Does it have a backbone?] and [Does the animal lay eggs?]",
+    "cost": 10.57,
+    "test_acc": 95.0,
+    "questions": [
+     "Does it have a backbone?",
+     "Does the animal lay eggs?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Does it have a backbone?] and [Does it lay eggs?]",
+    "cost": 9.99,
+    "test_acc": 92.5,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it lay eggs?"
+    ]
+   },
+   "oracle": {
+    "rule": "[backbone] and [eggs]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "backbone",
+     "eggs"
+    ]
+   },
+   "question_traits": {
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Does it have feathers?": [
+     "feathers"
+    ],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Does it have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Does it have fins?": [
+     "fins"
+    ],
+    "Does it have a beak?": [
+     "feathers"
+    ],
+    "Is it an amphibian?": [],
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Does the animal lay eggs?": [
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have scales?": [],
+    "Is the animal a bird or a fish?": [
+     "feathers"
+    ],
+    "Does the animal breathe with gills?": [
+     "breathes"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal fly?": [
+     "airborne"
+    ]
+   }
+  },
+  {
+   "id": "rule3_draw1",
+   "rule": "airborne or fins",
+   "w_rules": [
+    "Yes animals are capable of flying or swimming, while no animals are only capable of walking or running on land.",
+    "The animal is in the \"yes\" group if it can fly or swim.",
+    "The animal is classified as \"yes\" if it can swim.",
+    "The hidden rule is that the animal must be capable of flying."
+   ],
+   "w_replies": [
+    "Yes animals are capable of flying or swimming, while no animals are only capable of walking or running on land.",
+    "The animal is in the \"yes\" group if it can fly or swim.",
+    "The animal is classified as \"yes\" if it can swim.",
+    "The hidden rule is that the animal must be capable of flying."
+   ],
+   "e_questions": [
+    "Can it fly?",
+    "Is it an insect?",
+    "Is it a fish?",
+    "Does it live in water?",
+    "Is it a bird?",
+    "Is it a mammal?",
+    "Is it a reptile?",
+    "Is it an amphibian?",
+    "Does it have feathers?",
+    "Does it have wings?",
+    "Is it a vertebrate?",
+    "Does it lay eggs?",
+    "Is it smaller than a cat?",
+    "Does the animal fly?",
+    "Is the animal an insect?",
+    "Is the animal a bird?"
+   ],
+   "e_replies": [
+    "Can it fly?\nIs it an insect?\nIs it a fish?\nDoes it live in water?\nIs it a bird?\nIs it a mammal?\nIs it a reptile?\nIs it an amphibian?",
+    "Can it fly?\nDoes it live in water?\nDoes it have feathers?\nIs it an insect?\nDoes it have wings?\nIs it a vertebrate?\nDoes it lay eggs?\nIs it smaller than a cat?",
+    "Does the animal fly?\nIs the animal an insect?\nIs the animal a bird?\nIs the animal a fish?\nDoes the animal live in water?\nDoes the animal have wings?\nIs the animal a mammal?\nDoes the animal have legs?",
+    "Does the animal live in water?\nIs the animal an insect?\nIs the animal a bird?\nDoes the animal have gills?\nIs the animal a fish?\nCan the animal fly?\nIs the animal a mammal?\nDoes the animal have fur or hair?"
+   ],
+   "A": {
+    "test_acc": 90.0
+   },
+   "W": {
+    "rule": "Yes animals are capable of flying or swimming, while no animals are only capable of walking or running on land.",
+    "stream_errors": 4,
+    "test_acc": 82.5
+   },
+   "E": {
+    "rule": "[Can it fly?] or [Is it a fish?]",
+    "cost": 10.57,
+    "test_acc": 87.5,
+    "questions": [
+     "Can it fly?",
+     "Is it a fish?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Can it fly?] or [Does it have fins?]",
+    "cost": 7.05,
+    "test_acc": 95.0,
+    "questions": [
+     "Can it fly?",
+     "Does it have fins?"
+    ]
+   },
+   "oracle": {
+    "rule": "[airborne] or [fins]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "fins"
+    ]
+   },
+   "question_traits": {
+    "Can it fly?": [
+     "airborne"
+    ],
+    "Is it an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is it a reptile?": [
+     "venomous"
+    ],
+    "Is it an amphibian?": [
+     "venomous"
+    ],
+    "Does it have feathers?": [
+     "feathers"
+    ],
+    "Does it have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is it a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does it lay eggs?": [
+     "eggs",
+     "milk"
+    ],
+    "Is it smaller than a cat?": [],
+    "Does the animal fly?": [
+     "airborne"
+    ],
+    "Is the animal an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ]
+   }
+  },
+  {
+   "id": "rule3_draw2",
+   "rule": "airborne or fins",
+   "w_rules": [
+    "The rule is that the animal is capable of flight.",
+    "The rule is that the animal is classified as \"yes\" if it can fly and \"no\" otherwise.",
+    "The animal is capable of flight.",
+    "The animal is classified as \"yes\" if it can fly."
+   ],
+   "w_replies": [
+    "The rule is that the animal is capable of flight.",
+    "The rule is that the animal is classified as \"yes\" if it can fly and \"no\" otherwise.",
+    "The animal is capable of flight.",
+    "The animal is classified as \"yes\" if it can fly."
+   ],
+   "e_questions": [
+    "Does the animal have wings?",
+    "Is the animal capable of flight?",
+    "Is the animal a bird?",
+    "Is the animal a fish?",
+    "Is the animal an insect?",
+    "Does the animal live primarily in water?",
+    "Is the animal a mammal?",
+    "Does the animal have feathers?",
+    "Can it fly?",
+    "Is it a bird?",
+    "Is it an insect?",
+    "Is it a mammal?",
+    "Is it a reptile?",
+    "Is it an amphibian?",
+    "Does it live in water?",
+    "Is it a crustacean?"
+   ],
+   "e_replies": [
+    "Does the animal have wings?\nIs the animal capable of flight?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal an insect?\nDoes the animal live primarily in water?\nIs the animal a mammal?\nDoes the animal have feathers?",
+    "Can it fly?\nIs it a bird?\nIs it an insect?\nIs it a mammal?\nIs it a reptile?\nIs it an amphibian?\nDoes it live in water?\nIs it a crustacean?",
+    "Does the animal have wings?\nDoes the animal fly?\nIs the animal a bird?\nIs the animal an insect?\nIs the animal a bat?\nIs the animal a fish?\nDoes the animal live primarily in water?\nIs the animal a mammal?",
+    "Is the animal a bird?\nIs the animal a fish?\nIs the animal an insect?\nIs the animal a bat?\nIs the animal a mammal that lives on land?\nIs the animal a mammal that lives in water?\nIs the animal a reptile?\nIs the animal a crustacean?"
+   ],
+   "A": {
+    "test_acc": 80.0
+   },
+   "W": {
+    "rule": "The animal is capable of flight.",
+    "stream_errors": 7,
+    "test_acc": 75.0
+   },
+   "E": {
+    "rule": "[Does the animal have wings?] or [Is the animal a fish?]",
+    "cost": 10.57,
+    "test_acc": 80.0,
+    "questions": [
+     "Does the animal have wings?",
+     "Is the animal a fish?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Can it fly?] or [Does it have fins?]",
+    "cost": 12.94,
+    "test_acc": 97.5,
+    "questions": [
+     "Can it fly?",
+     "Does it have fins?"
+    ]
+   },
+   "oracle": {
+    "rule": "[airborne] or [fins]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "fins"
+    ]
+   },
+   "question_traits": {
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal capable of flight?": [
+     "airborne"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Does the animal live primarily in water?": [
+     "aquatic",
+     "breathes"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Can it fly?": [
+     "airborne"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is it a reptile?": [
+     "venomous"
+    ],
+    "Is it an amphibian?": [
+     "venomous"
+    ],
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Is it a crustacean?": [
+     "venomous"
+    ]
+   }
+  },
+  {
+   "id": "rule4_draw1",
+   "rule": "not airborne and breathes",
+   "w_rules": [
+    "The animal is classified as yes if it has a backbone (is a vertebrate) and no if it does not (is an invertebrate).",
+    "The animal is classified as \"yes\" if it is a mammal, reptile, or an invertebrate that is not an arthropod or echinoderm; otherwise, it is \"no\".",
+    "The animal is classified as \"yes\" if and only if it is a mammal.",
+    "The rule is that the animal is a mammal or a reptile."
+   ],
+   "w_replies": [
+    "The animal is classified as yes if it has a backbone (is a vertebrate) and no if it does not (is an invertebrate).",
+    "The animal is classified as \"yes\" if it is a mammal, reptile, or an invertebrate that is not an arthropod or echinoderm; otherwise, it is \"no\".\n\nWait, looking closer at the data, specifically \"girl\" (yes), \"clam\" (no), \"worm\" (yes), \"scorpion\" (yes), \"star",
+    "The animal is classified as \"yes\" if and only if it is a mammal.",
+    "The rule is that the animal is a mammal or a reptile."
+   ],
+   "e_questions": [
+    "Is the animal a mammal?",
+    "Is the animal a reptile?",
+    "Is the animal a vertebrate?",
+    "Does the animal live exclusively in the ocean?",
+    "Is the animal a bird?",
+    "Is the animal an invertebrate?",
+    "Is the animal a fish?",
+    "Does the animal have a backbone?",
+    "Does the animal have a vertebral column?",
+    "Does the animal breathe air with lungs?",
+    "Is the animal warm-blooded?",
+    "Does the animal have hair or fur?",
+    "Does the animal live primarily on land?",
+    "Does the animal have fur or hair?",
+    "Is the animal vertebrate with four legs?",
+    "Does the animal breathe air through lungs?"
+   ],
+   "e_replies": [
+    "Is the animal a mammal?\nIs the animal a reptile?\nIs the animal a vertebrate?\nDoes the animal live exclusively in the ocean?\nIs the animal a bird?\nIs the animal an invertebrate?\nIs the animal a fish?\nDoes the animal have a backbone?",
+    "Is the animal a mammal?\nDoes the animal have a vertebral column?\nDoes the animal breathe air with lungs?\nIs the animal warm-blooded?\nDoes the animal have hair or fur?\nIs the animal a reptile?\nDoes the animal live primarily on land?\nIs the animal a bird?",
+    "Does the animal have fur or hair?\nIs the animal a mammal?\nIs the animal vertebrate with four legs?\nDoes the animal breathe air through lungs?\nIs the animal warm-blooded?\nDoes the animal give birth to live young?\nIs the animal a land-dwelling mammal?\nDoes the animal have a backbone and walk on land?",
+    "Is the animal a mammal?\nIs the animal a reptile?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal an insect?\nIs the animal a crustacean?\nIs the animal a human?\nIs the animal a worm?"
+   ],
+   "A": {
+    "test_acc": 85.0
+   },
+   "W": {
+    "rule": "The rule is that the animal is a mammal or a reptile.",
+    "stream_errors": 6,
+    "test_acc": 82.5
+   },
+   "E": {
+    "rule": "[Does the animal breathe air through lungs?] and not [Is the animal a bird?]",
+    "cost": 22.35,
+    "test_acc": 87.5,
+    "questions": [
+     "Does the animal breathe air through lungs?",
+     "Is the animal a bird?"
+    ],
+    "uses_rule_trait": false
+   },
+   "E_true": {
+    "rule": "not [Can it fly?] and [Does it breathe air?]",
+    "cost": 15.88,
+    "test_acc": 97.5,
+    "questions": [
+     "Can it fly?",
+     "Does it breathe air?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [airborne] and [breathes]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "breathes"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal live exclusively in the ocean?": [],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal an invertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal have a vertebral column?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal breathe air with lungs?": [],
+    "Is the animal warm-blooded?": [],
+    "Does the animal have hair or fur?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal live primarily on land?": [
+     "aquatic"
+    ],
+    "Does the animal have fur or hair?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal vertebrate with four legs?": [],
+    "Does the animal breathe air through lungs?": []
+   }
+  },
+  {
+   "id": "rule4_draw2",
+   "rule": "not airborne and breathes",
+   "w_rules": [
+    "The animal is classified as \"yes\" if it is a mammal or a reptile.",
+    "The rule is that the animal must have a name ending in the letter \"e\".",
+    "The animal is classified as \"yes\" if it is a mammal, a reptile, or a slug, and \"no\" otherwise.",
+    "The animal is included in the \"yes\" group if it has a name that starts with a consonant, ends with a vowel, and contains the letter 'a' (excluding birds and fish)."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if it is a mammal or a reptile.",
+    "The rule is that the animal must have a name ending in the letter \"e\".",
+    "The animal is classified as \"yes\" if it is a mammal, a reptile, or a slug, and \"no\" otherwise.",
+    "The animal is included in the \"yes\" group if it has a name that starts with a consonant, ends with a vowel, and contains the letter 'a' (excluding birds and fish).\n\n**Correction/Refinement based on closer analysis:**\nLet's re-examine the data.\nYes: antelope, boar, buffalo, calf, dolphin, elephant, giraffe,"
+   ],
+   "e_questions": [
+    "Is the animal a mammal?",
+    "Does the animal live on land?",
+    "Does the animal have fur or hair?",
+    "Does the animal give birth to live young?",
+    "Is the animal warm-blooded?",
+    "Does the animal breathe air through lungs?",
+    "Is the animal capable of running?",
+    "Does the animal have a backbone?",
+    "Does the animal nurse its young with milk?",
+    "Is the animal born alive rather than from an egg?",
+    "Does the animal live primarily on land?",
+    "Is the animal a vertebrate?",
+    "Does the animal have lungs for breathing air?",
+    "Is the animal a bird?",
+    "Is the animal a fish?",
+    "Does the animal have feathers?"
+   ],
+   "e_replies": [
+    "Is the animal a mammal?\nDoes the animal live on land?\nDoes the animal have fur or hair?\nDoes the animal give birth to live young?\nIs the animal warm-blooded?\nDoes the animal breathe air through lungs?\nIs the animal capable of running?\nDoes the animal have a backbone?",
+    "Is the animal a mammal?\nDoes the animal have fur or hair?\nDoes the animal nurse its young with milk?\nIs the animal warm-blooded?\nIs the animal born alive rather than from an egg?\nDoes the animal live primarily on land?\nIs the animal a vertebrate?\nDoes the animal have lungs for breathing air?",
+    "Is the animal a mammal?\nDoes the animal live primarily on land?\nIs the animal a bird?\nIs the animal a fish?\nDoes the animal have feathers?\nDoes the animal have scales?\nIs the animal an invertebrate?\nDoes the animal live in the ocean?",
+    "Is the animal a mammal?\nIs the animal a reptile?\nIs the animal a mollusk?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal an arthropod?\nIs the animal a human?\nIs the animal a cephalopod?"
+   ],
+   "A": {
+    "test_acc": 95.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it is a mammal, a reptile, or a slug, and \"no\" otherwise.",
+    "stream_errors": 2,
+    "test_acc": 85.0
+   },
+   "E": {
+    "rule": "[Does the animal breathe air through lungs?] and not [Does the animal have feathers?]",
+    "cost": 13.51,
+    "test_acc": 87.5,
+    "questions": [
+     "Does the animal breathe air through lungs?",
+     "Does the animal have feathers?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Does it have hair?]",
+    "cost": 12.01,
+    "test_acc": 77.5,
+    "questions": [
+     "Does it have hair?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [airborne] and [breathes]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "breathes"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal live on land?": [
+     "aquatic",
+     "breathes"
+    ],
+    "Does the animal have fur or hair?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal give birth to live young?": [
+     "eggs",
+     "milk"
+    ],
+    "Is the animal warm-blooded?": [],
+    "Does the animal breathe air through lungs?": [],
+    "Is the animal capable of running?": [],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal nurse its young with milk?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal born alive rather than from an egg?": [
+     "eggs",
+     "milk"
+    ],
+    "Does the animal live primarily on land?": [
+     "aquatic"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal have lungs for breathing air?": [],
+    "Is the animal a bird?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does the animal have feathers?": [
+     "feathers",
+     "airborne"
+    ]
+   }
+  },
+  {
+   "id": "rule5_draw1",
+   "rule": "fins or not tail",
+   "w_rules": [
+    "The animal is classified as yes if it has no feathers.",
+    "The animal is classified as \"yes\" if it has teeth.",
+    "The animal is classified as \"yes\" if it can swim or live in water, and \"no\" otherwise.",
+    "The animal is classified as yes if it is not a bird, mammal, or reptile."
+   ],
+   "w_replies": [
+    "The animal is classified as yes if it has no feathers.",
+    "The animal is classified as \"yes\" if it has teeth.",
+    "The animal is classified as \"yes\" if it can swim or live in water, and \"no\" otherwise.",
+    "The animal is classified as yes if it is not a bird, mammal, or reptile."
+   ],
+   "e_questions": [
+    "Does the animal live primarily in water?",
+    "Does the animal have an exoskeleton?",
+    "Does the animal lay eggs on land?",
+    "Does the animal have fur or hair?",
+    "Does the animal have scales?",
+    "Does the animal have six legs?",
+    "Does the animal have a backbone?",
+    "Does the animal live exclusively in cold climates?",
+    "Is it a bird?",
+    "Is it a mammal?",
+    "Does it live in water?",
+    "Does it have wings?",
+    "Does it have legs?",
+    "Is it an insect?",
+    "Does it fly?",
+    "Does it have scales?"
+   ],
+   "e_replies": [
+    "Does the animal live primarily in water?\nDoes the animal have an exoskeleton?\nDoes the animal lay eggs on land?\nDoes the animal have fur or hair?\nDoes the animal have scales?\nDoes the animal have six legs?\nDoes the animal have a backbone?\nDoes the animal live exclusively in cold climates?",
+    "Is it a bird?\nIs it a mammal?\nDoes it live in water?\nDoes it have wings?\nDoes it have legs?\nIs it an insect?\nDoes it fly?\nDoes it have scales?",
+    "Is the animal cold-blooded?\nIs the animal an invertebrate?\nDoes the animal live in water?\nDoes the animal have a backbone?\nIs the animal a bird?\nIs the animal a mammal?\nDoes the animal have fur or hair?\nDoes the animal have feathers?",
+    "Is the animal warm-blooded?\nDoes the animal lay hard-shelled eggs?\nDoes the animal have wings?\nIs the animal a bird?\nDoes the animal live primarily on land?\nDoes the animal have fur or hair?\nIs the animal a mammal?\nDoes the animal have a backbone?"
+   ],
+   "A": {
+    "test_acc": 85.0
+   },
+   "W": {
+    "rule": "The animal is classified as yes if it is not a bird, mammal, or reptile.",
+    "stream_errors": 6,
+    "test_acc": 90.0
+   },
+   "E": {
+    "rule": "[Does the animal have six legs?] or [Does the animal live primarily in water?]",
+    "cost": 19.4,
+    "test_acc": 80.0,
+    "questions": [
+     "Does the animal have six legs?",
+     "Does the animal live primarily in water?"
+    ],
+    "uses_rule_trait": false
+   },
+   "E_true": {
+    "rule": "not [Does it have a tail?] or [Does it have fins?]",
+    "cost": 15.88,
+    "test_acc": 87.5,
+    "questions": [
+     "Does it have a tail?",
+     "Does it have fins?"
+    ]
+   },
+   "oracle": {
+    "rule": "[fins] or not [tail]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "fins",
+     "tail"
+    ]
+   },
+   "question_traits": {
+    "Does the animal live primarily in water?": [
+     "aquatic",
+     "breathes"
+    ],
+    "Does the animal have an exoskeleton?": [
+     "backbone"
+    ],
+    "Does the animal lay eggs on land?": [],
+    "Does the animal have fur or hair?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have scales?": [],
+    "Does the animal have six legs?": [],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal live exclusively in cold climates?": [
+     "venomous"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Does it have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does it have legs?": [],
+    "Is it an insect?": [],
+    "Does it fly?": [
+     "airborne"
+    ],
+    "Does it have scales?": []
+   }
+  },
+  {
+   "id": "rule5_draw2",
+   "rule": "fins or not tail",
+   "w_rules": [
+    "The animal is classified as \"yes\" if its name contains two or more letters that are identical to the letter immediately preceding them (i.e., contains a double letter).",
+    "The animal is classified as \"yes\" if it is an invertebrate or a fish, and \"no\" if it is a vertebrate that is not a fish.",
+    "The animal is classified as \"yes\" if its name ends with the letter 'e' or if it is an invertebrate or a fish, except for cases where the name ends in 'o' or 'a' but is not a fish or invertebrate; howe",
+    "The animal is included if its name starts with a letter that has a curved line in it."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if its name contains two or more letters that are identical to the letter immediately preceding them (i.e., contains a double letter).",
+    "The animal is classified as \"yes\" if it is an invertebrate or a fish, and \"no\" if it is a vertebrate that is not a fish.",
+    "The animal is classified as \"yes\" if its name ends with the letter 'e' or if it is an invertebrate or a fish, except for cases where the name ends in 'o' or 'a' but is not a fish or invertebrate; however, upon closer inspection of the data, the rule is simply: the animal is \"yes\" if it is a fish",
+    "The animal is included if its name starts with a letter that has a curved line in it."
+   ],
+   "e_questions": [
+    "Does the animal live in water?",
+    "Is the animal an invertebrate?",
+    "Does the animal have wings?",
+    "Is the animal a fish?",
+    "Is the animal a mammal?",
+    "Does the animal have fur?",
+    "Is the animal a bird?",
+    "Does the animal have a backbone?",
+    "Does it live in water?",
+    "Does it have a shell?",
+    "Is it an insect?",
+    "Is it a fish?",
+    "Does it have wings?",
+    "Is it a mammal?",
+    "Does it fly?",
+    "Is it a bird?"
+   ],
+   "e_replies": [
+    "Does the animal live in water?\nIs the animal an invertebrate?\nDoes the animal have wings?\nIs the animal a fish?\nIs the animal a mammal?\nDoes the animal have fur?\nIs the animal a bird?\nDoes the animal have a backbone?",
+    "Does it live in water?\nDoes it have a shell?\nIs it an insect?\nIs it a fish?\nDoes it have wings?\nIs it a mammal?\nDoes it fly?\nIs it a bird?",
+    "Is the animal an invertebrate?\nIs the animal a fish?\nIs the animal an amphibian?\nIs the animal a mammal?\nIs the animal a bird?\nIs the animal a reptile?\nIs the animal a human?\nDoes the animal live exclusively in water?",
+    "Is the animal invertebrate?\nDoes the animal live in water?\nIs the animal a mammal?\nIs the animal a bird?\nDoes the animal have feathers?\nDoes the animal have fur or hair?\nIs the animal a reptile?\nDoes the animal have scales?"
+   ],
+   "A": {
+    "test_acc": 80.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it is an invertebrate or a fish, and \"no\" if it is a vertebrate that is not a fish.",
+    "stream_errors": 5,
+    "test_acc": 87.5
+   },
+   "E": {
+    "rule": "[Does the animal live in water?] or [Is it an insect?]",
+    "cost": 22.35,
+    "test_acc": 85.0,
+    "questions": [
+     "Does the animal live in water?",
+     "Is it an insect?"
+    ],
+    "uses_rule_trait": false
+   },
+   "E_true": {
+    "rule": "not [Does it have a backbone?] or [Does it have fins?]",
+    "cost": 18.83,
+    "test_acc": 95.0,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it have fins?"
+    ]
+   },
+   "oracle": {
+    "rule": "[fins] or not [tail]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "fins",
+     "tail"
+    ]
+   },
+   "question_traits": {
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Is the animal an invertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have fur?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Does it have a shell?": [],
+    "Is it an insect?": [],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does it have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does it fly?": [
+     "airborne"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ]
+   }
+  },
+  {
+   "id": "rule6_draw1",
+   "rule": "milk or not backbone",
+   "w_rules": [
+    "The animal is classified as \"yes\" if it is a mammal or an invertebrate, and \"no\" if it is a fish, bird, or reptile.",
+    "The animal is included in the \"yes\" group if and only if its common name starts with a consonant that is immediately followed by a vowel, or if it is a mammal, amphibian, arachnid, mollusk, or insect ",
+    "The animal is classified as \"yes\" if it has a backbone (is a vertebrate) or if it is an invertebrate with a hard exoskeleton or distinct body segments like an arthropod or mollusk, but this pattern fa",
+    "The rule is that the animal's name must contain a double letter."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if it is a mammal or an invertebrate, and \"no\" if it is a fish, bird, or reptile.",
+    "The animal is included in the \"yes\" group if and only if its common name starts with a consonant that is immediately followed by a vowel, or if it is a mammal, amphibian, arachnid, mollusk, or insect that is not a fish or bird.\n\nWait, let's re-examine the data more carefully to find a simpler linguistic or biological pattern.\n\n",
+    "The animal is classified as \"yes\" if it has a backbone (is a vertebrate) or if it is an invertebrate with a hard exoskeleton or distinct body segments like an arthropod or mollusk, but this pattern fails for slugs and worms. Let's re-evaluate the negative list: bass, carp, catfish, chub, dogfish, herring",
+    "The rule is that the animal's name must contain a double letter."
+   ],
+   "e_questions": [
+    "Is the animal a mammal?",
+    "Is the animal an insect?",
+    "Is the animal an arachnid?",
+    "Is the animal a mollusk?",
+    "Is the animal a reptile?",
+    "Is the animal a bird?",
+    "Is the animal a fish?",
+    "Is the animal an amphibian?",
+    "Is the animal an annelid?",
+    "Is the animal a crustacean?",
+    "Does the animal have wings?",
+    "Does the animal live in water?",
+    "Does the animal have a backbone?",
+    "Is the animal an insect or arachnid?",
+    "Does the animal have legs?",
+    "Is the animal a reptile or amphibian?"
+   ],
+   "e_replies": [
+    "Is the animal a mammal?\nIs the animal an insect?\nIs the animal an arachnid?\nIs the animal a mollusk?\nIs the animal a reptile?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal an amphibian?",
+    "Is the animal a mammal?\nIs the animal an arachnid?\nIs the animal a mollusk?\nIs the animal an annelid?\nIs the animal an insect?\nIs the animal a reptile?\nIs the animal a crustacean?\nIs the animal a bird?",
+    "Is the animal a mammal?\nDoes the animal have wings?\nDoes the animal live in water?\nDoes the animal have a backbone?\nIs the animal an insect or arachnid?\nDoes the animal have legs?\nIs the animal a bird?\nIs the animal a reptile or amphibian?",
+    "Is the animal a mammal?\nIs the animal a bird?\nIs the animal a fish?\nDoes the animal live in water?\nDoes the animal have legs?\nIs the animal an insect?\nIs the animal an arthropod?\nIs the animal a reptile?"
+   ],
+   "A": {
+    "test_acc": 85.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it is a mammal or an invertebrate, and \"no\" if it is a fish, bird, or reptile.",
+    "stream_errors": 1,
+    "test_acc": 97.5
+   },
+   "E": {
+    "rule": "not [Does the animal have a backbone?] or [Is the animal a mammal?]",
+    "cost": 7.62,
+    "test_acc": 100.0,
+    "questions": [
+     "Does the animal have a backbone?",
+     "Is the animal a mammal?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "not [Does it have a backbone?] or [Does it have hair?]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it have hair?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [backbone] or [hair]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "backbone",
+     "hair"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal an arachnid?": [
+     "venomous"
+    ],
+    "Is the animal a mollusk?": [],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal an amphibian?": [
+     "venomous"
+    ],
+    "Is the animal an annelid?": [
+     "venomous"
+    ],
+    "Is the animal a crustacean?": [],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal an insect or arachnid?": [
+     "backbone",
+     "venomous"
+    ],
+    "Does the animal have legs?": [],
+    "Is the animal a reptile or amphibian?": [
+     "venomous"
+    ]
+   }
+  },
+  {
+   "id": "rule6_draw2",
+   "rule": "milk or not backbone",
+   "w_rules": [
+    "The animal has a name that ends with a consonant.",
+    "The animal is a mammal or an insect.",
+    "The animal is classified as \"yes\" if its common English name contains a double letter.",
+    "The animal has a name that ends with the letter \"e\" or \"r\"."
+   ],
+   "w_replies": [
+    "The animal has a name that ends with a consonant.",
+    "The animal is a mammal or an insect.",
+    "The animal is classified as \"yes\" if its common English name contains a double letter.",
+    "The animal has a name that ends with the letter \"e\" or \"r\"."
+   ],
+   "e_questions": [
+    "Is the animal a mammal?",
+    "Is the animal an insect?",
+    "Is the animal a crustacean?",
+    "Is the animal an amphibian?",
+    "Is the animal a reptile?",
+    "Is the animal a bird?",
+    "Is the animal a fish?",
+    "Is the animal a vertebrate?",
+    "Is the animal a human?",
+    "Is the animal a mammal-like reptile (monotreme)?",
+    "Is the animal a mammal-like amphibian (mole)?",
+    "Does the animal have fur or hair?"
+   ],
+   "e_replies": [
+    "Is the animal a mammal?\nIs the animal an insect?\nIs the animal a crustacean?\nIs the animal an amphibian?\nIs the animal a reptile?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal a vertebrate?",
+    "Is the animal a mammal?\nIs the animal an insect?\nIs the animal a crustacean?\nIs the animal a bird?\nIs the animal a reptile?\nIs the animal an amphibian?\nIs the animal a fish?\nIs the animal a human?",
+    "Is the animal a mammal?\nIs the animal an insect?\nIs the animal a crustacean?\nIs the animal a mammal-like reptile (monotreme)?\nIs the animal a mammal-like amphibian (mole)?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal a human?",
+    "Is the animal a mammal?\nIs the animal an insect?\nIs the animal a crustacean?\nDoes the animal have fur or hair?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal a reptile?\nIs the animal an amphibian?"
+   ],
+   "A": {
+    "test_acc": 85.0
+   },
+   "W": {
+    "rule": "The animal is a mammal or an insect.",
+    "stream_errors": 2,
+    "test_acc": 90.0
+   },
+   "E": {
+    "rule": "[Does the animal have fur or hair?] or not [Is the animal a vertebrate?]",
+    "cost": 7.05,
+    "test_acc": 97.5,
+    "questions": [
+     "Does the animal have fur or hair?",
+     "Is the animal a vertebrate?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "not [Does it have a backbone?] or [Does it have hair?]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it have hair?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [backbone] or [hair]",
+    "cost": 7.05,
+    "test_acc": 97.5,
+    "questions": [
+     "backbone",
+     "hair"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal a crustacean?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal an amphibian?": [
+     "venomous"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal a bird?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal a human?": [
+     "venomous"
+    ],
+    "Is the animal a mammal-like reptile (monotreme)?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal a mammal-like amphibian (mole)?": [
+     "backbone",
+     "venomous"
+    ],
+    "Does the animal have fur or hair?": [
+     "hair",
+     "eggs",
+     "milk"
+    ]
+   }
+  },
+  {
+   "id": "rule7_draw1",
+   "rule": "not milk and tail",
+   "w_rules": [
+    "The animal is classified as \"yes\" if and only if it has feathers or a beak.",
+    "The animal is a bird, a reptile, or a fish.",
+    "The animal is classified as \"yes\" if and only if it can fly or is a bird.",
+    "The animal is classified as yes if it can fly, lays eggs, or is a bird, fish, or reptile that is not a mammal."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if and only if it has feathers or a beak.",
+    "The animal is a bird, a reptile, or a fish.",
+    "The animal is classified as \"yes\" if and only if it can fly or is a bird.",
+    "The animal is classified as yes if it can fly, lays eggs, or is a bird, fish, or reptile that is not a mammal.\n\n**Correction after re-evaluating the data:**\nLet's look closer at the \"no\" group: bear (mammal), boar (mammal), cheetah (mammal), dolphin (mammal"
+   ],
+   "e_questions": [
+    "Does the animal have feathers?",
+    "Does the animal have wings?",
+    "Does the animal have scales?",
+    "Does the animal have a backbone?",
+    "Is the animal a bird?",
+    "Is the animal a reptile?",
+    "Is the animal a fish?",
+    "Does the animal live in water?",
+    "Is it a bird?",
+    "Is it a fish?",
+    "Is it a reptile?",
+    "Is it an insect?",
+    "Is it a mammal?",
+    "Is it an amphibian?",
+    "Is it an arthropod?",
+    "Is it a marine mammal?"
+   ],
+   "e_replies": [
+    "Does the animal have feathers?\nDoes the animal have wings?\nDoes the animal have scales?\nDoes the animal have a backbone?\nIs the animal a bird?\nIs the animal a reptile?\nIs the animal a fish?\nDoes the animal live in water?",
+    "Is it a bird?\nIs it a fish?\nIs it a reptile?\nIs it an insect?\nIs it a mammal?\nIs it an amphibian?\nIs it an arthropod?\nIs it a marine mammal?",
+    "Does it fly?\nDoes it have feathers?\nDoes it have a backbone?\nIs it a vertebrate?\nDoes it have legs?\nIs it warm-blooded?\nDoes it live primarily in water?\nIs it a bird?",
+    "Can it fly?\nIs it a bird?\nDoes it lay eggs?\nIs it a fish?\nIs it a reptile?\nIs it an insect?\nIs it a mammal?\nDoes it have wings?"
+   ],
+   "A": {
+    "test_acc": 95.0
+   },
+   "W": {
+    "rule": "The animal is a bird, a reptile, or a fish.",
+    "stream_errors": 0,
+    "test_acc": 95.0
+   },
+   "E": {
+    "rule": "[Does the animal have a backbone?] and not [Is it a mammal?]",
+    "cost": 7.62,
+    "test_acc": 97.5,
+    "questions": [
+     "Does the animal have a backbone?",
+     "Is it a mammal?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Does it have a backbone?] and not [Does it have hair?]",
+    "cost": 7.05,
+    "test_acc": 97.5,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it have hair?"
+    ]
+   },
+   "oracle": {
+    "rule": "[backbone] and [eggs]",
+    "cost": 7.05,
+    "test_acc": 95.0,
+    "questions": [
+     "backbone",
+     "eggs"
+    ]
+   },
+   "question_traits": {
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal have scales?": [],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is it a reptile?": [
+     "venomous"
+    ],
+    "Is it an insect?": [
+     "backbone"
+    ],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is it an amphibian?": [
+     "venomous"
+    ],
+    "Is it an arthropod?": [
+     "backbone"
+    ],
+    "Is it a marine mammal?": []
+   }
+  },
+  {
+   "id": "rule7_draw2",
+   "rule": "not milk and tail",
+   "w_rules": [
+    "The animal has a backbone and breathes air using lungs.",
+    "The animal has feathers.",
+    "The animal is classified as \"yes\" if it can fly.",
+    "The animal is in the \"yes\" group if it is a vertebrate that is either a bird or a fish."
+   ],
+   "w_replies": [
+    "The animal has a backbone and breathes air using lungs.",
+    "The animal has feathers.",
+    "The animal is classified as \"yes\" if it can fly.",
+    "The animal is in the \"yes\" group if it is a vertebrate that is either a bird or a fish."
+   ],
+   "e_questions": [
+    "Does the animal have wings?",
+    "Can the animal fly?",
+    "Is the animal a bird?",
+    "Does the animal have feathers?",
+    "Does the animal lay hard-shelled eggs?",
+    "Is the animal a fish?",
+    "Is the animal a reptile?",
+    "Is the animal capable of flight or swimming in open water?",
+    "Does the animal have wings used for flight?",
+    "Is the animal a vertebrate?",
+    "Does the animal have a beak?",
+    "Is the animal primarily terrestrial or aerial rather than aquatic?",
+    "Does the animal belong to the class Aves?",
+    "Is it a bird?",
+    "Is it a fish?",
+    "Is it a reptile?"
+   ],
+   "e_replies": [
+    "Does the animal have wings?\nCan the animal fly?\nIs the animal a bird?\nDoes the animal have feathers?\nDoes the animal lay hard-shelled eggs?\nIs the animal a fish?\nIs the animal a reptile?\nIs the animal capable of flight or swimming in open water?",
+    "Is the animal a bird?\nDoes the animal have feathers?\nDoes the animal lay hard-shelled eggs?\nDoes the animal have wings used for flight?\nIs the animal a vertebrate?\nDoes the animal have a beak?\nIs the animal primarily terrestrial or aerial rather than aquatic?\nDoes the animal belong to the class Aves?",
+    "Is it a bird?\nIs it a fish?\nIs it a reptile?\nDoes it have feathers?\nDoes it live in water?\nIs it a mammal?\nIs it an invertebrate?\nIs it an amphibian?",
+    "Does it have feathers?\nDoes it fly?\nDoes it lay eggs?\nIs it a bird?\nIs it a fish?\nDoes it live in water?\nDoes it have wings?\nIs it warm-blooded?"
+   ],
+   "A": {
+    "test_acc": 90.0
+   },
+   "W": {
+    "rule": "The animal is in the \"yes\" group if it is a vertebrate that is either a bird or a fish.",
+    "stream_errors": 2,
+    "test_acc": 90.0
+   },
+   "E": {
+    "rule": "[Does the animal belong to the class Aves?] or [Is it a fish?]",
+    "cost": 13.51,
+    "test_acc": 87.5,
+    "questions": [
+     "Does the animal belong to the class Aves?",
+     "Is it a fish?"
+    ],
+    "uses_rule_trait": false
+   },
+   "E_true": {
+    "rule": "[Does it have a backbone?] and not [Does it have hair?]",
+    "cost": 7.05,
+    "test_acc": 97.5,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it have hair?"
+    ]
+   },
+   "oracle": {
+    "rule": "[backbone] and [eggs]",
+    "cost": 7.05,
+    "test_acc": 92.5,
+    "questions": [
+     "backbone",
+     "eggs"
+    ]
+   },
+   "question_traits": {
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Can the animal fly?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a bird?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal have feathers?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal lay hard-shelled eggs?": [
+     "feathers"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal capable of flight or swimming in open water?": [],
+    "Does the animal have wings used for flight?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal have a beak?": [
+     "feathers"
+    ],
+    "Is the animal primarily terrestrial or aerial rather than aquatic?": [
+     "aquatic"
+    ],
+    "Does the animal belong to the class Aves?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is it a bird?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is it a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is it a reptile?": [
+     "venomous"
+    ]
+   }
+  },
+  {
+   "id": "rule8_draw1",
+   "rule": "airborne or not tail",
+   "w_rules": [
+    "The animal is in the \"yes\" group if it can fly or if it is a cavy.",
+    "The animal belongs to the \"yes\" group if and only if it is capable of flight.",
+    "The rule is that the animal belongs to the \"yes\" group if it can fly, and to the \"no\" group if it cannot.",
+    "The animal is in the \"yes\" group if it has wings."
+   ],
+   "w_replies": [
+    "The animal is in the \"yes\" group if it can fly or if it is a cavy.",
+    "The animal belongs to the \"yes\" group if and only if it is capable of flight.",
+    "The rule is that the animal belongs to the \"yes\" group if it can fly, and to the \"no\" group if it cannot.",
+    "The animal is in the \"yes\" group if it has wings."
+   ],
+   "e_questions": [
+    "Is the animal an insect or arachnid?",
+    "Is the animal a bird?",
+    "Is the animal a mollusk?",
+    "Is the animal an arthropod?",
+    "Is the animal a mammal that gives birth to live young?",
+    "Is the animal a fish?",
+    "Is the animal a reptile?",
+    "Is the animal a mammal that does not give birth to live young?",
+    "Does the animal have wings?",
+    "Does the animal fly?",
+    "Is the animal an insect?",
+    "Is the animal a crustacean?",
+    "Does the animal live in water?",
+    "Is the animal a mammal?",
+    "Is the animal an amphibian?",
+    "Does the animal have feathers?"
+   ],
+   "e_replies": [
+    "Is the animal an insect or arachnid?\nIs the animal a bird?\nIs the animal a mollusk?\nIs the animal an arthropod?\nIs the animal a mammal that gives birth to live young?\nIs the animal a fish?\nIs the animal a reptile?\nIs the animal a mammal that does not give birth to live young?",
+    "Does the animal have wings?\nDoes the animal fly?\nIs the animal an insect?\nIs the animal a bird?\nIs the animal a mollusk?\nIs the animal a crustacean?\nDoes the animal live in water?\nIs the animal a mammal?",
+    "Is the animal a bird?\nIs the animal an insect?\nIs the animal a mammal?\nIs the animal a fish?\nIs the animal a reptile?\nIs the animal a crustacean?\nIs the animal an amphibian?\nIs the animal a mollusk?",
+    "Does the animal have wings?\nDoes the animal fly?\nDoes the animal have feathers?\nIs the animal an insect?\nIs the animal a bird?\nDoes the animal live in water only?\nIs the animal a mammal?\nDoes the animal have legs?"
+   ],
+   "A": {
+    "test_acc": 80.0
+   },
+   "W": {
+    "rule": "The animal is in the \"yes\" group if it can fly or if it is a cavy.",
+    "stream_errors": 7,
+    "test_acc": 75.0
+   },
+   "E": {
+    "rule": "[Does the animal fly?] or [Is the animal a mollusk?]",
+    "cost": 19.4,
+    "test_acc": 72.5,
+    "questions": [
+     "Does the animal fly?",
+     "Is the animal a mollusk?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Can it fly?] or not [Does it have a backbone?]",
+    "cost": 15.88,
+    "test_acc": 90.0,
+    "questions": [
+     "Can it fly?",
+     "Does it have a backbone?"
+    ]
+   },
+   "oracle": {
+    "rule": "[airborne] or not [tail]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "tail"
+    ]
+   },
+   "question_traits": {
+    "Is the animal an insect or arachnid?": [],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a mollusk?": [
+     "venomous"
+    ],
+    "Is the animal an arthropod?": [
+     "backbone"
+    ],
+    "Is the animal a mammal that gives birth to live young?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal a mammal that does not give birth to live young?": [
+     "venomous"
+    ],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal fly?": [
+     "airborne"
+    ],
+    "Is the animal an insect?": [],
+    "Is the animal a crustacean?": [
+     "venomous"
+    ],
+    "Does the animal live in water?": [
+     "aquatic"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal an amphibian?": [
+     "venomous"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ]
+   }
+  },
+  {
+   "id": "rule8_draw2",
+   "rule": "airborne or not tail",
+   "w_rules": [
+    "The animal is classified as \"yes\" if its name begins with a letter that has vertical symmetry (A, B, C, D, E, H, I, K, M, O, T, U, V, W, X, Y) or if it is an invertebrate, otherwise \"no\".",
+    "The animal is classified as \"yes\" if its English name ends with the letter \"s\".",
+    "The animal is included if its name starts with the same letter as the name of a bird in the list.",
+    "The animal is classified as \"yes\" if it has wings or can fly."
+   ],
+   "w_replies": [
+    "The animal is classified as \"yes\" if its name begins with a letter that has vertical symmetry (A, B, C, D, E, H, I, K, M, O, T, U, V, W, X, Y) or if it is an invertebrate, otherwise \"no\".\n\nWait, let me re-evaluate the pattern based on the specific list",
+    "The animal is classified as \"yes\" if its English name ends with the letter \"s\".",
+    "The animal is included if its name starts with the same letter as the name of a bird in the list.",
+    "The animal is classified as \"yes\" if it has wings or can fly."
+   ],
+   "e_questions": [
+    "Does the animal have wings?",
+    "Can the animal fly?",
+    "Is the animal an insect?",
+    "Is the animal a bird?",
+    "Does the animal live in the sea?",
+    "Is the animal a mammal?",
+    "Does the animal have feathers?",
+    "Is the animal a vertebrate?",
+    "Does the animal fly?",
+    "Does the animal live in the sky?",
+    "Does the animal have a beak?",
+    "Does the animal have a hollow bone structure?",
+    "Is the animal warm-blooded and a bird?",
+    "Is the animal an invertebrate?",
+    "Is the animal capable of powered flight?",
+    "Does the animal live primarily in water?"
+   ],
+   "e_replies": [
+    "Does the animal have wings?\nCan the animal fly?\nIs the animal an insect?\nIs the animal a bird?\nDoes the animal live in the sea?\nIs the animal a mammal?\nDoes the animal have feathers?\nIs the animal a vertebrate?",
+    "Does the animal have feathers?\nDoes the animal have wings?\nDoes the animal fly?\nDoes the animal live in the sky?\nIs the animal a bird?\nDoes the animal have a beak?\nDoes the animal have a hollow bone structure?\nIs the animal warm-blooded and a bird?",
+    "Does the animal have wings?\nDoes the animal fly?\nIs the animal a bird?\nIs the animal an insect?\nIs the animal an invertebrate?\nDoes the animal have feathers?\nDoes the animal live in the sky?\nIs the animal capable of powered flight?",
+    "Can the animal fly?\nDoes the animal live primarily in water?\nIs the animal an insect?\nIs the animal a bird?\nDoes the animal have wings?\nIs the animal a mammal?\nDoes the animal have feathers?\nIs the animal a vertebrate?"
+   ],
+   "A": {
+    "test_acc": 75.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it has wings or can fly.",
+    "stream_errors": 10,
+    "test_acc": 75.0
+   },
+   "E": {
+    "rule": "[Can the animal fly?] or not [Is the animal a vertebrate?]",
+    "cost": 16.46,
+    "test_acc": 92.5,
+    "questions": [
+     "Can the animal fly?",
+     "Is the animal a vertebrate?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Can it fly?] or not [Does it have a backbone?]",
+    "cost": 15.88,
+    "test_acc": 90.0,
+    "questions": [
+     "Can it fly?",
+     "Does it have a backbone?"
+    ]
+   },
+   "oracle": {
+    "rule": "[airborne] or not [tail]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "airborne",
+     "tail"
+    ]
+   },
+   "question_traits": {
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Can the animal fly?": [
+     "airborne"
+    ],
+    "Is the animal an insect?": [
+     "backbone"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Does the animal live in the sea?": [],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal fly?": [
+     "airborne"
+    ],
+    "Does the animal live in the sky?": [
+     "venomous"
+    ],
+    "Does the animal have a beak?": [
+     "feathers"
+    ],
+    "Does the animal have a hollow bone structure?": [
+     "feathers"
+    ],
+    "Is the animal warm-blooded and a bird?": [
+     "feathers"
+    ],
+    "Is the animal an invertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal capable of powered flight?": [
+     "airborne"
+    ],
+    "Does the animal live primarily in water?": [
+     "breathes"
+    ]
+   }
+  },
+  {
+   "id": "rule9_draw1",
+   "rule": "not aquatic and tail",
+   "w_rules": [
+    "The animal is a terrestrial or flying vertebrate.",
+    "The animal is in the \"yes\" group if it is a mammal or a bird.",
+    "The animal is included if it is a vertebrate that lives primarily on land.",
+    "The animal is classified as \"yes\" if it is a mammal or a bird."
+   ],
+   "w_replies": [
+    "The animal is a terrestrial or flying vertebrate.",
+    "The animal is in the \"yes\" group if it is a mammal or a bird.",
+    "The animal is included if it is a vertebrate that lives primarily on land.",
+    "The animal is classified as \"yes\" if it is a mammal or a bird."
+   ],
+   "e_questions": [
+    "Is the animal a mammal?",
+    "Is the animal a bird?",
+    "Is the animal a reptile?",
+    "Is the animal a vertebrate?",
+    "Does the animal live primarily on land?",
+    "Is the animal a predator?",
+    "Does the animal have fur or hair?",
+    "Does the animal lay eggs?",
+    "Does the animal have wings?",
+    "Is the animal warm-blooded?",
+    "Is it a mammal?",
+    "Is it a bird?",
+    "Is it a reptile?",
+    "Does it live on land?",
+    "Does it have feathers?",
+    "Does it have fur or hair?"
+   ],
+   "e_replies": [
+    "Is the animal a mammal?\nIs the animal a bird?\nIs the animal a reptile?\nIs the animal a vertebrate?\nDoes the animal live primarily on land?\nIs the animal a predator?\nDoes the animal have fur or hair?\nDoes the animal lay eggs?",
+    "Is the animal a mammal?\nIs the animal a bird?\nIs the animal a reptile?\nDoes the animal have wings?\nDoes the animal live primarily on land?\nDoes the animal have fur or hair?\nIs the animal warm-blooded?\nIs the animal a vertebrate?",
+    "Is it a mammal?\nIs it a bird?\nIs it a reptile?\nDoes it live on land?\nDoes it have feathers?\nDoes it have fur or hair?\nIs it warm-blooded?\nCan it fly?",
+    "Is the animal a mammal?\nIs the animal a bird?\nIs the animal a vertebrate?\nDoes the animal live on land?\nDoes the animal have fur or feathers?\nIs the animal warm-blooded?\nIs the animal a fish?\nIs the animal an invertebrate?"
+   ],
+   "A": {
+    "test_acc": 70.0
+   },
+   "W": {
+    "rule": "The animal is a terrestrial or flying vertebrate.",
+    "stream_errors": 3,
+    "test_acc": 87.5
+   },
+   "E": {
+    "rule": "[Does the animal live primarily on land?]",
+    "cost": 15.24,
+    "test_acc": 75.0,
+    "questions": [
+     "Does the animal live primarily on land?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Does it have a backbone?] and not [Does it live in water?]",
+    "cost": 15.88,
+    "test_acc": 90.0,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it live in water?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [aquatic] and [tail]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "aquatic",
+     "tail"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal live primarily on land?": [
+     "aquatic"
+    ],
+    "Is the animal a predator?": [],
+    "Does the animal have fur or hair?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal lay eggs?": [
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal warm-blooded?": [],
+    "Is it a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is it a bird?": [
+     "feathers"
+    ],
+    "Is it a reptile?": [
+     "venomous"
+    ],
+    "Does it live on land?": [
+     "breathes",
+     "fins"
+    ],
+    "Does it have feathers?": [
+     "feathers"
+    ],
+    "Does it have fur or hair?": [
+     "milk"
+    ]
+   }
+  },
+  {
+   "id": "rule9_draw2",
+   "rule": "not aquatic and tail",
+   "w_rules": [
+    "The animal is in the \"yes\" group if it is a mammal that moves primarily on land or a reptile that is not an aquatic fish or amphibian.",
+    "The animal is a mammal or a bird that cannot fly.",
+    "The rule is that the animal has a placenta (is a placental mammal).",
+    "The animal is in the \"yes\" group if and only if it is a mammal that gives birth to live young."
+   ],
+   "w_replies": [
+    "The animal is in the \"yes\" group if it is a mammal that moves primarily on land or a reptile that is not an aquatic fish or amphibian.\n\nWait, let's re-evaluate the data.\nLet's look at the \"no\" group:\nbass (fish), carp (fish), crayfish (crustacean), dolphin (mammal,",
+    "The animal is a mammal or a bird that cannot fly.",
+    "The rule is that the animal has a placenta (is a placental mammal).",
+    "The animal is in the \"yes\" group if and only if it is a mammal that gives birth to live young."
+   ],
+   "e_questions": [
+    "Is the animal a mammal?",
+    "Is the animal a bird?",
+    "Is the animal a reptile?",
+    "Does the animal lay eggs?",
+    "Does the animal have feathers?",
+    "Does the animal have fur or hair?",
+    "Does the animal give birth to live young?",
+    "Is the animal a fish?",
+    "Does the animal live primarily on land?",
+    "Is the animal an amphibian?",
+    "Is the animal an insect or crustacean?",
+    "Is the animal an insect?",
+    "Is the animal a crustacean?",
+    "Does the animal live primarily in water?"
+   ],
+   "e_replies": [
+    "Is the animal a mammal?\nIs the animal a bird?\nIs the animal a reptile?\nDoes the animal lay eggs?\nDoes the animal have feathers?\nDoes the animal have fur or hair?\nDoes the animal give birth to live young?\nIs the animal a fish?",
+    "Is the animal a mammal?\nDoes the animal live primarily on land?\nIs the animal a bird?\nDoes the animal have feathers?\nIs the animal a fish?\nIs the animal an amphibian?\nIs the animal a reptile?\nIs the animal an insect or crustacean?",
+    "Is the animal a mammal?\nIs the animal a bird?\nIs the animal a reptile?\nIs the animal a fish?\nIs the animal an amphibian?\nIs the animal an insect?\nIs the animal a crustacean?\nDoes the animal lay eggs?",
+    "Is the animal a mammal?\nIs the animal a reptile?\nIs the animal a bird?\nIs the animal a fish?\nIs the animal an amphibian?\nIs the animal an insect?\nIs the animal a crustacean?\nDoes the animal live primarily in water?"
+   ],
+   "A": {
+    "test_acc": 90.0
+   },
+   "W": {
+    "rule": "The animal is in the \"yes\" group if it is a mammal that moves primarily on land or a reptile that is not an aquatic fish or amphibian.",
+    "stream_errors": 10,
+    "test_acc": 80.0
+   },
+   "E": {
+    "rule": "[Does the animal live primarily on land?] and not [Is the animal an insect or crustacean?]",
+    "cost": 22.08,
+    "test_acc": 92.5,
+    "questions": [
+     "Does the animal live primarily on land?",
+     "Is the animal an insect or crustacean?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "[Does it have a backbone?] and not [Does it live in water?]",
+    "cost": 12.94,
+    "test_acc": 82.5,
+    "questions": [
+     "Does it have a backbone?",
+     "Does it live in water?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [aquatic] and [tail]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "aquatic",
+     "tail"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Does the animal lay eggs?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Does the animal have fur or hair?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal give birth to live young?": [
+     "eggs"
+    ],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Does the animal live primarily on land?": [
+     "aquatic"
+    ],
+    "Is the animal an amphibian?": [
+     "venomous"
+    ],
+    "Is the animal an insect or crustacean?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal an insect?": [
+     "backbone",
+     "venomous"
+    ],
+    "Is the animal a crustacean?": [
+     "backbone",
+     "venomous"
+    ],
+    "Does the animal live primarily in water?": [
+     "breathes"
+    ]
+   }
+  },
+  {
+   "id": "rule10_draw1",
+   "rule": "feathers or not breathes",
+   "w_rules": [
+    "The animal lives in water.",
+    "The animal is classified as yes if it lives in water.",
+    "The animals must live in water."
+   ],
+   "w_replies": [
+    "The animal lives in water.",
+    "The animal lives in water.",
+    "The animal is classified as yes if it lives in water.",
+    "The animals must live in water."
+   ],
+   "e_questions": [
+    "Is the animal a vertebrate?",
+    "Does the animal live primarily in water?",
+    "Does the animal have scales?",
+    "Does the animal have gills?",
+    "Does the animal have feathers?",
+    "Is the animal an invertebrate?",
+    "Does the animal fly?",
+    "Is the animal a bird or fish?",
+    "Does the animal have fins?",
+    "Is the animal a bird?",
+    "Does the animal breathe through gills?",
+    "Is the animal a cold-blooded vertebrate?",
+    "Is the animal a fish?",
+    "Is the animal capable of flight?",
+    "Does the animal have wings?",
+    "Is the animal a mammal?"
+   ],
+   "e_replies": [
+    "Is the animal a vertebrate?\nDoes the animal live primarily in water?\nDoes the animal have scales?\nDoes the animal have gills?\nDoes the animal have feathers?\nIs the animal an invertebrate?\nDoes the animal fly?\nIs the animal a bird or fish?",
+    "Does the animal live primarily in water?\nDoes the animal have fins?\nIs the animal a bird?\nDoes the animal breathe through gills?\nIs the animal a cold-blooded vertebrate?\nIs the animal an invertebrate?\nIs the animal a fish?\nIs the animal capable of flight?",
+    "Does the animal live primarily in water?\nIs the animal a vertebrate?\nDoes the animal have fins?\nDoes the animal have wings?\nIs the animal a mammal?\nIs the animal a bird?\nDoes the animal have legs for walking on land?\nDoes the animal have a backbone?",
+    "Does the animal live primarily in water?\nIs the animal a fish?\nIs the animal a bird?\nIs the animal an invertebrate?\nDoes the animal have scales?\nDoes the animal have fins?\nDoes the animal have gills?\nIs the animal a mammal?"
+   ],
+   "A": {
+    "test_acc": 85.0
+   },
+   "W": {
+    "rule": "The animals must live in water.",
+    "stream_errors": 6,
+    "test_acc": 67.5
+   },
+   "E": {
+    "rule": "[Does the animal have feathers?] or [Does the animal live primarily in water?]",
+    "cost": 7.62,
+    "test_acc": 92.5,
+    "questions": [
+     "Does the animal have feathers?",
+     "Does the animal live primarily in water?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "not [Does it breathe air?] or [Does it have feathers?]",
+    "cost": 12.94,
+    "test_acc": 97.5,
+    "questions": [
+     "Does it breathe air?",
+     "Does it have feathers?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [breathes] or [feathers]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "breathes",
+     "feathers"
+    ]
+   },
+   "question_traits": {
+    "Is the animal a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal live primarily in water?": [
+     "breathes"
+    ],
+    "Does the animal have scales?": [],
+    "Does the animal have gills?": [
+     "breathes"
+    ],
+    "Does the animal have feathers?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal an invertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does the animal fly?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a bird or fish?": [
+     "feathers"
+    ],
+    "Does the animal have fins?": [
+     "fins"
+    ],
+    "Is the animal a bird?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal breathe through gills?": [
+     "breathes"
+    ],
+    "Is the animal a cold-blooded vertebrate?": [],
+    "Is the animal a fish?": [
+     "breathes",
+     "fins"
+    ],
+    "Is the animal capable of flight?": [
+     "feathers",
+     "airborne"
+    ],
+    "Does the animal have wings?": [
+     "feathers",
+     "airborne"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ]
+   }
+  },
+  {
+   "id": "rule10_draw2",
+   "rule": "feathers or not breathes",
+   "w_rules": [
+    "The animal is classified as yes if it lives in water.",
+    "The animal is classified as \"yes\" if it lives primarily in water.",
+    "The animal is classified as \"yes\" if it lives primarily in water or is aquatic.",
+    "The animal is in the \"yes\" group if it lives in water."
+   ],
+   "w_replies": [
+    "The animal is classified as yes if it lives in water.",
+    "The animal is classified as \"yes\" if it lives primarily in water.",
+    "The animal is classified as \"yes\" if it lives primarily in water or is aquatic.",
+    "The animal is in the \"yes\" group if it lives in water."
+   ],
+   "e_questions": [
+    "Does the animal live primarily in water?",
+    "Does the animal have fins?",
+    "Is the animal a mammal?",
+    "Does the animal have feathers?",
+    "Does the animal have a backbone?",
+    "Is the animal a bird?",
+    "Does the animal breathe with gills?",
+    "Does the animal have a shell?",
+    "Is the animal an amphibian?",
+    "Is the animal a reptile?",
+    "Is the animal an insect?",
+    "Is the animal an arachnid?",
+    "Is the animal a crustacean?",
+    "Does it live in water?",
+    "Is it a vertebrate?",
+    "Does it breathe through gills?"
+   ],
+   "e_replies": [
+    "Does the animal live primarily in water?\nDoes the animal have fins?\nIs the animal a mammal?\nDoes the animal have feathers?\nDoes the animal have a backbone?\nIs the animal a bird?\nDoes the animal breathe with gills?\nDoes the animal have a shell?",
+    "Does the animal live primarily in water?\nIs the animal a mammal?\nIs the animal a bird?\nIs the animal an amphibian?\nIs the animal a reptile?\nIs the animal an insect?\nIs the animal an arachnid?\nIs the animal a crustacean?",
+    "Does it live in water?\nIs it a vertebrate?\nDoes it breathe through gills?\nDoes it have feathers?\nDoes it lay eggs?\nIs it warm-blooded?\nDoes it have fins?\nIs it an invertebrate?",
+    "Does the animal live in water?\nDoes the animal have scales?\nDoes the animal breathe through gills?\nIs the animal a fish?\nIs the animal an invertebrate that lives in water?\nDoes the animal have feathers and fly?\nIs the animal a bird that does not fly?\nIs the animal a mammal that lives on land?"
+   ],
+   "A": {
+    "test_acc": 90.0
+   },
+   "W": {
+    "rule": "The animal is classified as \"yes\" if it lives primarily in water.",
+    "stream_errors": 6,
+    "test_acc": 67.5
+   },
+   "E": {
+    "rule": "[Does the animal have feathers?] or [Does the animal live primarily in water?]",
+    "cost": 10.57,
+    "test_acc": 97.5,
+    "questions": [
+     "Does the animal have feathers?",
+     "Does the animal live primarily in water?"
+    ],
+    "uses_rule_trait": true
+   },
+   "E_true": {
+    "rule": "not [Does it breathe air?] or [Does it have feathers?]",
+    "cost": 12.94,
+    "test_acc": 95.0,
+    "questions": [
+     "Does it breathe air?",
+     "Does it have feathers?"
+    ]
+   },
+   "oracle": {
+    "rule": "not [breathes] or [feathers]",
+    "cost": 7.05,
+    "test_acc": 100.0,
+    "questions": [
+     "breathes",
+     "feathers"
+    ]
+   },
+   "question_traits": {
+    "Does the animal live primarily in water?": [
+     "breathes"
+    ],
+    "Does the animal have fins?": [
+     "fins"
+    ],
+    "Is the animal a mammal?": [
+     "hair",
+     "eggs",
+     "milk"
+    ],
+    "Does the animal have feathers?": [
+     "feathers"
+    ],
+    "Does the animal have a backbone?": [
+     "backbone",
+     "tail"
+    ],
+    "Is the animal a bird?": [
+     "feathers"
+    ],
+    "Does the animal breathe with gills?": [
+     "breathes"
+    ],
+    "Does the animal have a shell?": [],
+    "Is the animal an amphibian?": [
+     "venomous"
+    ],
+    "Is the animal a reptile?": [
+     "venomous"
+    ],
+    "Is the animal an insect?": [
+     "backbone"
+    ],
+    "Is the animal an arachnid?": [
+     "venomous"
+    ],
+    "Is the animal a crustacean?": [
+     "venomous"
+    ],
+    "Does it live in water?": [
+     "aquatic"
+    ],
+    "Is it a vertebrate?": [
+     "backbone",
+     "tail"
+    ],
+    "Does it breathe through gills?": [
+     "breathes"
+    ]
+   }
+  }
+ ],
+ "check": {
+  "first_token": "yes",
+  "answers_yes_no": true,
+  "margin": 0.169,
+  "questions_named": [
+   "Does the animal live in water?",
+   "Is the animal a fish?",
+   "Is the animal a bird?",
+   "Is the animal an insect?",
+   "Is the animal a mammal?",
+   "Is the animal a reptile?",
+   "Is the animal an amphibian?",
+   "Is the animal an arthropod?"
+  ]
+ },
+ "reading": {
+  "per_trait": {
+   "hair": 94.94949494949495,
+   "feathers": 100.0,
+   "eggs": 94.94949494949495,
+   "milk": 95.95959595959596,
+   "airborne": 96.96969696969697,
+   "aquatic": 93.93939393939394,
+   "toothed": 89.8989898989899,
+   "backbone": 97.97979797979798,
+   "breathes": 95.95959595959596,
+   "venomous": 93.93939393939394,
+   "fins": 98.98989898989899,
+   "tail": 90.9090909090909
+  },
+  "overall": 95.37037037037037
+ },
+ "true_question_match": {
+  "Can it fly?": [
+   "airborne"
+  ],
+  "Does it live in water?": [
+   "aquatic"
+  ],
+  "Is it a bird?": [
+   "airborne",
+   "feathers"
+  ],
+  "Is it a fish?": [
+   "breathes",
+   "fins"
+  ],
+  "Is it a mammal?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Is it an insect?": [
+   "backbone",
+   "venomous"
+  ],
+  "Is it a reptile?": [
+   "venomous"
+  ],
+  "Is it a crustacean?": [
+   "venomous"
+  ],
+  "Does the animal live in water?": [
+   "aquatic"
+  ],
+  "Is the animal an insect?": [
+   "backbone",
+   "venomous"
+  ],
+  "Does the animal have wings?": [
+   "airborne",
+   "feathers"
+  ],
+  "Is the animal a bird?": [
+   "airborne",
+   "feathers"
+  ],
+  "Is the animal a mammal?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Is the animal a reptile?": [
+   "venomous"
+  ],
+  "Is the animal an arthropod?": [
+   "backbone"
+  ],
+  "Does the animal breathe through gills?": [
+   "breathes"
+  ],
+  "Can it swim?": [],
+  "Is it a vertebrate?": [
+   "backbone",
+   "tail"
+  ],
+  "Is it cold-blooded?": [],
+  "Does it have wings?": [
+   "airborne",
+   "feathers"
+  ],
+  "Does the animal have feathers?": [
+   "airborne",
+   "feathers"
+  ],
+  "Does the animal lay eggs?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Does the animal have an exoskeleton?": [
+   "backbone"
+  ],
+  "Does the animal have a backbone?": [
+   "backbone",
+   "tail"
+  ],
+  "Does the animal eat insects?": [],
+  "Does the animal migrate?": [],
+  "Does it live in water (at least part of its life)?": [
+   "aquatic"
+  ],
+  "Is it an amphibian?": [
+   "venomous"
+  ],
+  "Does it have scales?": [],
+  "Is the animal a vertebrate?": [
+   "backbone",
+   "tail"
+  ],
+  "Is the animal an amphibian?": [
+   "venomous"
+  ],
+  "Is the animal a fish?": [
+   "breathes",
+   "fins"
+  ],
+  "Does the animal have gills at any stage of life?": [
+   "breathes",
+   "fins"
+  ],
+  "Does it have feathers?": [
+   "feathers"
+  ],
+  "Does it have a backbone?": [
+   "backbone",
+   "tail"
+  ],
+  "Does it have fins?": [
+   "fins"
+  ],
+  "Does it have a beak?": [
+   "feathers"
+  ],
+  "Does the animal have scales?": [],
+  "Is the animal a bird or a fish?": [
+   "feathers"
+  ],
+  "Does the animal breathe with gills?": [
+   "breathes"
+  ],
+  "Does the animal fly?": [
+   "airborne",
+   "feathers"
+  ],
+  "Does it lay eggs?": [
+   "eggs",
+   "milk"
+  ],
+  "Is it smaller than a cat?": [],
+  "Is the animal capable of flight?": [
+   "airborne",
+   "feathers"
+  ],
+  "Does the animal live primarily in water?": [
+   "aquatic",
+   "breathes"
+  ],
+  "Does the animal live exclusively in the ocean?": [],
+  "Is the animal an invertebrate?": [
+   "backbone",
+   "tail"
+  ],
+  "Does the animal have a vertebral column?": [
+   "backbone",
+   "tail"
+  ],
+  "Does the animal breathe air with lungs?": [],
+  "Is the animal warm-blooded?": [],
+  "Does the animal have hair or fur?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Does the animal live primarily on land?": [
+   "aquatic"
+  ],
+  "Does the animal have fur or hair?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Is the animal vertebrate with four legs?": [],
+  "Does the animal breathe air through lungs?": [],
+  "Does the animal live on land?": [
+   "aquatic",
+   "breathes"
+  ],
+  "Does the animal give birth to live young?": [
+   "eggs",
+   "milk"
+  ],
+  "Is the animal capable of running?": [],
+  "Does the animal nurse its young with milk?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Is the animal born alive rather than from an egg?": [
+   "eggs",
+   "milk"
+  ],
+  "Does the animal have lungs for breathing air?": [],
+  "Does the animal lay eggs on land?": [],
+  "Does the animal have six legs?": [],
+  "Does the animal live exclusively in cold climates?": [
+   "venomous"
+  ],
+  "Does it have legs?": [],
+  "Does it fly?": [
+   "airborne"
+  ],
+  "Does the animal have fur?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Does it have a shell?": [],
+  "Is the animal an arachnid?": [
+   "venomous"
+  ],
+  "Is the animal a mollusk?": [
+   "venomous"
+  ],
+  "Is the animal an annelid?": [
+   "venomous"
+  ],
+  "Is the animal a crustacean?": [
+   "backbone",
+   "venomous"
+  ],
+  "Is the animal an insect or arachnid?": [
+   "backbone",
+   "venomous"
+  ],
+  "Does the animal have legs?": [],
+  "Is the animal a reptile or amphibian?": [
+   "venomous"
+  ],
+  "Is the animal a human?": [
+   "venomous"
+  ],
+  "Is the animal a mammal-like reptile (monotreme)?": [
+   "backbone",
+   "venomous"
+  ],
+  "Is the animal a mammal-like amphibian (mole)?": [
+   "backbone",
+   "venomous"
+  ],
+  "Is it an arthropod?": [
+   "backbone"
+  ],
+  "Is it a marine mammal?": [],
+  "Can the animal fly?": [
+   "airborne",
+   "feathers"
+  ],
+  "Does the animal lay hard-shelled eggs?": [
+   "feathers"
+  ],
+  "Is the animal capable of flight or swimming in open water?": [],
+  "Does the animal have wings used for flight?": [
+   "airborne",
+   "feathers"
+  ],
+  "Does the animal have a beak?": [
+   "feathers"
+  ],
+  "Is the animal primarily terrestrial or aerial rather than aquatic?": [
+   "aquatic"
+  ],
+  "Does the animal belong to the class Aves?": [
+   "airborne",
+   "feathers"
+  ],
+  "Is the animal a mammal that gives birth to live young?": [
+   "eggs",
+   "hair",
+   "milk"
+  ],
+  "Is the animal a mammal that does not give birth to live young?": [
+   "venomous"
+  ],
+  "Does the animal live in the sea?": [],
+  "Does the animal live in the sky?": [
+   "venomous"
+  ],
+  "Does the animal have a hollow bone structure?": [
+   "feathers"
+  ],
+  "Is the animal warm-blooded and a bird?": [
+   "feathers"
+  ],
+  "Is the animal capable of powered flight?": [
+   "airborne"
+  ],
+  "Is the animal a predator?": [],
+  "Does it live on land?": [
+   "breathes",
+   "fins"
+  ],
+  "Does it have fur or hair?": [
+   "milk"
+  ],
+  "Is the animal an insect or crustacean?": [
+   "backbone",
+   "venomous"
+  ],
+  "Does the animal have gills?": [
+   "breathes"
+  ],
+  "Is the animal a bird or fish?": [
+   "feathers"
+  ],
+  "Does the animal have fins?": [
+   "fins"
+  ],
+  "Is the animal a cold-blooded vertebrate?": [],
+  "Does the animal have a shell?": [],
+  "Does it breathe through gills?": [
+   "breathes"
+  ]
+ },
+ "calls": {
+  "answers": 16786,
+  "off_format": 0,
+  "minutes": 9.6
+ },
+ "summary": {
+  "A": 86.25,
+  "W": 83.625,
+  "E": 89.375,
+  "E_true": 93.25,
+  "oracle": 99.25,
+  "A_se": 1.5336145813764703,
+  "W_se": 2.2248225831098956,
+  "E_se": 1.7384487186478699,
+  "E_true_se": 1.3340184643241992,
+  "reading_acc": 95.37037037037037,
+  "off_format_rate": 0.0,
+  "E_uses_true_trait": 0.8
+ }
+}

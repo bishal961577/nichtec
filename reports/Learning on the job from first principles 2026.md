@@ -347,3 +347,50 @@ There is one rule per distinct pair of traits:
 
 **Cost:** about 25,000 short calls per model, many repeated across tasks and cached. That is likely 10–20 minutes on
 each dedicated endpoint, and a few dollars in all. No forecast is made.
+
+## 8. Ingredients test 1 result (Qwen3.5-27B-FP8, 18 October 2026): in between
+
+**How it ran:**
+- From this session against a dedicated Modal endpoint, in 9.6 minutes.
+- 16,786 answer calls, after caching. No answer was anything other than yes or no.
+- The raw data are in `results/ingredients_Qwen3.5-27B-FP8/`.
+
+| Agent | Test accuracy (20 tasks) |
+|---|---|
+| A, full history | 86.2 ± 1.5 |
+| W, whole rule in words, judged by code | 83.6 ± 2.2 |
+| **E, model names traits, code combines** | **89.4 ± 1.7** |
+| E with the 12 true questions (reference) | 93.2 ± 1.3 |
+| Oracle: recorded traits, same combining | 99.2 |
+
+**Checks:** all passed.
+- The oracle scored 99.2, against a line of 95.
+- Reading accuracy was 95.4%, against a line of 85.
+- No answer fell outside yes or no.
+
+**Lines:**
+- **Pass** needed E at least 5 points above both A and W.
+- **Stop** applied if E was less than 2 points above the better of them.
+- E is 3.1 above A (± 1.6 paired; 13 wins, 6 losses) and 5.8 above W (± 2.7). **In between.** By the plan:
+  report, diagnose, and decide with the owner.
+
+**Where the points go** (paired, across the 20 tasks):
+- **Reading the traits wrongly costs 6.0 points** (oracle 99.2 → E with the true questions 93.2).
+  - The model's yes-or-no answers about single traits are 95.4% right: teeth 90%, tail 91%.
+  - Two traits per rule compound the errors.
+  - Some of the disagreement is the dataset's own labelling.
+- **Naming the wrong traits costs 3.9 points** (93.2 → E's 89.4). E often used near-synonyms or class questions
+  instead of the traits: "Is it a fish?" for fins, "Does it have wings?" for airborne, "Is it a mammal?" for milk.
+  Its final rule used one of the hidden rule's own traits in 80% of tasks.
+- **Splitting the jobs beats writing whole rules:** E beat W by 5.8 points. W's sentences were often wrong
+  generalisations, such as "the animal is a mammal or a reptile".
+- **With the right ingredients, splitting beats reading the history clearly:** E with the true questions beat A by
+  7.0 ± 2.1, winning 16 tasks and losing 4. This is a reference, not the agent under test.
+- **At 27B, reading the history is strong on this task** (86.2, against 83.7 on the abstract toy rules), because the
+  model knows these animals.
+
+**What it means:**
+- Splitting is the better design.
+- Its limits are the model's yes-or-no knowledge of single traits and its habit of naming near-synonyms.
+- At 27B the margin over plain history reading is real but small: +3.1, inside the in-between band.
+- Test 2 (4B) runs next, as pre-registered. That is where splitting matters most for a phone.
