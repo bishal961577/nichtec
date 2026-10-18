@@ -134,3 +134,54 @@ few dollars in total. No forecast is made.
 - then the nightly rebuild ("sleep").
 
 Each gets its own pre-registration.
+
+## 5. Test 1 result (Qwen3.5-27B-FP8, 18 October 2026): stop, by 0.7 points
+
+**How it ran:**
+- On a dedicated Modal endpoint (SGLang), in 3.6 minutes: 480 guessing rounds and 1,540 valid guesses.
+- The probe passed.
+- The raw data are in `results/scientist_Qwen3.5-27B-FP8/`.
+
+| Agent | Random orders | Decoy first | Decoy last | Order gap | Final rule good |
+|---|---|---|---|---|---|
+| **D, scientist (pre-registered)** | **89.3 ± 3.0** | 91.7 | 91.5 | −2.2 | 43% |
+| D-count (same guesses, judged by count only) | 92.4 ± 1.5 | 91.7 | 94.2 | 0.8 | 43% |
+| A, full history (order-gap test) | 83.7 | 81.2 | 82.5 | 2.5 | — |
+| B, old ledger (order-gap test) | 81.2 | 86.2 | 81.2 | −0.1 | 12% |
+| Brute force over 2,578 simple rules | 99.4 | | | | |
+
+**Line:** D scored 89.3, under 90. **Stop.** The loop as specified does not fix induction. The pre-registered next
+step is a diagnosis, not a variant.
+
+**Diagnosis from the saved guesses** (no new calls):
+1. **The guesser improves as evidence grows.** The share of good guesses rose from 0.4% after 5 cases to 48.9% after
+   40. In 68% of streams the pool held a rule that was at least 90% right on all items, against 12% good rules in
+   the order-gap test. Showing all the evidence and the mistakes helps.
+2. **It patches instead of rethinking.** 41% of guesses kept D's current best rule and bolted exceptions onto it. That
+   is "rigid early beliefs", the failure CL-Bench names, caused here by the design: showing the current best invites
+   patching. Guesses grew from 2.5 conditions after 5 cases to 4.8 in the middle of the stream.
+3. **It still cannot check itself.** Even with every case in front of it, only 49–76% of guesses per round fitted
+   all of them (37% contradicted them overall, against 61% before). Code has to do the checking, and when it did, the
+   result beat the full-history agent by 5.6 to 8.7 points.
+4. **My simplicity charge was the wrong measure.** D and D-count chose different rules in 20 of 60 streams, and
+   D-count won 14 of those against 2.
+   - The usual case: the pool lacked the true rule. The length charge then preferred a short wrong rule (for
+     example 2 conditions with 4 errors) over a longer rule made of the true rule plus a narrow exception (3 errors,
+     95% on the test set).
+   - Counting comparisons charges an exception that covers one item of 576 as much as a condition that splits the
+     items in half.
+   - A better-founded charge would cost a rule by how much it claims (the size principle), not by how many symbols it
+     uses. Choosing it now, after seeing the data, would be a forking path. It needs fresh tasks.
+5. **The system is unaffected by order,** as designed: decoy orders scored slightly higher than random ones.
+
+**What this means:**
+- The bottleneck is the guesser's search: it patches, does not check itself, and is not drawn to simple rules even
+  when asked.
+- The code-side judge works.
+- Neither D (89.3) nor D-count (92.4) reached the 95 line, against 99.4 for exhaustive search, which shows the
+  information was there.
+
+**Next, as pre-registered:**
+- Test 2 (Qwen3.5-4B) still runs, with its own lines.
+- Any redesign drawn from this diagnosis must be pre-registered and tested on fresh tasks, not on these 12. A
+  redesign drawn from one diagnosis is not a "variant", but it gets one attempt only.
