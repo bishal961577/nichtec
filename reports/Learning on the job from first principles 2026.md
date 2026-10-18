@@ -214,3 +214,136 @@ model without them.
   at 4B rarely produces anything consistent with what it was shown.
 - The code-side parts work: exact checking, tallies, and indifference to order when the guesses are good.
 - Exhaustive search over a small rule language reaches 99.4, so the evidence was always sufficient.
+
+## 7. The one redesign: the model names the ingredients, code combines them (pre-registered 18 October 2026)
+
+Written and committed before any code or run. This is the single redesign that section 5 allowed. If its test 1
+stops, this line of work ends.
+
+**From first principles:**
+- A rule has two parts: ingredients (traits that matter, such as "can it fly?") and a way of combining them
+  ("flies or lives in water").
+- **Naming ingredients takes knowledge of the world**, which language models have.
+- **Combining and checking takes exact, exhaustive work.** That is what code does perfectly (99.4% in test 1) and what
+  the models failed at (37% and 96% of guesses contradicted the shown cases).
+- Tests 1 and 2 gave both jobs to the model. Here they are split:
+  - the model only names candidate traits and answers yes or no about one trait of one item;
+  - code combines the traits, checks every combination against every case, and keeps the simplest that fits.
+- The toy task handed the ingredients over as four fields, so code could solve it without the model. A real test
+  needs **hidden ingredients**: items given only by name, with the rule depending on traits that the model has to
+  know or notice.
+
+**What it stands on:**
+- language-model-generated features combined by a classic learner: CAAFE 2023, Aug-imodels 2023;
+- concept bottleneck models with model-named concepts: LaBo, Label-free CBM, 2023;
+- concept induction from text: LLooM, 2024;
+- hypotheses written in plain language and checked by a model: Ellis 2023.
+
+The question here is narrower than any of these: does splitting induction this way beat letting the model write
+whole explanations, and reading the whole history, when learning from experience? And does it rescue a phone-sized
+model?
+
+### Task
+
+**Data:** UCI Zoo (Forsyth, CC BY 4.0).
+- Animals given by name only, with their recorded traits.
+- `zoo.data` sha256 `cddc71c2…f0315`.
+- The name "frog" appears twice with different values, so both rows are dropped, leaving 99 animals.
+
+**Hidden rules:** ten rules, each over two traits. Each was chosen in advance by three conditions:
+- it uses only these traits: hair, feathers, eggs, milk, airborne, aquatic, toothed, backbone, breathes, venomous,
+  fins, tail;
+- 40–59 of the 99 animals are in the "yes" group;
+- no single trait (or its negation) agrees with it on more than 85% of animals, so both ingredients are needed.
+
+There is one rule per distinct pair of traits:
+
+| # | Hidden rule | Animals in "yes" |
+|---|---|---|
+| 1 | airborne or aquatic | 53 |
+| 2 | eggs and backbone | 40 |
+| 3 | airborne or fins | 41 |
+| 4 | not airborne and breathes | 54 |
+| 5 | fins or not tail | 40 |
+| 6 | milk or not backbone | 59 |
+| 7 | not milk and tail | 40 |
+| 8 | airborne or not tail | 42 |
+| 9 | not aquatic and tail | 49 |
+| 10 | feathers or not breathes | 41 |
+
+**Tasks:**
+- Each rule has 2 draws, giving 20 tasks.
+- A task is a 40-case stream (20 yes, 20 no) and a separate 40-animal test set (20 yes, 20 no) drawn from the rest.
+- **There is no order manipulation.** The order question is settled; this test is about whether the lesson gets
+  learned. Each task has one random stream order.
+
+### Agents (same model for all)
+
+- **A, history:** the full stream in arrival order in the prompt. It says yes or no for each test animal from the
+  top-20 log-probabilities, with the median threshold, as in the order-gap test.
+- **W, whole-rule writer with a code judge:**
+  - From all 40 cases, listed in sorted order, the model writes the hidden rule as one sentence: 4 samples,
+    temperature 0.8.
+  - The model then judges each written rule on each of the 80 animals ("Does this animal satisfy the rule?").
+  - Code keeps the rule with the fewest errors on the stream (ties go to the shorter text) and uses it on the test
+    set.
+  - This is test 1's D-count, with whole explanations in plain language.
+- **E, ingredients:**
+  1. **Naming:** from all 40 sorted cases, the model lists up to 8 short yes-or-no questions about an animal's traits
+     that might explain the groups. That is 4 samples at temperature 0.8. Lines ending in "?" are kept,
+     de-duplicated by their lower-case letters and digits, up to 16 per task in order of appearance.
+  2. **Reading:** the model answers each question for each of the 80 animals, yes or no, from the top-20
+     log-probabilities at threshold zero. Answers are cached by (question, animal).
+  3. **Combining (code):** every rule with one or two questions is tried, each question possibly negated and two
+     joined by "and" or "or". Its cost in nats is the errors on the stream × ln 19, plus the number of questions
+     × ln(2K) (picking one of K questions and its sign), plus ln 2 for the joining word. The cheapest wins; ties go
+     to fewer questions, then text order. It is applied to the test animals with their read answers.
+
+     Because no rule can hold more than two questions, the exception-patching that defeated test 1's length charge
+     cannot occur.
+
+### References and checks (same model)
+
+- **Oracle:** the same combining over the 12 traits with their recorded values. It shows what the evidence allows.
+- **E with the true questions:** the same combining over 12 fixed questions read by the model:
+  - "Does it have hair?"
+  - "Does it have feathers?"
+  - "Does it lay eggs?"
+  - "Does it produce milk?"
+  - "Can it fly?"
+  - "Does it live in water?"
+  - "Does it have teeth?"
+  - "Does it have a backbone?"
+  - "Does it breathe air?"
+  - "Is it venomous?"
+  - "Does it have fins?"
+  - "Does it have a tail?"
+
+  This separates naming the wrong ingredients from reading them wrongly.
+- **Reading accuracy:** the model's answers to those 12 questions for all 99 animals, against the recorded values.
+
+### Lines, fixed now
+
+- **Check 1, the task:** the oracle scores at least 95% on the test sets. If not, the task is faulty and nothing is
+  concluded.
+- **Check 2, reading:** the model's reading accuracy is at least 85%. If not, its knowledge disagrees with the
+  records too often, and the test is inconclusive for that model.
+- **Check 3, answering:** at most 10% of the reading and A calls have neither yes nor no among their top 20 tokens.
+- **Test 1, Qwen3.5-27B-FP8:**
+  - **Pass:** E is at least 5 points above both A and W.
+  - **Stop:** E is less than 2 points above the better of A and W. Then splitting the jobs does not help, and this
+    line of work ends.
+  - In between: report, diagnose, and decide with the owner.
+- **Test 2, Qwen3.5-4B, run whatever test 1 shows:**
+  - **Pass:** 4B-E is at least as good as 27B-A from test 1, meaning the small model with split jobs matches the big
+    model reading its history.
+  - **Stop:** 4B-E is more than 5 points below 27B-A.
+- **Reported without lines:**
+  - A, W and E on both models;
+  - E with the true questions;
+  - the questions E chose, and how often they match a true trait;
+  - per-trait reading accuracy;
+  - the number of calls.
+
+**Cost:** about 25,000 short calls per model, many repeated across tasks and cached. That is likely 10–20 minutes on
+each dedicated endpoint, and a few dollars in all. No forecast is made.
