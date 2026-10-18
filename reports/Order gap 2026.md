@@ -4,7 +4,8 @@ This is the step after the CIFAR-10 stop. It tests one link: this repo's startin
 depends on the order experience arrives in learns badly) against the failures CL-Bench names in today's AI agents.
 They are "rigid in early, incorrect beliefs" and "misled by spurious correlations". Sections 1–6 were written and
 committed before any run. Section 7, also written before any run, moves the main test to two larger Qwen3.5 models
-on a GPU endpoint and adds two lines.
+on a GPU endpoint and adds two lines. **Result (section 8): stop.** On Qwen3.5-27B, a planted misleading block cost the
+full-history agent 2.5 points, under the 5-point line, so the route ends.
 
 **Bottom line, before the run:**
 - **Setup:** the same 40 experiences, five orders, three agent memories, one small model (Qwen2.5-1.5B-Instruct).
@@ -207,6 +208,63 @@ attribute. Tasks, orders and the misleading block are built exactly as in sectio
 
 **Route decision.** It comes from the primary model. If the primary is inconclusive (line 1, 8 or 9), what to do
 next is the owner's decision. No new model or rule set is tried without a new pre-registration.
+
+## 8. Result: Qwen3.5-27B-FP8, 18 October 2026: stop
+
+**How it ran:**
+- From the cloud session, against a dedicated Modal endpoint served by SGLang.
+- It took 8 minutes: 5,760 answer calls and 480 proposal rounds.
+- The probe passed: the first answer token was yes or no, so thinking was off.
+- The raw numbers are in `results/order_gap_Qwen3.5-27B-FP8/`.
+
+Test-set accuracy (%) after the 40 cases, averaged over the 12 tasks:
+
+| Agent | Random orders | Decoy first | Decoy last | Learning | Order gap |
+|---|---|---|---|---|---|
+| A, history | 83.7 | 81.2 | 82.5 | 33.7 ± 1.8 | **2.5** (first 2.5 ± 1.7, last 1.2 ± 1.7) |
+| B, ledger | 81.2 | 86.2 | 81.2 | 31.2 ± 2.7 | −0.1 |
+| C, revise | 66.8 | 64.8 | 58.1 | 16.8 ± 3.4 | 8.7 (last 8.7 ± 4.5) |
+
+Controls: A with no history scored 52.1. A with its history sorted scored 86.2.
+
+**The lines, in order:**
+
+| Line | Result |
+|---|---|
+| 8. A answers yes or no | Yes: 0.0% of 5,760 answers were anything else |
+| 1. A learns | Yes: 33.7 points over chance |
+| 9. Too easy | No: 83.7 is under 95, so the harder rules did not run |
+| **3. Stop** | **A's order gap is 2.5, under 5. Stop: the route ends.** |
+| 2. Proposer | Failed: a good rule was proposed in only 12% of streams, under the 25% line, so B and C are inconclusive |
+| 6. Trivial cure | Yes: the sorted history scored 86.2 against 83.7 |
+| 7. Secondary | Not evaluated, because line 2 failed |
+
+**What it means:**
+- **The full-history agent learns these rules well and is not hurt by the planted block.** It reaches 84% against 52%
+  with no history. Ten misleading cases at the start or at the end cost it 1–3 points on average, inside the noise.
+- **Ordinary reshuffles move its score more than the planted block does:** an average spread of 8.8 points between
+  three random orders. Part of that spread is the server, not order. Identical requests sent three times scored
+  85/80/75 on one stream, and the same on three others (`noise_check.txt`). This check was run after the main run and
+  is not part of the verdict.
+- **The rule-writing agents did worse than the plain history agent.** The model wrote long, over-fitted rules (three
+  or four conditions joined together) instead of the two-condition truth. B learned 31.2 points against A's 33.7.
+- **C's 8.7-point loss when the block came last, against B's −0.1, points the way the thesis predicts,** for an agent
+  that only remembers its last 10 cases. By the pre-registered lines it is not a finding: the proposer check failed,
+  and the error bar (±4.5) is half the effect.
+
+**What it does not show.** That order never matters for agents:
+- CL-Bench agents keep their own reasoning in context;
+- their histories are much longer;
+- their tasks are far harder.
+
+Testing any of that would be a new design, not a variant of this one, and the agreed rule is that a stop ends the
+route.
+
+**The link to this repo's thesis.** The thesis was about learning in the weights, where gradient updates do not
+commute. Learning inside the prompt behaves differently, as Russin et al. also found. Here it showed no order
+damage worth the name.
+
+**Not run:** the secondary Qwen3.5-4B model. It cannot change the route decision.
 
 ## Sources
 

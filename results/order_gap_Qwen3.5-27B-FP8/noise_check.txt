@@ -1,0 +1,11 @@
+Server repeatability check (run after the main run, not part of the verdict).
+Agent A's test-set predictions for the same stream, sent three times with identical requests to the same endpoint
+(SGLang, Qwen3.5-27B-FP8, temperature 0):
+
+rule1_draw1 random1: test accuracy 85.0, 80.0, 75.0; largest change in a yes-no margin 0.81
+rule1_draw1 random2: test accuracy 75.0, 75.0, 75.0; largest change 0.99
+rule4_draw1 random1: test accuracy 100.0, 100.0, 100.0; largest change 0.84
+rule4_draw1 random2: test accuracy 95.0, 95.0, 95.0; largest change 0.46
+
+Identical requests do not always give identical answers on this server, so part of A's spread between random orders
+(8.8 points) is server noise rather than order.
