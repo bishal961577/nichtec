@@ -185,3 +185,32 @@ step is a diagnosis, not a variant.
 - Test 2 (Qwen3.5-4B) still runs, with its own lines.
 - Any redesign drawn from this diagnosis must be pre-registered and tested on fresh tasks, not on these 12. A
   redesign drawn from one diagnosis is not a "variant", but it gets one attempt only.
+
+## 6. Test 2 result (Qwen3.5-4B, 18 October 2026): stop
+
+**How it ran:** the same agent D on a dedicated Modal endpoint, in 0.6 minutes. The raw data are in
+`results/scientist_Qwen3.5-4B/`.
+
+| Agent | Random orders | Decoy first | Decoy last | Order gap | Good rule in pool |
+|---|---|---|---|---|---|
+| **4B, D (pre-registered)** | **75.2 ± 3.4** | 65.0 | 76.0 | 10.2 | 7% of streams |
+| 4B, D-count | 79.0 ± 2.3 | 65.4 | 77.3 | 13.6 | 7% |
+| 27B, D (test 1) | 89.3 | 91.7 | 91.5 | −2.2 | 43% |
+| 27B, A (order-gap test, the line) | 83.7 | 81.2 | 82.5 | 2.5 | — |
+
+**Line:** 4B-D scored 75.2, under 83.7. **Stop.** The phone-sized model with these habits does worse than the 27B
+model without them.
+
+**Why:**
+- **96% of the 4B model's guesses contradicted the cases they were shown,** against 37% at 27B. Only 7% of streams
+  ever held a good rule. A judge cannot pick a good guess that is never made.
+- **With almost no good guesses, the pool depends on order.** The rules guessed from the misleading block at the
+  start stay among the best available. That is the 10-point order gap, against −2.2 at 27B. Order-freedom in the
+  judge does not make the whole system order-free when the guesser fails. Section 1 listed this risk: the guesser
+  cannot imagine the right explanation.
+
+**What tests 1 and 2 show together:**
+- The weak part is the language model as the writer of whole explanations. It patches, does not check itself, and
+  at 4B rarely produces anything consistent with what it was shown.
+- The code-side parts work: exact checking, tallies, and indifference to order when the guesses are good.
+- Exhaustive search over a small rule language reaches 99.4, so the evidence was always sufficient.
