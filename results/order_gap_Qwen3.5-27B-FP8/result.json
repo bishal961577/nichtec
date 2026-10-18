@@ -1,0 +1,1028 @@
+{
+ "model": "Qwen3.5-27B-FP8",
+ "rules": "standard",
+ "settings": {
+  "orders": [
+   "random1",
+   "random2",
+   "random3",
+   "decoy_first",
+   "decoy_last"
+  ],
+  "every": 5,
+  "window": 10,
+  "per_round": 4,
+  "sampling": {
+   "temperature": 0.8,
+   "top_p": 0.95,
+   "top_k": 50,
+   "max_new_tokens": 64
+  },
+  "good": 0.95,
+  "ceiling": 95,
+  "off_format": 0.1
+ },
+ "tasks": [
+  {
+   "id": "rule1_draw1",
+   "rule": "size >= 5 and color != 'red'",
+   "decoy": "shape in ('circle', 'square')",
+   "A": {
+    "random1": {
+     "test_acc": 80.0,
+     "test_acc_threshold0": 70.0,
+     "online_acc": 52.5,
+     "late_online_acc": 35.0
+    },
+    "random2": {
+     "test_acc": 75.0,
+     "test_acc_threshold0": 70.0,
+     "online_acc": 57.5,
+     "late_online_acc": 70.0
+    },
+    "random3": {
+     "test_acc": 75.0,
+     "test_acc_threshold0": 80.0,
+     "online_acc": 77.5,
+     "late_online_acc": 90.0
+    },
+    "decoy_first": {
+     "test_acc": 85.0,
+     "test_acc_threshold0": 72.5,
+     "online_acc": 55.0,
+     "late_online_acc": 60.0
+    },
+    "decoy_last": {
+     "test_acc": 85.0,
+     "test_acc_threshold0": 55.0,
+     "online_acc": 52.5,
+     "late_online_acc": 55.0
+    }
+   },
+   "B": {
+    "random1": {
+     "test_acc": 72.5,
+     "online_acc": 65.0,
+     "late_online_acc": 60.0,
+     "rule": "color in ['yellow', 'blue', 'green'] and shape != 'star' and size >= 6",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "random2": {
+     "test_acc": 72.5,
+     "online_acc": 62.5,
+     "late_online_acc": 65.0,
+     "rule": "size >= 5 and (color == 'blue' or color == 'yellow') and material != 'plastic'",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "random3": {
+     "test_acc": 52.5,
+     "online_acc": 60.0,
+     "late_online_acc": 75.0,
+     "rule": "material == 'metal' or size == 7",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "decoy_first": {
+     "test_acc": 95.0,
+     "online_acc": 70.0,
+     "late_online_acc": 80.0,
+     "rule": "size >= 5 and (color != 'yellow' or material != 'glass') and (color != 'red' or material != 'metal')",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "decoy_last": {
+     "test_acc": 85.0,
+     "online_acc": 72.5,
+     "late_online_acc": 85.0,
+     "rule": "size > 4 or (shape == 'star' and color == 'green')",
+     "rule_good": false,
+     "rule_decoy": false
+    }
+   },
+   "C": {
+    "random1": {
+     "test_acc": 62.5,
+     "online_acc": 67.5,
+     "late_online_acc": 60.0,
+     "rule": "color == 'yellow' or color == 'green'",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "random2": {
+     "test_acc": 47.5,
+     "online_acc": 55.0,
+     "late_online_acc": 60.0,
+     "rule": "material == 'metal' or (shape == 'circle' and material == 'plastic')",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "random3": {
+     "test_acc": 50.0,
+     "online_acc": 57.5,
+     "late_online_acc": 65.0,
+     "rule": "shape in ['square', 'triangle'] and material in ['metal', 'wood'] and size > 5 or (shape == 'triangle' and material == 'glass' and size == 7)",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "decoy_first": {
+     "test_acc": 60.0,
+     "online_acc": 70.0,
+     "late_online_acc": 80.0,
+     "rule": "shape == 'star' or shape == 'triangle' or (color == 'yellow' and shape == 'square' and size > 4) or (color == 'green' and shape == 'square' and size > 4)",
+     "rule_good": false,
+     "rule_decoy": false
+    },
+    "decoy_last": {
+     "test_acc": 62.5,
+     "online_acc": 65.0,
+     "late_online_acc": 70.0,
+     "rule": "color == 'green' or (size > 6 and color == 'yellow')",
+     "rule_good": false,
+     "rule_decoy": false
+    }
+   },
+   "streams": {
+    "random1": {
+     "proposals": 32,
+     "valid": 28,
+     "pool_size": 28,
+     "pool_has_good_rule": false,
+     "pool_has_decoy": false,
+     "rounds": {
+      "5": [
+       {
+        "reply": "shape == 'circle' and material == 'metal' and size > 1 and color == 'blue'",
+        "rule": "shape == 'circle' and material == 'metal' and size > 1 and color == 'blue'"
+       },
+       {
+        "reply": "shape == 'circle' and size > 5",
+        "rule": "shape == 'circle' and size > 5"
+       },
+       {
+        "reply": "shape == 'circle' and material == 'metal' and size > 5",
+        "rule": "shape == 'circle' and material == 'metal' and size > 5"
+       },
+       {
+        "reply": "shape == 'circle' and material == 'metal' and size == 6",
+        "rule": "shape == 'circle' and material == 'metal' and size == 6"
+       }
+      ],
+      "10": [
+       {
+        "reply": "(color == 'blue' and shape == 'circle' and material == 'metal' and size == 6) or (color == 'yellow' and shape == 'square' and material == 'wood' and size == 5)",
+        "rule": "(color == 'blue' and shape == 'circle' and material == 'metal' and size == 6) or (color == 'yellow' and shape == 'square' and material == 'wood' and size == 5)"
+       },
+       {
+        "reply": "shape == 'circle' and material == 'metal' and size > 4 or shape == 'square' and color == 'yellow' and material == 'wood'",
+        "rule": "shape == 'circle' and material == 'metal' and size > 4 or shape == 'square' and color == 'yellow' and material == 'wood'"
+       },
+       {
+        "reply": "shape == 'circle' and size == 6 and material == 'metal' or shape == 'square' and size == 5 and material == 'wood'",
+        "rule": "shape == 'circle' and size == 6 and material == 'metal' or shape == 'square' and size == 5 and material == 'wood'"
+       },
+       {
+        "reply": "shape == 'square' and size == 5 and color == 'yellow'",
+        "rule": "shape == 'square' and size == 5 and color == 'yellow'"
+       }
+      ],
+      "15": [
+       {
+        "reply": "(shape == 'square' and color == 'yellow') or (shape == 'triangle' and color == 'green') or (shape == 'square' and color == 'green' and material == 'glass')",
+        "rule": "(shape == 'square' and color == 'yellow') or (shape == 'triangle' and color == 'green') or (shape == 'square' and color == 'green' and material == 'glass')"
+       },
+       {
+        "reply": "(color == 'yellow' and shape == 'square' and material == 'wood') or (color == 'green' and shape == 'square' and size == 5 and material == 'glass') or (color == 'green' and shape == 'triangle' and size == 9 and material == 'metal",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'square' or (color == 'green' and shape == 'triangle')",
+        "rule": "shape == 'square' or (color == 'green' and shape == 'triangle')"
+       },
+       {
+        "reply": "shape == 'square' and material == 'wood' or shape == 'triangle' and material == 'metal' or shape == 'square' and material == 'glass' and color == 'green'",
+        "rule": "shape == 'square' and material == 'wood' or shape == 'triangle' and material == 'metal' or shape == 'square' and material == 'glass' and color == 'green'"
+       }
+      ],
+      "20": [
+       {
+        "reply": "shape == 'triangle' and size > 5 and material == 'metal' or color == 'green' and shape == 'square' and size == 5 and material == 'glass' or color == 'green' and shape == 'circle' and size == 7 and material == 'plastic'",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'triangle' or (shape == 'square' and color == 'green') or (shape == 'circle' and color == 'green')",
+        "rule": "shape == 'triangle' or (shape == 'square' and color == 'green') or (shape == 'circle' and color == 'green')"
+       },
+       {
+        "reply": "color == 'green' and shape in ('triangle', 'square', 'circle') and size >= 5 and material in ('metal', 'glass', 'plastic')",
+        "rule": "color == 'green' and shape in ('triangle', 'square', 'circle') and size >= 5 and material in ('metal', 'glass', 'plastic')"
+       },
+       {
+        "reply": "color == 'green' and shape != 'circle' and material == 'metal' and size > 5 or color == 'green' and shape == 'square' and material == 'glass' and size == 5 or color == 'green' and shape == 'circle' and material == 'plastic'",
+        "rule": null
+       }
+      ],
+      "25": [
+       {
+        "reply": "shape in ['triangle', 'circle'] or size > 5",
+        "rule": "shape in ['triangle', 'circle'] or size > 5"
+       },
+       {
+        "reply": "color == 'green' or color == 'yellow' or shape == 'triangle' or shape == 'square' or material == 'glass' or size > 5",
+        "rule": "color == 'green' or color == 'yellow' or shape == 'triangle' or shape == 'square' or material == 'glass' or size > 5"
+       },
+       {
+        "reply": "color == 'green' or color == 'yellow' or color == 'blue' and shape == 'triangle' or material == 'glass' and size > 4",
+        "rule": "color == 'green' or color == 'yellow' or color == 'blue' and shape == 'triangle' or material == 'glass' and size > 4"
+       },
+       {
+        "reply": "shape == 'triangle' or size == 6 or size == 7",
+        "rule": "shape == 'triangle' or size == 6 or size == 7"
+       }
+      ],
+      "30": [
+       {
+        "reply": "color in ['yellow', 'blue', 'green'] and shape != 'star' and size >= 6",
+        "rule": "color in ['yellow', 'blue', 'green'] and shape != 'star' and size >= 6"
+       },
+       {
+        "reply": "shape != 'star' and color != 'red' or (size > 5 and material != 'wood')",
+        "rule": "shape != 'star' and color != 'red' or (size > 5 and material != 'wood')"
+       },
+       {
+        "reply": "(shape == 'triangle' or shape == 'square' or shape == 'circle') and color != 'red' and size > 5",
+        "rule": "(shape == 'triangle' or shape == 'square' or shape == 'circle') and color != 'red' and size > 5"
+       },
+       {
+        "reply": "shape != 'star'",
+        "rule": "shape != 'star'"
+       }
+      ],
+      "35": [
+       {
+        "reply": "shape == 'circle' or shape == 'square' or shape == 'triangle' or material == 'metal'",
+        "rule": "shape == 'circle' or shape == 'square' or shape == 'triangle' or material == 'metal'"
+       },
+       {
+        "reply": "material == 'metal' or (material == 'wood' and color == 'yellow') or (material == 'glass' and color == 'yellow')",
+        "rule": "material == 'metal' or (material == 'wood' and color == 'yellow') or (material == 'glass' and color == 'yellow')"
+       },
+       {
+        "reply": "color == 'yellow' or color == 'green' or (color == 'blue' and shape == 'square' and material == 'metal') or (color == 'blue' and shape == 'square' and size == 8) or (color == 'blue' and shape == 'square' and material",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'triangle' or shape == 'square'",
+        "rule": "shape == 'circle' or shape == 'triangle' or shape == 'square'"
+       }
+      ],
+      "40": [
+       {
+        "reply": "color == 'yellow' or material == 'metal' or material == 'glass' or (color == 'green' and shape != 'star') or (shape == 'square' and size != 8)",
+        "rule": "color == 'yellow' or material == 'metal' or material == 'glass' or (color == 'green' and shape != 'star') or (shape == 'square' and size != 8)"
+       },
+       {
+        "reply": "color == 'yellow' or color == 'green'",
+        "rule": "color == 'yellow' or color == 'green'"
+       },
+       {
+        "reply": "color == 'yellow' or size > 4",
+        "rule": "color == 'yellow' or size > 4"
+       },
+       {
+        "reply": "color == 'yellow' or material == 'metal' or shape == 'square' or size > 4",
+        "rule": "color == 'yellow' or material == 'metal' or shape == 'square' or size > 4"
+       }
+      ]
+     }
+    },
+    "random2": {
+     "proposals": 32,
+     "valid": 29,
+     "pool_size": 28,
+     "pool_has_good_rule": false,
+     "pool_has_decoy": false,
+     "rounds": {
+      "5": [
+       {
+        "reply": "shape == 'circle' and material == 'metal'",
+        "rule": "shape == 'circle' and material == 'metal'"
+       },
+       {
+        "reply": "color == 'yellow' or shape == 'triangle'",
+        "rule": "color == 'yellow' or shape == 'triangle'"
+       },
+       {
+        "reply": "color == 'blue' and size % 2 == 0 or color == 'yellow' and shape != 'circle' or color == 'red' and size % 2 == 0",
+        "rule": "color == 'blue' and size % 2 == 0 or color == 'yellow' and shape != 'circle' or color == 'red' and size % 2 == 0"
+       },
+       {
+        "reply": "size >= 5 and (color == 'blue' or color == 'yellow') and material != 'plastic'",
+        "rule": "size >= 5 and (color == 'blue' or color == 'yellow') and material != 'plastic'"
+       }
+      ],
+      "10": [
+       {
+        "reply": "shape == 'circle' and color == 'blue' or shape == 'triangle' or shape == 'square' and material == 'glass'",
+        "rule": "shape == 'circle' and color == 'blue' or shape == 'triangle' or shape == 'square' and material == 'glass'"
+       },
+       {
+        "reply": "(size % 2 != 0) or (material == 'metal' and size % 2 == 0 and color in ['blue', 'green'])",
+        "rule": "(size % 2 != 0) or (material == 'metal' and size % 2 == 0 and color in ['blue', 'green'])"
+       },
+       {
+        "reply": "shape == 'triangle' or (shape == 'circle' and color == 'blue') or (shape == 'square' and color == 'green')",
+        "rule": "shape == 'triangle' or (shape == 'circle' and color == 'blue') or (shape == 'square' and color == 'green')"
+       },
+       {
+        "reply": "size % 2 == 0 and color != 'yellow' or shape == 'triangle'",
+        "rule": "size % 2 == 0 and color != 'yellow' or shape == 'triangle'"
+       }
+      ],
+      "15": [
+       {
+        "reply": "color in ('blue', 'green', 'yellow') and shape != 'square' or (color == 'blue' and shape == 'square' and size > 1) or (color == 'yellow' and shape == 'triangle') or (color == 'green' and shape == 'square' and size",
+        "rule": null
+       },
+       {
+        "reply": "color != 'red' and not (color == 'blue' and shape == 'square' and size == 1)",
+        "rule": "color != 'red' and not (color == 'blue' and shape == 'square' and size == 1)"
+       },
+       {
+        "reply": "color in ['green', 'blue', 'yellow'] and (shape in ['triangle', 'circle', 'star', 'square'] and size >= 5 or (shape == 'square' and size == 8)) and (not (color == 'blue' and shape == 'square' and size == ",
+        "rule": null
+       },
+       {
+        "reply": "color != 'red' and not (color == 'blue' and shape == 'square' and size < 8) and not (color == 'blue' and shape == 'star' and material == 'wood')",
+        "rule": "color != 'red' and not (color == 'blue' and shape == 'square' and size < 8) and not (color == 'blue' and shape == 'star' and material == 'wood')"
+       }
+      ],
+      "20": [
+       {
+        "reply": "(size % 2 == 1) or (color == 'blue' and shape == 'square') or (color == 'yellow' and shape == 'square' and size == 7)",
+        "rule": "(size % 2 == 1) or (color == 'blue' and shape == 'square') or (color == 'yellow' and shape == 'square' and size == 7)"
+       },
+       {
+        "reply": "(shape == 'star' and size % 2 == 1) or (shape != 'star' and material in ['metal', 'wood'] and size % 2 == 1)",
+        "rule": "(shape == 'star' and size % 2 == 1) or (shape != 'star' and material in ['metal', 'wood'] and size % 2 == 1)"
+       },
+       {
+        "reply": "size % 2 == 1",
+        "rule": "size % 2 == 1"
+       },
+       {
+        "reply": "size > 3 and size % 2 == 1",
+        "rule": "size > 3 and size % 2 == 1"
+       }
+      ],
+      "25": [
+       {
+        "reply": "shape == 'square' and size >= 5 or (shape == 'star' and size == 5 and material == 'plastic') or (shape == 'circle' and size == 7 and material == 'metal')",
+        "rule": "shape == 'square' and size >= 5 or (shape == 'star' and size == 5 and material == 'plastic') or (shape == 'circle' and size == 7 and material == 'metal')"
+       },
+       {
+        "reply": "size >= 5 and material == 'wood'",
+        "rule": "size >= 5 and material == 'wood'"
+       },
+       {
+        "reply": "shape == 'square' and material == 'wood' and size > 2 or color == 'green' and material != 'wood'",
+        "rule": "shape == 'square' and material == 'wood' and size > 2 or color == 'green' and material != 'wood'"
+       },
+       {
+        "reply": "shape == 'square' and material == 'wood' and size != 2",
+        "rule": "shape == 'square' and material == 'wood' and size != 2"
+       }
+      ],
+      "30": [
+       {
+        "reply": "shape == 'square' and color == 'yellow' and size > 2",
+        "rule": "shape == 'square' and color == 'yellow' and size > 2"
+       },
+       {
+        "reply": "(color == 'yellow' and shape == 'square') or (color == 'green' and shape == 'circle' and material == 'metal' and size == 7)",
+        "rule": "(color == 'yellow' and shape == 'square') or (color == 'green' and shape == 'circle' and material == 'metal' and size == 7)"
+       },
+       {
+        "reply": "shape == 'square' and color == 'yellow' and size > 2",
+        "rule": "shape == 'square' and color == 'yellow' and size > 2"
+       },
+       {
+        "reply": "shape == 'square' and color == 'yellow' and size > 4",
+        "rule": "shape == 'square' and color == 'yellow' and size > 4"
+       }
+      ],
+      "35": [
+       {
+        "reply": "shape == 'square' or (shape == 'triangle' and material == 'metal')",
+        "rule": "shape == 'square' or (shape == 'triangle' and material == 'metal')"
+       },
+       {
+        "reply": "shape in ('square', 'triangle') and size >= 6",
+        "rule": "shape in ('square', 'triangle') and size >= 6"
+       },
+       {
+        "reply": "shape in ['square', 'triangle'] and material == 'metal' and size > 2",
+        "rule": "shape in ['square', 'triangle'] and material == 'metal' and size > 2"
+       },
+       {
+        "reply": "shape == 'square' or (shape == 'triangle' and size == 6 and material == 'metal') or (shape == 'triangle' and size == 7 and material == 'metal')",
+        "rule": "shape == 'square' or (shape == 'triangle' and size == 6 and material == 'metal') or (shape == 'triangle' and size == 7 and material == 'metal')"
+       }
+      ],
+      "40": [
+       {
+        "reply": "shape == 'square' or shape == 'triangle' or material == 'metal'",
+        "rule": "shape == 'square' or shape == 'triangle' or material == 'metal'"
+       },
+       {
+        "reply": "size >= 6 and material == 'metal'",
+        "rule": "size >= 6 and material == 'metal'"
+       },
+       {
+        "reply": "(material == 'metal' and color in ['yellow', 'green']) or (material == 'plastic' and color == 'green') or (material == 'wood' and color == 'yellow' and size == 3) or (material == 'glass' and color == 'red' and shape == '",
+        "rule": null
+       },
+       {
+        "reply": "material == 'metal' or (shape == 'circle' and material == 'plastic')",
+        "rule": "material == 'metal' or (shape == 'circle' and material == 'plastic')"
+       }
+      ]
+     }
+    },
+    "random3": {
+     "proposals": 32,
+     "valid": 24,
+     "pool_size": 23,
+     "pool_has_good_rule": false,
+     "pool_has_decoy": true,
+     "rounds": {
+      "5": [
+       {
+        "reply": "shape == 'triangle' and material == 'metal'",
+        "rule": "shape == 'triangle' and material == 'metal'"
+       },
+       {
+        "reply": "color == 'yellow' or (color == 'green' and shape == 'triangle') or (color == 'blue' and shape == 'star') or (color == 'red' and shape == 'square') or (material == 'metal' and shape == 'triangle') or (material == 'plastic",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'triangle' and material == 'metal'",
+        "rule": "shape == 'triangle' and material == 'metal'"
+       },
+       {
+        "reply": "(material == 'metal' and color != 'blue') or (color == 'yellow' and shape == 'triangle') or (color == 'green' and shape == 'triangle')",
+        "rule": "(material == 'metal' and color != 'blue') or (color == 'yellow' and shape == 'triangle') or (color == 'green' and shape == 'triangle')"
+       }
+      ],
+      "10": [
+       {
+        "reply": "shape == 'triangle' or shape == 'circle' or shape == 'square'",
+        "rule": "shape == 'triangle' or shape == 'circle' or shape == 'square'"
+       },
+       {
+        "reply": "shape == 'triangle' and (material == 'metal' or color == 'green') or (shape == 'circle' and material == 'plastic') or (shape == 'square' and color == 'yellow') or (shape == 'star' and material == 'metal')",
+        "rule": null
+       },
+       {
+        "reply": "material == 'metal' or size == 7",
+        "rule": "material == 'metal' or size == 7"
+       },
+       {
+        "reply": "color == 'yellow' or shape == 'triangle' or material == 'plastic' or (size == 7 and material == 'wood') or (size == 7 and color == 'green') or (size == 7 and color == 'green' and material == 'plastic') or (color",
+        "rule": null
+       }
+      ],
+      "15": [
+       {
+        "reply": "(color == 'green' and shape == 'circle') or (color == 'yellow' and shape in ['square', 'star', 'triangle'] and size > 3) or (color == 'red' and shape == 'circle' and size < 9) or (color == 'blue' and shape",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'square' or shape == 'triangle' and size >= 5 or (color == 'yellow' and shape == 'star' and size >= 5) or (color == 'green' and shape == 'circle')",
+        "rule": "shape == 'circle' or shape == 'square' or shape == 'triangle' and size >= 5 or (color == 'yellow' and shape == 'star' and size >= 5) or (color == 'green' and shape == 'circle')"
+       },
+       {
+        "reply": "shape == 'circle' or (color == 'yellow' and shape in ('star', 'triangle')) or (color == 'green' and shape == 'circle') or (size == 7 and material in ('plastic', 'wood', 'metal')) or (size == 5 and material in ('metal",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'square' or shape == 'triangle' or (color == 'yellow' and material != 'wood' and size > 3) or (color == 'yellow' and shape == 'star' and size == 5)",
+        "rule": "shape == 'circle' or shape == 'square' or shape == 'triangle' or (color == 'yellow' and material != 'wood' and size > 3) or (color == 'yellow' and shape == 'star' and size == 5)"
+       }
+      ],
+      "20": [
+       {
+        "reply": "color in ['green', 'yellow'] and shape != 'triangle' or (color == 'yellow' and shape == 'triangle') or (color == 'green' and shape == 'circle' and material == 'metal') or (color == 'green' and shape == 'square' and material == 'glass",
+        "rule": null
+       },
+       {
+        "reply": "size % 2 == 1 and (color != 'red' or material != 'metal')",
+        "rule": "size % 2 == 1 and (color != 'red' or material != 'metal')"
+       },
+       {
+        "reply": "shape in ['circle', 'square'] and size >= 5",
+        "rule": "shape in ['circle', 'square'] and size >= 5"
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'square'",
+        "rule": "shape == 'circle' or shape == 'square'"
+       }
+      ],
+      "25": [
+       {
+        "reply": "(shape == 'square' and size >= 5) or (shape == 'circle' and size >= 6 and material == 'metal')",
+        "rule": "(shape == 'square' and size >= 5) or (shape == 'circle' and size >= 6 and material == 'metal')"
+       },
+       {
+        "reply": "size % 2 == 0 and material == 'metal' or (size % 2 == 1 and shape == 'square' and material == 'glass') or (size % 2 == 1 and shape == 'circle' and material == 'metal') or (size % 2 == 0",
+        "rule": null
+       },
+       {
+        "reply": "(shape == 'square' and size >= 5) or (material == 'metal' and shape == 'circle')",
+        "rule": "(shape == 'square' and size >= 5) or (material == 'metal' and shape == 'circle')"
+       },
+       {
+        "reply": "shape == 'square' or material == 'metal'",
+        "rule": "shape == 'square' or material == 'metal'"
+       }
+      ],
+      "30": [
+       {
+        "reply": "shape == 'circle' or shape == 'square' and size > 1 or shape == 'star' or shape == 'triangle' and size > 6 and material == 'metal' or color == 'yellow' and shape == 'square' and size == 5",
+        "rule": "shape == 'circle' or shape == 'square' and size > 1 or shape == 'star' or shape == 'triangle' and size > 6 and material == 'metal' or color == 'yellow' and shape == 'square' and size == 5"
+       },
+       {
+        "reply": "size % 2 == 0 or material == 'wood' or material == 'glass' or shape == 'circle' or color == 'yellow'",
+        "rule": "size % 2 == 0 or material == 'wood' or material == 'glass' or shape == 'circle' or color == 'yellow'"
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'square' or shape == 'star' or (shape == 'triangle' and color == 'yellow') or (shape == 'triangle' and color == 'green') or (shape == 'triangle' and material == 'wood')",
+        "rule": "shape == 'circle' or shape == 'square' or shape == 'star' or (shape == 'triangle' and color == 'yellow') or (shape == 'triangle' and color == 'green') or (shape == 'triangle' and material == 'wood')"
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'star' or (shape == 'square' and size >= 5)",
+        "rule": "shape == 'circle' or shape == 'star' or (shape == 'square' and size >= 5)"
+       }
+      ],
+      "35": [
+       {
+        "reply": "shape == 'square' or material == 'metal' or color == 'green' or color == 'yellow' or size > 1",
+        "rule": "shape == 'square' or material == 'metal' or color == 'green' or color == 'yellow' or size > 1"
+       },
+       {
+        "reply": "shape != 'square' or size > 1 or material != 'plastic'",
+        "rule": "shape != 'square' or size > 1 or material != 'plastic'"
+       },
+       {
+        "reply": "material == 'plastic' and size > 1 or material != 'plastic'",
+        "rule": "material == 'plastic' and size > 1 or material != 'plastic'"
+       },
+       {
+        "reply": "size % 2 == 0 or material == 'wood' or material == 'plastic' or shape == 'circle' or shape == 'star'",
+        "rule": "size % 2 == 0 or material == 'wood' or material == 'plastic' or shape == 'circle' or shape == 'star'"
+       }
+      ],
+      "40": [
+       {
+        "reply": "shape in ['square', 'triangle'] and material in ['metal', 'wood']",
+        "rule": "shape in ['square', 'triangle'] and material in ['metal', 'wood']"
+       },
+       {
+        "reply": "material == 'metal' or (shape == 'triangle' and material == 'wood')",
+        "rule": "material == 'metal' or (shape == 'triangle' and material == 'wood')"
+       },
+       {
+        "reply": "shape != 'star' and not (color == 'yellow' and shape == 'square' and size < 6) and not (color == 'red' and shape == 'star' and material == 'glass') and not (color == 'red' and shape == 'triangle' and material == 'pl",
+        "rule": null
+       },
+       {
+        "reply": "shape in ['square', 'triangle'] and material in ['metal', 'wood'] and size > 5 or (shape == 'triangle' and material == 'glass' and size == 7)",
+        "rule": "shape in ['square', 'triangle'] and material in ['metal', 'wood'] and size > 5 or (shape == 'triangle' and material == 'glass' and size == 7)"
+       }
+      ]
+     }
+    },
+    "decoy_first": {
+     "proposals": 32,
+     "valid": 27,
+     "pool_size": 25,
+     "pool_has_good_rule": false,
+     "pool_has_decoy": false,
+     "rounds": {
+      "5": [
+       {
+        "reply": "(color == 'green' and shape == 'circle' and material == 'metal') or (color == 'yellow' and shape == 'circle' and material == 'metal')",
+        "rule": "(color == 'green' and shape == 'circle' and material == 'metal') or (color == 'yellow' and shape == 'circle' and material == 'metal')"
+       },
+       {
+        "reply": "shape == 'circle' and material == 'metal'",
+        "rule": "shape == 'circle' and material == 'metal'"
+       },
+       {
+        "reply": "shape == 'circle' and material == 'metal' and size >= 7",
+        "rule": "shape == 'circle' and material == 'metal' and size >= 7"
+       },
+       {
+        "reply": "shape == 'circle' and material == 'metal' and size >= 7",
+        "rule": "shape == 'circle' and material == 'metal' and size >= 7"
+       }
+      ],
+      "10": [
+       {
+        "reply": "shape == 'circle' or (material == 'metal' and color != 'red')",
+        "rule": "shape == 'circle' or (material == 'metal' and color != 'red')"
+       },
+       {
+        "reply": "(material == 'metal' and color in ['green', 'yellow']) or (shape == 'square' and material == 'wood')",
+        "rule": "(material == 'metal' and color in ['green', 'yellow']) or (shape == 'square' and material == 'wood')"
+       },
+       {
+        "reply": "shape == 'circle' or (shape == 'square' and material == 'metal')",
+        "rule": "shape == 'circle' or (shape == 'square' and material == 'metal')"
+       },
+       {
+        "reply": "shape == 'circle' or material == 'metal' or (color == 'yellow' and shape == 'square' and material == 'wood')",
+        "rule": "shape == 'circle' or material == 'metal' or (color == 'yellow' and shape == 'square' and material == 'wood')"
+       }
+      ],
+      "15": [
+       {
+        "reply": "color == 'yellow' and shape == 'square' and size % 2 == 1",
+        "rule": "color == 'yellow' and shape == 'square' and size % 2 == 1"
+       },
+       {
+        "reply": "shape == 'square' and color == 'yellow' and size > 4",
+        "rule": "shape == 'square' and color == 'yellow' and size > 4"
+       },
+       {
+        "reply": "color == 'yellow' and shape == 'square' and size % 2 == 1",
+        "rule": "color == 'yellow' and shape == 'square' and size % 2 == 1"
+       },
+       {
+        "reply": "color == 'yellow' and shape == 'square'",
+        "rule": "color == 'yellow' and shape == 'square'"
+       }
+      ],
+      "20": [
+       {
+        "reply": "shape == 'circle' or material == 'metal' or material == 'plastic' or (color == 'yellow' and shape == 'square' and material == 'wood')",
+        "rule": "shape == 'circle' or material == 'metal' or material == 'plastic' or (color == 'yellow' and shape == 'square' and material == 'wood')"
+       },
+       {
+        "reply": "shape != 'square' and (shape != 'triangle' or material == 'metal') and (shape != 'star' or (color == 'green' and material == 'plastic')) and (shape == 'circle' or size > 4) and (color != 'red' or (shape != '",
+        "rule": null
+       },
+       {
+        "reply": "size >= 5 and (color != 'yellow' or material != 'glass') and (color != 'red' or material != 'metal')",
+        "rule": "size >= 5 and (color != 'yellow' or material != 'glass') and (color != 'red' or material != 'metal')"
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'triangle' or shape == 'star' or (shape == 'square' and size == 5)",
+        "rule": "shape == 'circle' or shape == 'triangle' or shape == 'star' or (shape == 'square' and size == 5)"
+       }
+      ],
+      "25": [
+       {
+        "reply": "color == 'green' or size > 3",
+        "rule": "color == 'green' or size > 3"
+       },
+       {
+        "reply": "color == 'green' or (shape == 'triangle' and size > 5)",
+        "rule": "color == 'green' or (shape == 'triangle' and size > 5)"
+       },
+       {
+        "reply": "color == 'green' or size >= 6",
+        "rule": "color == 'green' or size >= 6"
+       },
+       {
+        "reply": "color == 'green' or size > 4",
+        "rule": "color == 'green' or size > 4"
+       }
+      ],
+      "30": [
+       {
+        "reply": "size == 6 and material != 'glass' or (size != 6 and shape == 'triangle' and material == 'glass') or (size == 7 and (color == 'green' or (color == 'blue' and shape == 'triangle' and material == 'glass'))) or (size ==",
+        "rule": null
+       },
+       {
+        "reply": "size > 5 or (shape == 'triangle' and color == 'blue') or (shape == 'square' and size >= 8)",
+        "rule": "size > 5 or (shape == 'triangle' and color == 'blue') or (shape == 'square' and size >= 8)"
+       },
+       {
+        "reply": "size == 6 and color != 'red' or size == 7 or (size == 8 and material == 'metal') or (size == 1 and False) or (color == 'blue' and shape == 'triangle' and size == 7) or (color == 'blue' and shape",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'square' or size > 5 or color == 'blue'",
+        "rule": "shape == 'square' or size > 5 or color == 'blue'"
+       }
+      ],
+      "35": [
+       {
+        "reply": "shape == 'star' or (color == 'yellow' and size > 4) or (color == 'blue' and size > 4 and shape == 'square')",
+        "rule": "shape == 'star' or (color == 'yellow' and size > 4) or (color == 'blue' and size > 4 and shape == 'square')"
+       },
+       {
+        "reply": "material == 'metal' or material == 'glass'",
+        "rule": "material == 'metal' or material == 'glass'"
+       },
+       {
+        "reply": "shape in ['square', 'star', 'triangle'] and not (color == 'blue' and shape == 'square' and size <= 8) and not (color == 'red' and shape == 'triangle' and size == 4) and not (color == 'red' and shape == 'star",
+        "rule": null
+       },
+       {
+        "reply": "(size > 5) or (color == 'blue' and shape == 'triangle') or (color == 'yellow' and material == 'metal') or (color == 'yellow' and shape == 'square')",
+        "rule": "(size > 5) or (color == 'blue' and shape == 'triangle') or (color == 'yellow' and material == 'metal') or (color == 'yellow' and shape == 'square')"
+       }
+      ],
+      "40": [
+       {
+        "reply": "color == 'yellow' and shape in ['star', 'square', 'triangle']",
+        "rule": "color == 'yellow' and shape in ['star', 'square', 'triangle']"
+       },
+       {
+        "reply": "shape in ['square', 'triangle', 'star'] and color == 'yellow' and size >= 5 or (shape == 'square' and color == 'green' and size >= 5) or (shape == 'triangle' and color == 'yellow' and size >= 5) or (shape ==",
+        "rule": null
+       },
+       {
+        "reply": "color == 'yellow' or (shape == 'square' and size > 1 and material != 'plastic' and material != 'wood')",
+        "rule": "color == 'yellow' or (shape == 'square' and size > 1 and material != 'plastic' and material != 'wood')"
+       },
+       {
+        "reply": "shape == 'star' or shape == 'triangle' or (color == 'yellow' and shape == 'square' and size > 4) or (color == 'green' and shape == 'square' and size > 4)",
+        "rule": "shape == 'star' or shape == 'triangle' or (color == 'yellow' and shape == 'square' and size > 4) or (color == 'green' and shape == 'square' and size > 4)"
+       }
+      ]
+     }
+    },
+    "decoy_last": {
+     "proposals": 32,
+     "valid": 26,
+     "pool_size": 25,
+     "pool_has_good_rule": false,
+     "pool_has_decoy": false,
+     "rounds": {
+      "5": [
+       {
+        "reply": "shape == 'circle' or (shape == 'square' and size > 2) or (shape == 'triangle' and size < 5) or (material == 'wood' and color == 'yellow' and shape == 'square')",
+        "rule": "shape == 'circle' or (shape == 'square' and size > 2) or (shape == 'triangle' and size < 5) or (material == 'wood' and color == 'yellow' and shape == 'square')"
+       },
+       {
+        "reply": "shape == 'circle' or (material == 'wood' and color == 'yellow')",
+        "rule": "shape == 'circle' or (material == 'wood' and color == 'yellow')"
+       },
+       {
+        "reply": "size == 5 or size == 6 and material == 'wood' or size == 6 and material == 'metal' and color == 'blue'",
+        "rule": "size == 5 or size == 6 and material == 'wood' or size == 6 and material == 'metal' and color == 'blue'"
+       },
+       {
+        "reply": "material == 'wood' and shape == 'square'",
+        "rule": "material == 'wood' and shape == 'square'"
+       }
+      ],
+      "10": [
+       {
+        "reply": "shape in ['circle', 'star', 'triangle'] or (color == 'yellow' and material == 'wood') or (size >= 6 and material == 'metal') or (size == 5 and material == 'wood')",
+        "rule": "shape in ['circle', 'star', 'triangle'] or (color == 'yellow' and material == 'wood') or (size >= 6 and material == 'metal') or (size == 5 and material == 'wood')"
+       },
+       {
+        "reply": "size > 4 or (shape == 'star' and color == 'green')",
+        "rule": "size > 4 or (shape == 'star' and color == 'green')"
+       },
+       {
+        "reply": "shape == 'circle' or shape == 'star' or (shape == 'triangle' and material == 'metal') or (shape == 'square' and material == 'wood')",
+        "rule": "shape == 'circle' or shape == 'star' or (shape == 'triangle' and material == 'metal') or (shape == 'square' and material == 'wood')"
+       },
+       {
+        "reply": "size > 3 and size != 6 and material != 'glass'",
+        "rule": "size > 3 and size != 6 and material != 'glass'"
+       }
+      ],
+      "15": [
+       {
+        "reply": "color == 'green' or shape == 'triangle' or size == 9 or material == 'plastic'",
+        "rule": "color == 'green' or shape == 'triangle' or size == 9 or material == 'plastic'"
+       },
+       {
+        "reply": "shape == 'triangle' or (color == 'green' and material == 'metal') or (color == 'yellow' and material == 'wood') or (color == 'green' and shape == 'star' and material == 'plastic') or (color == 'green' and shape == 'square'",
+        "rule": null
+       },
+       {
+        "reply": "color == 'green' or shape == 'triangle' or shape == 'star' or shape == 'square' or (material == 'metal' and size > 1) or (material == 'plastic' and size > 1) or (material == 'wood' and size > 1)",
+        "rule": "color == 'green' or shape == 'triangle' or shape == 'star' or shape == 'square' or (material == 'metal' and size > 1) or (material == 'plastic' and size > 1) or (material == 'wood' and size > 1)"
+       },
+       {
+        "reply": "color == 'green' or shape == 'triangle'",
+        "rule": "color == 'green' or shape == 'triangle'"
+       }
+      ],
+      "20": [
+       {
+        "reply": "(shape == 'square' and size > 1) or (shape == 'triangle' and size > 5) or (shape == 'circle' and size > 6) or (shape == 'star' and size > 6) or (color == 'green' and shape != 'star' and",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'triangle' or (color == 'green' and size > 5) or (color == 'blue' and (shape == 'square' or size == 7))",
+        "rule": "shape == 'triangle' or (color == 'green' and size > 5) or (color == 'blue' and (shape == 'square' or size == 7))"
+       },
+       {
+        "reply": "size == 6 and color != 'red' or size == 7 or size == 8",
+        "rule": "size == 6 and color != 'red' or size == 7 or size == 8"
+       },
+       {
+        "reply": "size == 6 or (shape == 'triangle' and size != 6) or (color == 'blue' and shape == 'square') or (color == 'blue' and shape == 'triangle') or (color == 'green' and shape == 'circle') or (color == 'green' and",
+        "rule": null
+       }
+      ],
+      "25": [
+       {
+        "reply": "shape != 'square' or size > 1",
+        "rule": "shape != 'square' or size > 1"
+       },
+       {
+        "reply": "shape == 'star' and color != 'red' or shape == 'square' and size > 7 or shape == 'triangle' and size > 4 or material == 'metal' and color == 'yellow'",
+        "rule": "shape == 'star' and color != 'red' or shape == 'square' and size > 7 or shape == 'triangle' and size > 4 or material == 'metal' and color == 'yellow'"
+       },
+       {
+        "reply": "color == 'yellow' or (shape == 'star' and size > 5) or (shape == 'square' and size > 7) or (shape == 'triangle' and size == 7)",
+        "rule": "color == 'yellow' or (shape == 'star' and size > 5) or (shape == 'square' and size > 7) or (shape == 'triangle' and size == 7)"
+       },
+       {
+        "reply": "shape in ['circle', 'triangle', 'star'] and size > 2",
+        "rule": "shape in ['circle', 'triangle', 'star'] and size > 2"
+       }
+      ],
+      "30": [
+       {
+        "reply": "color == 'yellow' and shape != 'circle'",
+        "rule": "color == 'yellow' and shape != 'circle'"
+       },
+       {
+        "reply": "color == 'yellow' and size > 3",
+        "rule": "color == 'yellow' and size > 3"
+       },
+       {
+        "reply": "color == 'yellow' and shape != 'circle'",
+        "rule": "color == 'yellow' and shape != 'circle'"
+       },
+       {
+        "reply": "color == 'yellow' and shape in ['star', 'square', 'triangle'] and size in [5, 6, 7] and material in ['metal', 'glass', 'wood']",
+        "rule": "color == 'yellow' and shape in ['star', 'square', 'triangle'] and size in [5, 6, 7] and material in ['metal', 'glass', 'wood']"
+       }
+      ],
+      "35": [
+       {
+        "reply": "color == 'green' or (size > 6 and color == 'yellow')",
+        "rule": "color == 'green' or (size > 6 and color == 'yellow')"
+       },
+       {
+        "reply": "color == 'green' or (color == 'yellow' and size > 5) or (color == 'yellow' and size == 5 and shape == 'triangle') or (color == 'yellow' and shape == 'circle' and size == 9) or (color == 'green' and shape",
+        "rule": null
+       },
+       {
+        "reply": "color == 'green' or (color == 'yellow' and shape != 'square' and shape != 'circle' and shape != 'star' and size == 5 and material == 'glass') or (color == 'yellow' and shape == 'circle' and size == 9 and material == 'metal",
+        "rule": null
+       },
+       {
+        "reply": "color == 'green' or size >= 7",
+        "rule": "color == 'green' or size >= 7"
+       }
+      ],
+      "40": [
+       {
+        "reply": "shape == 'circle' or (material == 'metal' and size >= 7) or (material == 'wood' and shape == 'square' and size == 7)",
+        "rule": "shape == 'circle' or (material == 'metal' and size >= 7) or (material == 'wood' and shape == 'square' and size == 7)"
+       },
+       {
+        "reply": "material == 'metal' or (material == 'wood' and shape == 'square') or (material == 'wood' and shape == 'triangle' and size == 3) or (material == 'wood' and shape == 'star' and size == 3) or (material == 'wood' and",
+        "rule": null
+       },
+       {
+        "reply": "shape == 'circle' or (shape == 'square' and material != 'wood') or (shape == 'triangle' and material == 'metal') or (shape == 'star' and material == 'metal')",
+        "rule": "shape == 'circle' or (shape == 'square' and material != 'wood') or (shape == 'triangle' and material == 'metal') or (shape == 'star' and material == 'metal')"
+       },
+       {
+        "reply": "material == 'metal' or shape == 'circle' or shape == 'square'",
+        "rule": "material == 'metal' or shape == 'circle' or shape == 'square'"
+       }
+      ]
+     }
+    }
+   },
+   "A_zero_shot": {
+    "test_acc": 60.0,
+    "test_acc_threshold0": 50.0
+   },
+   "A_sorted": {
+    "test_acc": 85.0,
+    "test_acc_threshold0": 75.0
+   },
+   "A_calls": 480,
+   "A_off_format": 0
+  }
+ ],
+ "check": {
+  "served_models": [
+   "order-gap-27b"
+  ],
+  "model": "order-gap-27b",
+  "first_token": "no",
+  "answers_yes_no": true,
+  "margin": -1.5751565291707146,
+  "top_tokens": [
+   [
+    "no",
+    -0.208
+   ],
+   [
+    "yes",
+    -1.833
+   ],
+   [
+    "Yes",
+    -4.583
+   ],
+   [
+    "No",
+    -4.583
+   ],
+   [
+    "To",
+    -5.458
+   ],
+   [
+    "Let",
+    -6.958
+   ]
+  ],
+  "proposals": [
+   "shape == 'circle' and material == 'metal' and size > 5 or shape == 'square' and color == 'yellow' and material == 'wood' and size == 5",
+   "shape == 'circle' and material == 'metal' and size > 5 or shape == 'square' and color == 'yellow' and size == 5 and material == 'wood'"
+  ],
+  "parsed_rules": [
+   "shape == 'circle' and material == 'metal' and size > 5 or shape == 'square' and color == 'yellow' and material == 'wood' and size == 5",
+   "shape == 'circle' and material == 'metal' and size > 5 or shape == 'square' and color == 'yellow' and size == 5 and material == 'wood'"
+  ]
+ },
+ "summary": {
+  "A": {
+   "learning": 26.66666666666667,
+   "learning_se": NaN,
+   "random_acc": 76.66666666666667,
+   "decoy_first_acc": 85.0,
+   "decoy_last_acc": 85.0,
+   "gap_first": -8.333333333333329,
+   "gap_first_se": NaN,
+   "gap_last": -8.333333333333329,
+   "gap_last_se": NaN,
+   "order_gap": -8.333333333333329,
+   "random_spread": 5.0,
+   "online_acc": 62.5,
+   "late_online_acc": 65.0,
+   "random_acc_threshold0": 73.33333333333333
+  },
+  "B": {
+   "learning": 15.833333333333329,
+   "learning_se": NaN,
+   "random_acc": 65.83333333333333,
+   "decoy_first_acc": 95.0,
+   "decoy_last_acc": 85.0,
+   "gap_first": -29.16666666666667,
+   "gap_first_se": NaN,
+   "gap_last": -19.16666666666667,
+   "gap_last_se": NaN,
+   "order_gap": -19.16666666666667,
+   "random_spread": 20.0,
+   "online_acc": 62.5,
+   "late_online_acc": 66.66666666666667,
+   "final_rule_good_rate": 0.0,
+   "final_rule_decoy_rate": 0.0,
+   "decoy_first_rule_decoy_rate": 0.0
+  },
+  "C": {
+   "learning": 3.3333333333333357,
+   "learning_se": NaN,
+   "random_acc": 53.333333333333336,
+   "decoy_first_acc": 60.0,
+   "decoy_last_acc": 62.5,
+   "gap_first": -6.666666666666664,
+   "gap_first_se": NaN,
+   "gap_last": -9.166666666666664,
+   "gap_last_se": NaN,
+   "order_gap": -6.666666666666664,
+   "random_spread": 15.0,
+   "online_acc": 60.0,
+   "late_online_acc": 61.666666666666664,
+   "final_rule_good_rate": 0.0,
+   "final_rule_decoy_rate": 0.0,
+   "decoy_first_rule_decoy_rate": 0.0
+  },
+  "A_zero_shot_acc": 60.0,
+  "A_sorted_acc": 85.0,
+  "proposer_good_rate": 0.0,
+  "A_calls": 480,
+  "off_format_rate": 0.0,
+  "proposal_valid_rate": 0.8375
+ }
+}
