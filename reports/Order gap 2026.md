@@ -3,7 +3,8 @@
 This is the step after the CIFAR-10 stop. It tests one link: this repo's starting thesis (a learner whose result
 depends on the order experience arrives in learns badly) against the failures CL-Bench names in today's AI agents.
 They are "rigid in early, incorrect beliefs" and "misled by spurious correlations". Sections 1–6 were written and
-committed before any run.
+committed before any run. Section 7, also written before any run, moves the main test to two larger Qwen3.5 models
+on a GPU endpoint and adds two lines.
 
 **Bottom line, before the run:**
 - **Setup:** the same 40 experiences, five orders, three agent memories, one small model (Qwen2.5-1.5B-Instruct).
@@ -153,6 +154,59 @@ there.
 - Before the run starts, it checks that the cached history gives the same answer as one full prompt, and stops if
   not.
 - `--stub` checks the bookkeeping without a model.
+
+## 7. Amendment before any run (18 October 2026): two Qwen3.5 models on an endpoint
+
+Nothing had run when this section was written. Why the change:
+- The 1.5B model may be too weak to learn the rules or to propose them, so lines 1 and 2 could end the test
+  without saying anything about order.
+- The owner has GPU credit on Modal, where larger open models can be served.
+
+**Models:**
+- **Primary: Qwen/Qwen3.5-27B-FP8.** The route's stop or pass is decided by this model.
+- **Secondary: Qwen/Qwen3.5-4B.** Phone-sized. Its verdict is reported, not used for the route.
+- **Same family, two sizes,** so the comparison is about size, not about how the models were trained.
+- **The Qwen2.5-1.5B laptop run stays optional.** If it is run, it is reported as a third size.
+
+**How they run:**
+- Each model sits behind an OpenAI-compatible endpoint (vLLM or SGLang) on Modal and is called from the owner's
+  laptop, with thinking switched off on every request.
+- Command: `python brain/order_gap.py --base-url <endpoint>/v1 --model Qwen/Qwen3.5-27B-FP8`, with `--check` first.
+- Cost: Modal GPU time, estimated at a few dollars per model.
+
+**What changes in the measurement:**
+- **Agent A's yes-or-no score** comes from the top 20 log-probabilities of the first answer token instead of the full
+  vocabulary. A side missing from the top 20 counts as 1 below the lowest listed value.
+- **The cached-history check is replaced by a probe.** The model's first answer token must be yes or no, or the run
+  stops.
+- **Proposals** use the same sampling settings, with a fixed seed per request.
+- **Calls run in parallel.** Each prompt is the same text the local model sees, wrapped by the server's chat
+  template.
+- Everything else is unchanged: items, rules, orders, agents, measures, and lines 1–7.
+
+**New lines, for every model:**
+
+8. **A must answer the question.** If more than 10% of A's answers have neither yes nor no among their top 20
+   tokens, A is not measured, and lines 3 and 4 are not applied.
+9. **Too easy.** If A's random-order accuracy is 95 or more, these rules cannot show order damage, and lines 3 and 4
+   are not applied. The harder rule set below then runs automatically on the same model, and that model's verdict
+   comes from it. If A also scores 95 or more on the harder set, the result is inconclusive for that model. There is
+   no third set.
+
+**The harder rule set,** fixed now. Each rule has three conditions, and the decoy is a condition on the fourth
+attribute. Tasks, orders and the misleading block are built exactly as in section 3.
+
+| Hidden rule | Decoy |
+|---|---|
+| `size >= 4 and color != 'red' and material != 'glass'` | `shape in ('circle', 'square')` |
+| `(shape == 'circle' or material == 'metal') and size <= 7` | `color in ('blue', 'green')` |
+| `(color in ('blue', 'green') and size % 2 == 1) or material == 'wood'` | `shape in ('triangle', 'star')` |
+| `material != 'wood' and shape != 'star' and size > 2` | `color in ('red', 'yellow')` |
+| `(size > 3 and shape in ('square', 'triangle')) or color == 'green'` | `material in ('metal', 'plastic')` |
+| `color == 'yellow' or (size >= 6 and material in ('metal', 'glass'))` | `shape in ('circle', 'triangle')` |
+
+**Route decision.** It comes from the primary model. If the primary is inconclusive (line 1, 8 or 9), what to do
+next is the owner's decision. No new model or rule set is tried without a new pre-registration.
 
 ## Sources
 

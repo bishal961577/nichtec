@@ -9,6 +9,12 @@ that fits the last 10 cases better. Every agent is scored on a separate balanced
 
   python brain/order_gap.py              # laptop: Qwen2.5-1.5B-Instruct on the GPU
   python brain/order_gap.py --stub       # plumbing check, no model
+  python brain/order_gap.py --base-url https://...modal.run/v1 --model Qwen/Qwen3.5-27B-FP8 --check
+  python brain/order_gap.py --base-url https://...modal.run/v1 --model Qwen/Qwen3.5-27B-FP8
+                                         # a model behind an OpenAI-compatible endpoint (vLLM or SGLang); --check
+                                         # makes two calls and stops. Auth from ENDPOINT_TOKEN (Bearer) or
+                                         # MODAL_KEY + MODAL_SECRET. If A is at the ceiling (random-order accuracy
+                                         # >= 95), the harder rule set runs next on its own, as pre-registered.
 """
 import argparse
 import ast
@@ -20,7 +26,11 @@ import os
 import random
 import statistics
 import sys
+import threading
 import time
+import urllib.error
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ATTRS = {"color": ["red", "blue", "green", "yellow"], "shape": ["circle", "square", "triangle", "star"],
@@ -34,6 +44,16 @@ RULES = [  # (hidden rule, decoy: one condition on an attribute the hidden rule 
     ("size > 3 and shape in ('square', 'triangle')", "color in ('red', 'yellow')"),
     ("color == 'yellow' or size >= 7", "material in ('metal', 'plastic')"),
 ]
+RULES_HARD = [  # three conditions; run only if A is at the ceiling on RULES (section 7 of the pre-registration)
+    ("size >= 4 and color != 'red' and material != 'glass'", "shape in ('circle', 'square')"),
+    ("(shape == 'circle' or material == 'metal') and size <= 7", "color in ('blue', 'green')"),
+    ("(color in ('blue', 'green') and size % 2 == 1) or material == 'wood'", "shape in ('triangle', 'star')"),
+    ("material != 'wood' and shape != 'star' and size > 2", "color in ('red', 'yellow')"),
+    ("(size > 3 and shape in ('square', 'triangle')) or color == 'green'", "material in ('metal', 'plastic')"),
+    ("color == 'yellow' or (size >= 6 and material in ('metal', 'glass'))", "shape in ('circle', 'triangle')"),
+]
+CEILING = 95                                  # A's random-order accuracy at or above this: too easy to show order
+OFF_FORMAT = 0.10                             # more of A's answers than this outside yes/no: A is not measured
 DRAWS = 2
 ORDERS = ["random1", "random2", "random3", "decoy_first", "decoy_last"]
 RANDOM = ORDERS[:3]
@@ -108,11 +128,11 @@ def item_text(i):
     return f"color={d['color']}, shape={d['shape']}, size={d['size']}, material={d['material']}"
 
 
-def make_task(r, draw):
+def make_task(r, draw, rules=RULES, prefix="rule"):
     """One hidden rule with one draw of items. Stream: 10 'block' cases on which the decoy agrees with the rule
     (5 accepted, 5 rejected) and 30 others on which the decoy is right 14 times; 20 accepted in all.
     Test set: 40 other items, 20 accepted, the decoy right on exactly half. The five orders hold the same 40 cases."""
-    truth, decoy = RULES[r]
+    truth, decoy = rules[r]
     T, D = compile_rule(truth), compile_rule(decoy)
     rng = random.Random(1000 * r + draw)
     cells = {(t, d): [i for i in range(len(DOMAIN)) if T[i] == t and D[i] == d] for t in (True, False)
@@ -134,7 +154,7 @@ def make_task(r, draw):
         rng.shuffle(s)
         orders[k] = s
     orders["decoy_first"], orders["decoy_last"] = block + rest, rest + block
-    return {"id": f"rule{r + 1}_draw{draw + 1}", "rule": truth, "decoy": decoy, "T": T, "D": D, "block": block,
+    return {"id": f"{prefix}{r + 1}_draw{draw + 1}", "rule": truth, "decoy": decoy, "T": T, "D": D, "block": block,
             "test": test, "orders": orders}
 
 
@@ -217,6 +237,9 @@ class LLM:
                                       self.tok.eos_token_id, **SAMPLING)
         return [self.tok.decode(o[x.shape[1]:], skip_special_tokens=True) for o in out]
 
+    def propose_batch(self, prompts, n, seeds):
+        return [self.propose(p, n, s) for p, s in zip(prompts, seeds)]
+
 
 class Stub:
     """No model: random margins with a weak pull toward the hidden rule, and proposals drawn from the hidden rule,
@@ -239,6 +262,100 @@ class Stub:
                 "```python\nmaterial == 'glass'\n```", "The rule is about colour.", "len(color) > 3"]
         return [rng.choice(pool) for _ in range(n)]
 
+    def propose_batch(self, prompts, n, seeds):
+        return [self.propose(p, n, s) for p, s in zip(prompts, seeds)]
+
+
+def logsumexp(xs):
+    m = max(xs)
+    return m + math.log(sum(math.exp(x - m) for x in xs))
+
+
+class Endpoint:
+    """A model behind an OpenAI-compatible chat endpoint (vLLM or SGLang, e.g. on Modal), with thinking switched off.
+    Agent A's yes-no margin comes from the top-20 log-probabilities of the first answer token; a side missing from
+    the top 20 counts as 1 below the lowest listed. Calls run in parallel; each prompt is the same text the local
+    model sees, wrapped by the server's chat template."""
+
+    def __init__(self, base_url, model, workers):
+        self.base, self.workers = base_url.rstrip("/"), workers
+        self.headers = {"Content-Type": "application/json"}
+        if os.environ.get("ENDPOINT_TOKEN"):
+            self.headers["Authorization"] = "Bearer " + os.environ["ENDPOINT_TOKEN"]
+        if os.environ.get("MODAL_KEY") and os.environ.get("MODAL_SECRET"):
+            self.headers.update({"Modal-Key": os.environ["MODAL_KEY"], "Modal-Secret": os.environ["MODAL_SECRET"]})
+        self.lock, self.calls, self.off_format = threading.Lock(), 0, 0
+        try:
+            self.served = [m["id"] for m in self.request("GET", "/models")["data"]]
+        except (SystemExit, KeyError, TypeError):
+            self.served = [model]
+        self.model = model if model in self.served else self.served[0]
+
+    def request(self, method, path, body=None):
+        data = json.dumps(body).encode() if body is not None else None
+        for attempt in range(6):
+            try:
+                req = urllib.request.Request(self.base + path, data=data, headers=self.headers, method=method)
+                with urllib.request.urlopen(req, timeout=600) as r:
+                    return json.loads(r.read().decode("utf-8"))
+            except urllib.error.HTTPError as e:
+                if e.code not in (408, 429, 500, 502, 503, 504) or attempt == 5:
+                    raise SystemExit(f"endpoint {method} {path}: HTTP {e.code}: {e.read().decode('utf-8', 'replace')[:500]}")
+            except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+                if attempt == 5:
+                    raise SystemExit(f"endpoint {method} {path}: {e}")
+            time.sleep(2 ** attempt)
+
+    def chat(self, content, **kw):
+        body = {"model": self.model, "messages": [{"role": "user", "content": content}],
+                "chat_template_kwargs": {"enable_thinking": False}, **kw}
+        return self.request("POST", "/chat/completions", body)
+
+    def answer(self, content):
+        r = self.chat(content, max_tokens=1, temperature=0, logprobs=True, top_logprobs=20)
+        top = r["choices"][0]["logprobs"]["content"][0]["top_logprobs"]
+        lp = {"yes": [], "no": []}
+        for t in top:
+            w = t["token"].strip().lower()
+            if w in lp:
+                lp[w].append(t["logprob"])
+        floor = min(t["logprob"] for t in top) - 1.0
+        with self.lock:
+            self.calls += 1
+            self.off_format += not (lp["yes"] or lp["no"])
+        return logsumexp(lp["yes"] or [floor]) - logsumexp(lp["no"] or [floor]), top
+
+    def map(self, f, xs):
+        with ThreadPoolExecutor(self.workers) as ex:
+            return list(ex.map(f, xs))
+
+    def history(self, stream, test, T, online=True):
+        head = INTRO + "Past items and the inspector's decisions:\n"
+        prompts = [head + "".join(case_line(j, T) for j in stream[:k]) + query(i)
+                   for k, i in enumerate(stream)] if online else []
+        full = head + "".join(case_line(j, T) for j in stream)
+        prompts += [full + query(j) for j in test]
+        m = self.map(lambda p: self.answer(p)[0], prompts)
+        return m[:len(prompts) - len(test)], m[len(prompts) - len(test):]
+
+    def propose_batch(self, prompts, n, seeds):
+        def one(ps):
+            r = self.chat(ps[0], n=n, seed=ps[1], max_tokens=SAMPLING["max_new_tokens"], temperature=SAMPLING["temperature"],
+                          top_p=SAMPLING["top_p"], top_k=SAMPLING["top_k"])
+            return [c["message"].get("content") or "" for c in r["choices"]]
+        return self.map(one, list(zip(prompts, seeds)))
+
+    def check_cache(self, stream, test, T):
+        """Two probe calls: does the model answer yes or no as its first token, and does it write rules?"""
+        m, top = self.answer(INTRO + "Past items and the inspector's decisions:\n" +
+                             "".join(case_line(j, T) for j in stream[:10]) + query(test[0]))
+        replies = self.propose_batch([proposal_prompt(stream[:10], T)], 2, [1])[0]
+        first = top[0]["token"].strip().lower()
+        return {"served_models": self.served, "model": self.model, "first_token": top[0]["token"],
+                "answers_yes_no": first in ("yes", "no"), "margin": m,
+                "top_tokens": [(t["token"], round(t["logprob"], 3)) for t in top[:6]],
+                "proposals": replies, "parsed_rules": [extract_rule(r) for r in replies]}
+
 
 # ---------------------------------------------------------------- agents B (ledger) and C (revise)
 
@@ -251,11 +368,10 @@ def proposal_prompt(window, T):
 
 def proposals(llm, stream, T, seed):
     """Every 5 cases, PER_ROUND rules written from the last WINDOW cases. Shared by B and C."""
-    rounds = {}
-    for t in range(EVERY, len(stream) + 1, EVERY):
-        replies = llm.propose(proposal_prompt(stream[max(0, t - WINDOW):t], T), PER_ROUND, seed + t)
-        rounds[t] = [{"reply": r[:300], "rule": extract_rule(r)} for r in replies]
-    return rounds
+    ts = list(range(EVERY, len(stream) + 1, EVERY))
+    replies = llm.propose_batch([proposal_prompt(stream[max(0, t - WINDOW):t], T) for t in ts], PER_ROUND,
+                                [seed + t for t in ts])
+    return {t: [{"reply": r[:300], "rule": extract_rule(r)} for r in rs] for t, rs in zip(ts, replies)}
 
 
 def score(rule, items, T):
@@ -314,6 +430,7 @@ def zero_acc(margins, items, T):
 def run_task(llm, task, k, log):
     T, test = task["T"], task["test"]
     res = {"id": task["id"], "rule": task["rule"], "decoy": task["decoy"], "A": {}, "B": {}, "C": {}, "streams": {}}
+    calls0, off0 = getattr(llm, "calls", 0), getattr(llm, "off_format", 0)
     _, held = llm.history([], test, T, online=False)
     res["A_zero_shot"] = {"test_acc": median_acc(held, test, T), "test_acc_threshold0": zero_acc(held, test, T)}
     _, held = llm.history(sorted(task["orders"]["random1"], key=item_text), test, T, online=False)
@@ -343,6 +460,7 @@ def run_task(llm, task, k, log):
             f"C {res['C'][o]['test_acc']:5.1f}  valid {res['streams'][o]['valid']}/{len(all_p)}  "
             f"good-in-pool {res['streams'][o]['pool_has_good_rule']}  B rule: {res['B'][o]['rule']}  "
             f"({time.time() - t0:.0f}s)")
+    res["A_calls"], res["A_off_format"] = getattr(llm, "calls", 0) - calls0, getattr(llm, "off_format", 0) - off0
     return res
 
 
@@ -377,6 +495,8 @@ def summarise(tasks):
     S["A_sorted_acc"] = mean([t["A_sorted"]["test_acc"] for t in tasks])
     streams = [s for t in tasks for s in t["streams"].values()]
     S["proposer_good_rate"] = mean([s["pool_has_good_rule"] for s in streams])
+    S["A_calls"] = sum(t.get("A_calls", 0) for t in tasks)
+    S["off_format_rate"] = sum(t.get("A_off_format", 0) for t in tasks) / max(1, S["A_calls"])
     S["proposal_valid_rate"] = sum(s["valid"] for s in streams) / max(1, sum(s["proposals"] for s in streams))
     for a in "BC":
         S[a]["final_rule_good_rate"] = mean([t[a][o]["rule_good"] for t in tasks for o in ORDERS])
@@ -385,15 +505,25 @@ def summarise(tasks):
     return S
 
 
-def verdict(S):
+def verdict(S, hard=False):
     A, B, C = S["A"], S["B"], S["C"]
-    v1, v2 = A["learning"] >= 5, S["proposer_good_rate"] >= 0.25
+    measured = S.get("off_format_rate", 0.0) <= OFF_FORMAT
+    v1, v2 = measured and A["learning"] >= 5, S["proposer_good_rate"] >= 0.25
     out = [f"Check A learns (learning >= 5): {'yes' if v1 else 'no'} ({A['learning']:.1f}).",
            f"Check the proposer (good rule in >= 25% of streams): {'yes' if v2 else 'no'} "
            f"({100 * S['proposer_good_rate']:.0f}%)."]
-    if not v1:
+    if not measured:
+        out.append(f"INCONCLUSIVE for A: {100 * S['off_format_rate']:.0f}% of A's answers were neither yes nor no "
+                   f"(line: at most {100 * OFF_FORMAT:.0f}%), so A is not measured and the stop and pass lines are not "
+                   "applied.")
+    elif not v1:
         out.append("INCONCLUSIVE for A: A does not learn at this scale, so its order gap means nothing and the stop "
                    "and pass lines are not applied.")
+    elif A["random_acc"] >= CEILING:
+        out.append(f"TOO EASY: A scores {A['random_acc']:.1f} >= {CEILING} on random orders, so these rules cannot show "
+                   "order damage and the stop and pass lines are not applied. "
+                   + ("Inconclusive for this model even with the harder rules." if hard else
+                      "The harder rule set runs next, as pre-registered."))
     elif A["order_gap"] < 5:
         out.append(f"STOP: A's order gap is {A['order_gap']:.1f} < 5. Order is not what holds back a full-history "
                    "agent here; the route ends.")
@@ -423,7 +553,8 @@ def verdict(S):
 def write(out_dir, R, done, total):
     tasks = R["tasks"]
     L = ["# Order gap: does the order of experience change what an agent learns?", "",
-         f"Model {R['model']}, {done} of {total} tasks done. Pre-registration: reports/Order gap 2026.md.", ""]
+         f"Model {R['model']}, {R['rules']} rules, {done} of {total} tasks done. Pre-registration: "
+         "reports/Order gap 2026.md.", ""]
     if tasks:
         S = summarise(tasks)
         R["summary"] = S
@@ -440,6 +571,8 @@ def write(out_dir, R, done, total):
                      f"{s['random_spread']:.1f} | {s['late_online_acc']:.1f} |")
         L += ["", f"A with no history: {S['A_zero_shot_acc']:.1f}. A with the history sorted: {S['A_sorted_acc']:.1f}. "
               f"A at threshold zero instead of the median, random orders: {S['A']['random_acc_threshold0']:.1f}.",
+              (f"A's answers that were neither yes nor no: {100 * S['off_format_rate']:.1f}% of {S['A_calls']:,} "
+               "calls. " if S["A_calls"] else "") +
               f"Proposals that are valid rules: {100 * S['proposal_valid_rate']:.0f}%. Streams whose proposals include "
               f"a good rule: {100 * S['proposer_good_rate']:.0f}%.",
               f"Final rule good / decoy: B {100 * S['B']['final_rule_good_rate']:.0f}% / "
@@ -454,9 +587,8 @@ def write(out_dir, R, done, total):
                      for a in "ABC"]
             L.append(f"| {t['id']} | `{t['rule']}` | " + " | ".join(cells) + " |")
         L += ["", "## Verdict" + ("" if done == total else " (provisional: not all tasks done)"), ""]
-        L += [f"- {v}" for v in verdict(S)]
-        if "cache_check" in R:
-            L += ["", f"Cache check: {R['cache_check']}"]
+        L += [f"- {v}" for v in verdict(S, R["rules"] == "hard")]
+        L += ["", f"Check before the run: {R['check']}"]
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "result.json"), "w", encoding="utf-8") as f:
         json.dump(R, f, indent=1, ensure_ascii=True)
@@ -465,10 +597,41 @@ def write(out_dir, R, done, total):
     return L
 
 
+def run_set(llm, tag, rules_name, args, log):
+    rules, prefix = (RULES, "rule") if rules_name == "standard" else (RULES_HARD, "hard")
+    suffix = "" if rules_name == "standard" else "_hard"
+    out = (args.out + suffix) if args.out else os.path.join(ROOT, "results", f"order_gap_{tag}{suffix}")
+    tasks = [make_task(r, d, rules, prefix) for r in range(len(rules)) for d in range(DRAWS)][:args.tasks]
+    R = {"model": tag, "rules": rules_name, "settings": {"orders": ORDERS, "every": EVERY, "window": WINDOW,
+         "per_round": PER_ROUND, "sampling": SAMPLING, "good": GOOD, "ceiling": CEILING, "off_format": OFF_FORMAT},
+         "tasks": []}
+    t = tasks[0]
+    R["check"] = c = llm.check_cache(t["orders"]["random1"], t["test"], t["T"])
+    log(f"check: {json.dumps(c, ensure_ascii=True)}")
+    if c.get("same_tokens") and abs(c["margin_full"] - c["margin_cached"]) > 0.2:
+        raise SystemExit("the cached history gives a different answer from the full prompt: stopping")
+    if c.get("answers_yes_no") is False:
+        raise SystemExit("the model's first answer token is not yes or no (is thinking still on?): stopping")
+    if args.check:
+        raise SystemExit("check done; no run")
+    t0 = time.time()
+    for k, task in enumerate(tasks):
+        R["tasks"].append(run_task(llm, task, k, log))
+        write(out, R, k + 1, len(tasks))
+        log(f"task {k + 1}/{len(tasks)} done, {(time.time() - t0) / 60:.1f} min")
+    log("\n".join(write(out, R, len(tasks), len(tasks))))
+    log(f"wrote {out}")
+    return R["summary"]
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="Qwen/Qwen2.5-1.5B-Instruct")
     p.add_argument("--device", default=None)
+    p.add_argument("--base-url", default=None, help="OpenAI-compatible endpoint, e.g. https://...modal.run/v1")
+    p.add_argument("--workers", type=int, default=16, help="parallel endpoint calls")
+    p.add_argument("--check", action="store_true", help="probe the model and stop")
+    p.add_argument("--rules", choices=["standard", "hard"], default="standard")
     p.add_argument("--tasks", type=int, default=len(RULES) * DRAWS, help="fewer tasks, for debugging only")
     p.add_argument("--stub", action="store_true")
     p.add_argument("--out", default=None)
@@ -481,27 +644,19 @@ def main():
 
     if args.stub:
         llm, tag = Stub(), "stub"
+    elif args.base_url:
+        llm, tag = Endpoint(args.base_url, args.model, args.workers), args.model.split("/")[-1]
+        log(f"endpoint {args.base_url}, serving {llm.served}; using {llm.model}")
     else:
         import torch
         dev = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
         log(f"loading {args.model} on {dev}")
         llm, tag = LLM(args.model, dev), args.model.split("/")[-1]
-    out = args.out or os.path.join(ROOT, "results", f"order_gap_{tag}")
-    tasks = [make_task(r, d) for r in range(len(RULES)) for d in range(DRAWS)][:args.tasks]
-    R = {"model": tag, "settings": {"orders": ORDERS, "every": EVERY, "window": WINDOW, "per_round": PER_ROUND,
-                                    "sampling": SAMPLING, "good": GOOD}, "tasks": []}
-    t = tasks[0]
-    R["cache_check"] = c = llm.check_cache(t["orders"]["random1"], t["test"], t["T"])
-    log(f"cache check: {c}")
-    if c["same_tokens"] and abs(c["margin_full"] - c["margin_cached"]) > 0.2:
-        raise SystemExit("the cached history gives a different answer from the full prompt: stopping")
-    t0 = time.time()
-    for k, task in enumerate(tasks):
-        R["tasks"].append(run_task(llm, task, k, log))
-        write(out, R, k + 1, len(tasks))
-        log(f"task {k + 1}/{len(tasks)} done, {(time.time() - t0) / 60:.1f} min")
-    log("\n".join(write(out, R, len(tasks), len(tasks))))
-    log(f"wrote {out}")
+    S = run_set(llm, tag, args.rules, args, log)
+    if (args.rules == "standard" and args.tasks == len(RULES) * DRAWS and S.get("off_format_rate", 0) <= OFF_FORMAT
+            and S["A"]["learning"] >= 5 and S["A"]["random_acc"] >= CEILING):
+        log("A is at the ceiling on the standard rules: running the harder rules, as pre-registered")
+        run_set(llm, tag, "hard", args, log)
 
 
 if __name__ == "__main__":
