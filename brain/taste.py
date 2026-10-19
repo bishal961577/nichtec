@@ -366,7 +366,7 @@ def run_model(llm, tag, movies, users, refs, args, log):
         if os.path.exists(GEN_CACHE["path"]):
             GEN_CACHE["m"] = json.load(open(GEN_CACHE["path"], encoding="utf-8"))
     R = {"model": tag, "users": len(users), "settings": {"stream": STREAM, "test": TEST, "Cs": CS, "max_q": MAX_Q,
-         "name_samples": NAME_SAMPLES, "gen": GEN, "batch": args.batch}}
+         "name_samples": NAME_SAMPLES, "gen": GEN, "batch": args.batch, "no_e": args.no_e}}
     u0 = users[0]
     margin, top = llm.answer(read_prompt(movies, u0["test"][0][0], "Is it a comedy?"))
     qs0 = parse_questions(generate(llm, e_prompt(movies, u0), NAME_SAMPLES, 1, 300, **GEN))
@@ -388,7 +388,7 @@ def run_model(llm, tag, movies, users, refs, args, log):
     A = Answers(llm, cache, batch=args.batch)
     hist = A.get([a_prompt(movies, u, m) for u in users for m, _ in u["test"]], log, "A, history")
     judged = A.get([judge_prompt(movies, d, m) for u, d in zip(users, descs) for m, _ in u["test"]], log, "W, judging")
-    read = A.get([read_prompt(movies, m, q) for u, qs in zip(users, names) for q in qs
+    read = {} if args.no_e else A.get([read_prompt(movies, m, q) for u, qs in zip(users, names) for q in qs
                   for m, _ in u["stream"] + u["test"]], log, "E, reading named questions")
     per = []
     for i, (u, d, qs) in enumerate(zip(users, descs, names)):
@@ -396,6 +396,12 @@ def run_model(llm, tag, movies, users, refs, args, log):
         rec = {"user": u["user"], "description": d[:600], "questions": qs}
         rec["A"] = auc([hist[a_prompt(movies, u, m)] for m, _ in u["test"]], yt)
         rec["W"] = auc([judged[judge_prompt(movies, d, m)] for m, _ in u["test"]], yt)
+        if args.no_e:
+            rec["E"], rec["E_C"], rec["E_weights"] = None, None, {}
+            for k in ("genres", "popularity", "cf"):
+                rec[k] = refs[k][i]
+            per.append(rec)
+            continue
         Xs = [[read[read_prompt(movies, m, q)] > 0 for q in qs] for m, _ in u["stream"]]
         Xt = [[read[read_prompt(movies, m, q)] > 0 for q in qs] for m, _ in u["test"]]
         sc, coef, C = fit_l1(Xs, [y for _, y in u["stream"]], Xt)
@@ -413,8 +419,15 @@ def run_model(llm, tag, movies, users, refs, args, log):
 
 def summarise(R):
     P = R["per_user"]
-    S = {k: float(np.mean([p[k] for p in P])) for k in ("A", "W", "E", "genres", "popularity", "cf")}
+    has_e = all(p["E"] is not None for p in P)
+    S = {k: float(np.mean([p[k] for p in P])) for k in ("A", "W", "genres", "popularity", "cf")}
+    S["E"] = float(np.mean([p["E"] for p in P])) if has_e else None
     S["off_format_rate"] = R["calls"]["off_format"] / max(1, R["calls"]["answers"])
+    S["W-A"] = boot([p["W"] - p["A"] for p in P])
+    S["A-popularity"] = boot([p["A"] - p["popularity"] for p in P])
+    if not has_e:
+        S["top_weighted_questions"] = []
+        return S
     for a, b in (("E", "A"), ("E", "W"), ("E", "genres"), ("E", "popularity")):
         S[f"{a}-{b}"] = boot([p[a] - p[b] for p in P])
     S["better_of_A_W"] = "A" if S["A"] >= S["W"] else "W"
@@ -431,6 +444,8 @@ def verdict(S):
            f"{'ok' if S['cf'] >= 0.60 else 'FAILED'}."]
     if S["off_format_rate"] > 0.10 or S["cf"] < 0.60:
         return out + ["INCONCLUSIVE: a check failed."]
+    if S["E"] is None:
+        return out + ["Test 1's line is not applied on this model: agent E was not run here (see the report)."]
     ea, ew, eb = S["E-A"], S["E-W"], S["E-best"]
     if ea[0] >= 0.03 and ea[1] > 0 and ew[0] >= 0.03 and ew[1] > 0:
         out.append(f"PASS: E beats A by {ea[0]:+.3f} [{ea[1]:+.3f}, {ea[2]:+.3f}] and W by {ew[0]:+.3f} "
@@ -451,13 +466,15 @@ def write(out, R, log):
          f"AUC over {R['users']} MovieLens-1M users (80 ratings learned, next 40 tested). 0.5 = guessing.", "",
          "| Agent | Mean AUC |", "|---|---|",
          f"| A, history in the prompt | {S['A']:.3f} |", f"| W, taste written in words | {S['W']:.3f} |",
-         f"| **E, model names questions, code learns the person** | **{S['E']:.3f}** |",
+         (f"| **E, model names questions, code learns the person** | **{S['E']:.3f}** |" if S["E"] is not None else
+          "| E, model names questions, code learns the person | not run on this model |"),
          f"| Genres + decades, same learner (no model) | {S['genres']:.3f} |",
          f"| Popularity before the test window (not personal) | {S['popularity']:.3f} |",
          f"| Collaborative filtering, everyone's data (reference) | {S['cf']:.3f} |", "",
          "Paired differences, mean [95% bootstrap interval over people]:",
-         f"- E - A: {f3(S['E-A'])}", f"- E - W: {f3(S['E-W'])}", f"- E - genres: {f3(S['E-genres'])}",
-         f"- E - popularity: {f3(S['E-popularity'])}", "",
+         f"- W - A: {f3(S['W-A'])}", f"- A - popularity: {f3(S['A-popularity'])}"] + (
+        [f"- E - A: {f3(S['E-A'])}", f"- E - W: {f3(S['E-W'])}", f"- E - genres: {f3(S['E-genres'])}",
+         f"- E - popularity: {f3(S['E-popularity'])}"] if S["E"] is not None else []) + ["",
          f"Answer calls: {R['calls']['answers']:,}; neither yes nor no: {100 * S['off_format_rate']:.1f}%; "
          f"{R['calls']['minutes']} min.",
          "Questions most often given weight: " + "; ".join(f"{q} ({n})" for q, n in S["top_weighted_questions"]),
@@ -504,6 +521,7 @@ def main():
     p.add_argument("--check", action="store_true")
     p.add_argument("--stub", action="store_true")
     p.add_argument("--refs", action="store_true", help="compute and save the references only")
+    p.add_argument("--no-e", action="store_true", help="skip agent E (report A and W only)")
     p.add_argument("--out", default=None)
     args = p.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
