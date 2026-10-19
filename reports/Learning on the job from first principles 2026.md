@@ -394,3 +394,56 @@ each dedicated endpoint, and a few dollars in all. No forecast is made.
 - Its limits are the model's yes-or-no knowledge of single traits and its habit of naming near-synonyms.
 - At 27B the margin over plain history reading is real but small: +3.1, inside the in-between band.
 - Test 2 (4B) runs next, as pre-registered. That is where splitting matters most for a phone.
+
+## 9. Ingredients test 2 result (Qwen3.5-4B, 19 October 2026): pass
+
+**How it ran:**
+- From this session against a dedicated Modal endpoint, in 7.9 minutes, with 16,582 answer calls.
+- The 4B model starts its answers to the history prompt with "Based…", so the code's own probe, which is not a
+  pre-registered line, was moved to a trait-reading question before the run (commit "Add --probe-reading").
+- Pre-registered check 3 governs A's answers. It passed: 0.0% of answers had neither yes nor no in the top 20.
+- The raw data are in `results/ingredients_Qwen3.5-4B/`.
+
+| Agent (4B unless marked) | Test accuracy (20 tasks) |
+|---|---|
+| A, full history | 59.0 ± 2.2 |
+| W, whole rule in words, judged by code | 73.6 ± 2.3 |
+| **E, model names traits, code combines** | **87.4 ± 2.1** |
+| E with the 12 true questions (reference) | 88.9 ± 1.5 |
+| 27B A, full history (test 1, the line) | 86.2 ± 1.5 |
+| 27B E (test 1) | 89.4 ± 1.7 |
+
+**Checks:** all passed. The oracle scored 99.2, reading accuracy was 94.0%, and no answer fell outside yes or no.
+
+**Line:**
+- Pass needed 4B-E to be at least 27B-A. **4B-E is 87.4, against 86.2: pass.**
+- Paired, the difference is +1.1 ± 1.9 (10 wins, 7 losses). That is "matches", not "beats". The pre-registered
+  line was "at least as good as", and it was met.
+
+**Within the 4B model, splitting the jobs is the whole difference:**
+- **E against A: +28.4 ± 2.6, winning all 20 tasks.** The small model reading its history is close to chance.
+- **E against W: +13.8 ± 2.7** (16 wins, 3 losses).
+- Naming costs only 1.5 points (E with the true questions 88.9, against E 87.4).
+- 4B-E is 2.0 ± 1.6 below 27B-E.
+
+**What it means:**
+- A phone-sized model that cannot learn these rules from its history (59%) learns them as well as a model about
+  seven times larger reading its history (87–86%). The change is not more knowledge. It is a division of labour: the
+  model names and reads single traits, which it can do, and code combines and checks, which the model cannot.
+- This is the first result in the project that supports the owner's idea: a small model with good learning habits
+  matching a large model without them.
+
+**Limits:**
+- One task family (animals).
+- Rules of two traits.
+- Traits the model already knows.
+- Labels that are exact.
+- A 40-case stream.
+- Not yet open-ended work, fuzzy lessons, a changing world, or lessons moved into the weights ("sleep").
+- 4B-A's 59.0 may be held down by the model's habit of starting with "Based…". That does not affect the line,
+  which compares with 27B-A.
+
+**Status of the redesign:**
+- Test 1 (27B) was in between: E beat A by 3.1, against a 5-point pass line.
+- Test 2 (4B) passed.
+- What comes next is the owner's decision. Anything further gets its own pre-registration.
