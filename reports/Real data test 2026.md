@@ -208,3 +208,49 @@ matches a model about seven times larger.
 - The toy results (the ingredients test) did not survive real data at scale.
 - The diagnosis in section 7 stands: on real tastes the shared part (what most people like) is larger than the
   personal part, and no agent tested here starts from it.
+
+## 9. Next test: a shared starting point plus a personal difference (pre-registered 19 October 2026)
+
+Written and committed before any computation. It uses only answers already saved from the runs above, so it needs no
+model calls.
+
+**First principles:**
+- Section 8 showed two things. Liking a movie is mostly shared: popularity alone scored 0.679. And no agent that
+  learned a person from scratch beat that.
+- A learner with 80 examples should start from what is generally true and learn only how this person differs.
+- On a phone, the shared part can be a public list shipped with the app, such as which movies people generally like.
+  It needs no one else's personal data on the device. The personal part is learned on the device.
+
+**The question:** does learning the person on top of the shared list beat the shared list alone?
+
+**Agents** (the same 300 people, 80 ratings, the next 40 tested, and per-person AUC):
+- **P, the shared list:** the popularity score from section 3. Its mean AUC was 0.679. It is the starting point.
+- **P+E (4B):**
+  - The same L1 logistic regression as E, with the same strength grid and cross-validation (seed 0).
+  - Its inputs are the 4B model's saved yes-or-no answers to its own questions, plus the popularity score
+    standardised within the person's 120 movies.
+  - Popularity is known at the start of the test window, so no test rating is used.
+- **P+A (4B) and P+A (27B):** for each test movie, the average of its popularity rank and its rank by A's saved
+  yes-or-no margin, weighted equally. Nothing is fitted. A was only asked about test movies, so no weight can be
+  learned from the 80.
+- **P+W (4B) and P+W (27B):** the same, with W's margin.
+- **P+genres (no model):** the same learner as P+E, on the genre and decade tags plus popularity. It shows whether the
+  model's questions add anything beyond the dataset's own tags once the shared list is there.
+
+**Sanity check (stops the test if it fails):** rebuilding E from the saved answers must reproduce the 4B run's E for
+every person, within 0.001 AUC.
+
+**Lines:**
+- **Main (P+E against P):**
+  - **Pass:** P+E is at least 0.02 above P, with the 95% interval above 0. On-device personal learning then adds
+    something real to a shared starting point.
+  - **Stop:** the interval includes 0 or lies below it. From 80 ratings, the personal part learnt this way adds
+    nothing.
+  - In between otherwise.
+- **Secondary, the same thresholds, each reported as pass, stop or in between:** P+A (4B), P+A (27B).
+- **Reported without lines:**
+  - P+W on both models;
+  - P+genres;
+  - P+E against P+genres;
+  - each against collaborative filtering (0.740, everyone's data).
+- Intervals are paired by person, from 10,000 bootstrap resamples (seed 0).
