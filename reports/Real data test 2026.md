@@ -254,3 +254,53 @@ every person, within 0.001 AUC.
   - P+E against P+genres;
   - each against collaborative filtering (0.740, everyone's data).
 - Intervals are paired by person, from 10,000 bootstrap resamples (seed 0).
+
+## 10. Result of the shared-list test (19 October 2026): stop
+
+Computed with `brain/prior.py` from saved answers, with no model calls. **Sanity check passed:** E rebuilt from the
+saved answers matched the 4B run for all 300 people, within 0.001. The raw data are in `results/prior_test/`.
+
+| Agent | Mean AUC | Minus P [95% interval] |
+|---|---|---|
+| P, shared list (popularity) | 0.679 | — |
+| P+E, personal questions learned on top of P (4B) | 0.666 | −0.012 [−0.021, −0.004] |
+| P+genres, dataset tags on top of P (no model) | 0.679 | +0.000 [−0.008, +0.009] |
+| P+A (4B) | 0.672 | −0.007 [−0.015, +0.000] |
+| P+A (27B) | 0.687 | +0.008 [−0.001, +0.017] |
+| P+W (4B) | 0.659 | −0.020 [−0.030, −0.010] |
+| P+W (27B) | 0.677 | −0.002 [−0.012, +0.009] |
+| Collaborative filtering, everyone's data | 0.740 | +0.061 [+0.051, +0.072] |
+
+**Lines:**
+- **Main (P+E against P): stop.** Learning the person on top of the shared list made it slightly worse. P+E kept
+  popularity in its model for 289 of the 300 people, with 3.8 personal questions on average.
+- **Secondary:**
+  - P+A (4B): stop. The interval reaches 0.
+  - P+A (27B): stop. The interval includes 0.
+- **Reported without lines:**
+  - P+genres equals P.
+  - P+E is below P+genres: −0.013 [−0.022, −0.003].
+
+**What it means:**
+- From a person's own 80 ratings, neither the model's questions, its reading of the history, its description of the
+  taste, nor the dataset's genre tags add anything reliable to the shared list.
+- Collaborative filtering does add something: +0.061 over the same list. Its person part is also learned from the
+  person's own ratings only. With the item factors fixed, alternating least squares solves each person's vector from
+  that person's ratings alone, which is exactly what a phone could compute.
+- The difference is the space it learns in. The item factors are a "taste space" learned from how millions of
+  ratings co-occur. The model's descriptive knowledge of movies (genres, themes, fame) does not give a space in which
+  80 ratings can locate a person.
+- So fast personal learning needed a representation learned in advance from many people's behaviour in the same
+  domain. A general language model's knowledge was not that representation, and code on top of it could not supply
+  it.
+- This is the established design of on-device and federated recommendation: shared item factors with a private user
+  vector. It is not new, but it is the measured answer here.
+
+**Where the real-data line of work stands:**
+- Every model-based way of learning a person tested here stopped:
+  - reading the history;
+  - writing the taste in words;
+  - splitting the jobs;
+  - each of these on top of a shared list.
+- The only approach that learned the person was a representation built from population data, which no model call
+  supplied.
