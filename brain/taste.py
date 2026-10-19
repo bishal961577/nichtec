@@ -241,11 +241,38 @@ def parse_questions(replies):
 
 # ---------------------------------------------------------------- model access
 
-class Answers:
-    """yes/no margins for prompts, cached on disk by prompt text (saved every 20,000 new answers)."""
+QWEN_USER = "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
 
-    def __init__(self, llm, path):
-        self.llm, self.path, self.lock = llm, path, threading.Lock()
+
+def batch_answers(llm, prompts):
+    """yes/no margins for many prompts in one /v1/completions request, each wrapped in the Qwen3.5 chat template
+    with thinking off. Checked against the chat endpoint on 16 prompts before use: same sign on all, margins within
+    0.15 (the server's own repeat noise is up to about 0.8)."""
+    body = {"model": llm.model, "prompt": [QWEN_USER.format(p) for p in prompts], "max_tokens": 1, "temperature": 0,
+            "logprobs": 20}
+    r = llm.request("POST", "/completions", body)
+    out = [None] * len(prompts)
+    for ch in r["choices"]:
+        top = ch["logprobs"]["top_logprobs"][0]
+        lp = {"yes": [], "no": []}
+        for tok, v in top.items():
+            w = tok.strip().lower()
+            if w in lp:
+                lp[w].append(v)
+        floor = min(top.values()) - 1.0
+        with llm.lock:
+            llm.calls += 1
+            llm.off_format += not (lp["yes"] or lp["no"])
+        out[ch["index"]] = G.logsumexp(lp["yes"] or [floor]) - G.logsumexp(lp["no"] or [floor])
+    return out
+
+
+class Answers:
+    """yes/no margins for prompts, cached on disk by prompt text (saved every 20,000 new answers). With batch=n the
+    model is asked n prompts per request through batch_answers."""
+
+    def __init__(self, llm, path, batch=0):
+        self.llm, self.path, self.lock, self.batch = llm, path, threading.Lock(), batch
         self.m = json.load(open(path, encoding="utf-8")) if path and os.path.exists(path) else {}
 
     def save(self):
@@ -261,7 +288,12 @@ class Answers:
         t0 = time.time()
         for i in range(0, len(todo), 20000):
             chunk = todo[i:i + 20000]
-            got = self.llm.map(lambda p: self.llm.answer(p)[0], chunk)
+            if self.batch:
+                parts = self.llm.map(lambda ps: batch_answers(self.llm, ps),
+                                     [chunk[j:j + self.batch] for j in range(0, len(chunk), self.batch)])
+                got = [x for part in parts for x in part]
+            else:
+                got = self.llm.map(lambda p: self.llm.answer(p)[0], chunk)
             with self.lock:
                 self.m.update(zip(chunk, got))
             self.save()
@@ -270,9 +302,26 @@ class Answers:
         return {p: self.m[p] for p in prompts}
 
 
+GEN_CACHE, GEN_LOCK = {"path": None, "m": {}}, threading.Lock()
+
+
 def generate(llm, prompt, n, seed, max_tokens, **kw):
+    """Model replies, cached on disk by (prompt, n, seed, settings) so a resumed run reuses them."""
+    key = json.dumps([prompt, n, seed, max_tokens, sorted(kw.items())])
+    if key in GEN_CACHE["m"]:
+        return GEN_CACHE["m"][key]
     r = llm.chat(prompt, n=n, seed=seed, max_tokens=max_tokens, **kw)
-    return [c["message"].get("content") or "" for c in r["choices"]]
+    out = [c["message"].get("content") or "" for c in r["choices"]]
+    with GEN_LOCK:
+        GEN_CACHE["m"][key] = out
+    return out
+
+
+def save_gen():
+    if GEN_CACHE["path"]:
+        with GEN_LOCK:
+            with open(GEN_CACHE["path"], "w", encoding="utf-8") as f:
+                json.dump(GEN_CACHE["m"], f)
 
 
 class Stub:
@@ -312,8 +361,12 @@ class Stub:
 def run_model(llm, tag, movies, users, refs, args, log):
     out = args.out or os.path.join(G.ROOT, "results", f"taste_{tag}")
     cache = None if args.stub else os.path.join(G.ROOT, "data", f"taste_cache_{tag}.json")
+    if not args.stub:
+        GEN_CACHE["path"] = os.path.join(G.ROOT, "data", f"taste_gen_{tag}.json")
+        if os.path.exists(GEN_CACHE["path"]):
+            GEN_CACHE["m"] = json.load(open(GEN_CACHE["path"], encoding="utf-8"))
     R = {"model": tag, "users": len(users), "settings": {"stream": STREAM, "test": TEST, "Cs": CS, "max_q": MAX_Q,
-         "name_samples": NAME_SAMPLES, "gen": GEN}}
+         "name_samples": NAME_SAMPLES, "gen": GEN, "batch": args.batch}}
     u0 = users[0]
     margin, top = llm.answer(read_prompt(movies, u0["test"][0][0], "Is it a comedy?"))
     qs0 = parse_questions(generate(llm, e_prompt(movies, u0), NAME_SAMPLES, 1, 300, **GEN))
@@ -331,7 +384,8 @@ def run_model(llm, tag, movies, users, refs, args, log):
                     list(enumerate(users)))
     names = llm.map(lambda iu: parse_questions(generate(llm, e_prompt(movies, iu[1]), NAME_SAMPLES, 2000 + iu[0], 300,
                                                         **GEN)), list(enumerate(users)))
-    A = Answers(llm, cache)
+    save_gen()
+    A = Answers(llm, cache, batch=args.batch)
     hist = A.get([a_prompt(movies, u, m) for u in users for m, _ in u["test"]], log, "A, history")
     judged = A.get([judge_prompt(movies, d, m) for u, d in zip(users, descs) for m, _ in u["test"]], log, "W, judging")
     read = A.get([read_prompt(movies, m, q) for u, qs in zip(users, names) for q in qs
@@ -445,6 +499,7 @@ def main():
     p.add_argument("--model", default="Qwen/Qwen3.5-4B")
     p.add_argument("--base-url", default=None)
     p.add_argument("--workers", type=int, default=128)
+    p.add_argument("--batch", type=int, default=0, help="prompts per /v1/completions request (0: one chat call each)")
     p.add_argument("--users", type=int, default=N_USERS, help="fewer people, for checking only")
     p.add_argument("--check", action="store_true")
     p.add_argument("--stub", action="store_true")
