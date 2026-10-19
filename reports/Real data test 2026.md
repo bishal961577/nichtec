@@ -119,3 +119,54 @@ This is the owner's goal in miniature: one AI per person, learning that person a
 **What is tested here:** whether, for a small model learning one person from 80 ratings, splitting the jobs (the model
 names and reads, code learns) beats the model reading the history or writing the taste in words, and whether it
 matches a model about seven times larger.
+
+## 7. Test 1 result (Qwen3.5-4B, 19 October 2026): stop
+
+**How it ran:**
+- From the cloud session against a dedicated Modal endpoint.
+- The first attempt ran at about 33 calls a second, whatever the prompt length, too slow for the 2-hour window. It
+  was stopped after the A answers and the W answers were cached.
+- Before the restart, batched requests were added (commit "Add batched yes/no answers"). On 128 saved answers they
+  gave the same yes or no on all 128, with a mean difference of 0.043. The measurement is unchanged.
+- The restart reused the cache: 10.6 minutes and 396,446 answers. None was outside yes or no.
+- The raw data are in `results/taste_Qwen3.5-4B/`.
+
+| Agent | Mean AUC (300 people) |
+|---|---|
+| A, history in the prompt | 0.614 |
+| W, taste written in words | 0.572 |
+| **E, model names questions, code learns the person** | **0.537** |
+| Genres + decades, same learner (no model) | 0.552 |
+| Popularity before the test window (not personal) | 0.679 |
+| Collaborative filtering, everyone's data | 0.740 |
+
+**Checks:** both passed. K1: 0.0% of answers outside yes or no. K2: collaborative filtering at 0.740.
+
+**Line:**
+- E minus A was −0.078 [−0.093, −0.061]. E minus W was −0.035 [−0.052, −0.017].
+- **Stop.** On real data, splitting the jobs is worse than the model reading the history, and worse than the model
+  writing the taste in words.
+- It is even slightly below the dataset's genre tags (−0.015 [−0.031, −0.000]).
+- **This line of work ends.**
+
+**Diagnosis from the saved data** (no new calls):
+1. **The toy pass did not carry over.** On animals the split matched a model about seven times larger. On real
+   people it loses by a wide margin. E beat A for only 88 of the 300 people.
+2. **E's questions are mostly genres:** "Is the movie a comedy?" (38 people), "a horror film?" (24), "a romantic
+   comedy?" (14). With 80 ratings, the learner found nothing worth weighting for 51 people, who got a flat
+   prediction. The mean was 5.7 weighted questions.
+3. **What A has and E lacks is general knowledge of which movies are good.**
+   - A's scores follow other people's ratings: a mean Spearman of 0.36 with popularity.
+   - Popularity alone, which is not personal at all, beats every personal agent (0.679).
+   - Liking a movie is mostly about the movie, the same for everyone, plus a smaller personal deviation.
+   - E learned each person from scratch on 80 ratings, with no prior about what most people like, so it could only
+     model the small personal part. It modelled that part poorly.
+4. **In first-principles terms:** a learner with 80 examples needs a strong prior, and learns the deviation from it.
+   The toy tasks had no shared prior, because hidden rules were arbitrary, which is why splitting looked good there.
+   Real tastes have a large shared component.
+
+**Next, as pre-registered:**
+- Test 2 (4B-E against 27B-A) is to be run whatever test 1 showed.
+- No redesign of E is made, because the line of work has ended.
+- A new idea from this diagnosis (a shared prior plus a personal deviation, with no other people's data at run time)
+  would be a new pre-registration, decided with the owner.
