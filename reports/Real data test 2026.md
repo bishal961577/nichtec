@@ -170,3 +170,41 @@ matches a model about seven times larger.
 - No redesign of E is made, because the line of work has ended.
 - A new idea from this diagnosis (a shared prior plus a personal deviation, with no other people's data at run time)
   would be a new pre-registration, decided with the owner.
+
+## 8. Test 2 and the 27B results (19 October 2026): stop
+
+**How it ran:**
+- The 27B run lost its first attempt to a restart of the cloud machine. It was resumed from the saved generations.
+- It answered A and W for all 300 people, at 25–29 answers a second.
+- E's reading ran at about 32 answers a second, which would have needed about 3 more hours. That stage was stopped,
+  and E was not run on 27B (commit "Add --no-e").
+  - Test 2's line needs only 27B-A, which was complete.
+  - 27B-E was "reported without a line", and test 1 had already ended E's line of work.
+  - The cut was made for speed and cost, before any 27B result was computed.
+- **K1** (answers outside yes or no) is counted from the cached answers. 27B: 0 of 24,000. 4B: 10 of 420,445, which
+  is 0.002%.
+
+| Agent | 4B | 27B |
+|---|---|---|
+| A, history in the prompt | 0.614 | **0.635** |
+| W, taste written in words | 0.572 | 0.605 |
+| E, split jobs | 0.537 | not run |
+| Popularity (not personal) | 0.679 | 0.679 |
+| Collaborative filtering (everyone's data) | 0.740 | 0.740 |
+
+**Test 2 line:**
+- 4B-E minus 27B-A was −0.098 [−0.114, −0.082]. The whole interval lies below −0.02. **Stop.**
+- The small model with split jobs does not match the large model reading its history. On real data it is far below.
+
+**Also measured:**
+- A larger model learns a person a little better from the same 80 ratings: A rose 0.021 from 4B to 27B, and W rose
+  0.033.
+- **Even 27B reading the history loses to plain popularity:** −0.044 [−0.062, −0.026]. From 80 ratings, neither
+  model's personal learning beats a list of what most people liked before.
+- W is below A at 27B too: −0.030 [−0.042, −0.019]. Writing the taste in words loses information.
+
+**Where this leaves the work:**
+- Both lines of the real-data plan stopped.
+- The toy results (the ingredients test) did not survive real data at scale.
+- The diagnosis in section 7 stands: on real tastes the shared part (what most people like) is larger than the
+  personal part, and no agent tested here starts from it.
