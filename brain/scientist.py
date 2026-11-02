@@ -11,6 +11,9 @@ judging over all 2,578 one- and two-condition rules) and D-count (D's guesses ju
   python brain/scientist.py --base-url https://...modal.direct/v1 --model Qwen/Qwen3.5-27B-FP8 --check
   python brain/scientist.py --base-url https://...modal.direct/v1 --model Qwen/Qwen3.5-27B-FP8    # test 1
   python brain/scientist.py --base-url https://...modal.direct/v1 --model Qwen/Qwen3.5-4B         # test 2
+  python brain/scientist.py --base-url ... --model Qwen/Qwen3.5-27B-FP8 --thinking   # rerun with thinking on
+The --thinking rerun is pre-registered in reports/Notebook reading at shipping size 2026.md (Part B): order random1
+only, the same seeds, thinking on with Qwen's thinking-mode sampling, compared with the original run's random1 streams.
 """
 import argparse
 import ast
@@ -233,6 +236,75 @@ def write(out, R, test, done, total):
     return L
 
 
+THINK_SAMPLING = {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 6144}
+WITHDRAW, STANDS, READABLE = 0.10, 0.30, 0.50   # Part B lines: contradiction rate, and readable share of proposals
+
+
+def stream_stats(streams):
+    props = [g for s in streams for rd in s["rounds"].values() for g in rd["proposals"]]
+    guesses = sum(s["guesses"] for s in streams)
+    return {"proposals": len(props), "readable": sum(g["rule"] is not None for g in props), "guesses": guesses,
+            "contradict": sum(s["contradict_shown"] for s in streams),
+            "contradict_rate": sum(s["contradict_shown"] for s in streams) / max(1, guesses),
+            "readable_rate": sum(g["rule"] is not None for g in props) / max(1, len(props)),
+            "pool_good_rate": G.mean([s["pool_has_good_rule"] for s in streams])}
+
+
+def thinking_run(llm, tag, tasks, workers):
+    """Part B: the scientist's random1 streams again, thinking on. Returns the summary lines."""
+    out = os.path.join(G.ROOT, "results", f"scientist_{tag}_thinking")
+    res = [None] * len(tasks)
+    with ThreadPoolExecutor(workers) as ex:
+        futs = {ex.submit(run_stream, llm, task, "random1", 1_000_000 * k): k for k, task in enumerate(tasks)}
+        for f in as_completed(futs):
+            res[futs[f]] = f.result()
+            print(f"task {sum(r is not None for r in res)}/{len(tasks)} done", flush=True)
+    new = stream_stats(res)
+    new["D_acc"] = G.mean([r["D"]["test_acc"] for r in res])
+    new["D_rule_good"] = G.mean([r["D"]["rule_good"] for r in res])
+    orig_path = os.path.join(G.ROOT, "results", f"scientist_{tag}", "result.json")
+    old = None
+    if os.path.exists(orig_path):
+        O = json.load(open(orig_path, encoding="utf-8"))
+        ts = [t for t in O["tasks"] if t is not None]
+        old = stream_stats([t["streams"]["random1"] for t in ts])
+        old["D_acc"] = G.mean([t["D"]["random1"]["test_acc"] for t in ts])
+        old["D_rule_good"] = G.mean([t["D"]["random1"]["rule_good"] for t in ts])
+        old["contradict_rate_all_orders"] = O["summary"]["contradict_rate"]
+    if new["readable_rate"] < READABLE:
+        v = (f"UNREADABLE: only {100 * new['readable_rate']:.0f}% of proposals gave a rule (line {100 * READABLE:.0f}%); "
+             "the contradiction rate covers too few guesses to judge conclusion (b).")
+    elif new["contradict_rate"] <= WITHDRAW:
+        v = (f"WITHDRAWN: with thinking on, {100 * new['contradict_rate']:.1f}% of guesses contradict the cases shown "
+             f"(<= {100 * WITHDRAW:.0f}%). Conclusion (b) does not hold for this model in thinking mode.")
+    elif new["contradict_rate"] >= STANDS:
+        v = (f"STANDS: with thinking on, {100 * new['contradict_rate']:.1f}% of guesses still contradict the cases shown "
+             f"(>= {100 * STANDS:.0f}%). Conclusion (b) holds in thinking mode too.")
+    else:
+        v = (f"WEAKENED: with thinking on, {100 * new['contradict_rate']:.1f}% of guesses contradict the cases shown "
+             f"(between {100 * WITHDRAW:.0f}% and {100 * STANDS:.0f}%).")
+    L = [f"# Agent D, the scientist, with thinking on: {tag}", "",
+         "Pre-registration: reports/Notebook reading at shipping size 2026.md (Part B). Order random1, 12 tasks, "
+         f"same seeds as the original run; sampling {THINK_SAMPLING}.", "",
+         "| | Proposals | Readable rule | Guesses contradicting shown cases | Good rule in pool | D test accuracy | "
+         "D's final rule good |", "|---|---|---|---|---|---|---|"]
+    for name, S in (("thinking on", new), ("original (thinking off), random1", old)):
+        if S:
+            L.append(f"| {name} | {S['proposals']} | {100 * S['readable_rate']:.0f}% | {100 * S['contradict_rate']:.1f}% "
+                     f"of {S['guesses']} | {100 * S['pool_good_rate']:.0f}% | {S['D_acc']:.1f} | "
+                     f"{100 * S['D_rule_good']:.0f}% |")
+    if old:
+        L += ["", f"Original run, all five orders: {100 * old['contradict_rate_all_orders']:.1f}% of guesses contradicted."]
+    L += ["", "## Verdict", "", f"- {v}"]
+    os.makedirs(out, exist_ok=True)
+    with open(os.path.join(out, "result.json"), "w", encoding="utf-8") as f:
+        json.dump({"model": tag, "sampling": THINK_SAMPLING, "new": new, "original_random1": old, "verdict": v,
+                   "streams": res}, f, indent=1, ensure_ascii=True)
+    with open(os.path.join(out, "summary.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(L) + "\n")
+    return L
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="Qwen/Qwen3.5-27B-FP8")
@@ -241,6 +313,7 @@ def main():
     p.add_argument("--test", type=int, choices=[1, 2], default=None, help="default: 2 for a 4B model, else 1")
     p.add_argument("--check", action="store_true")
     p.add_argument("--stub", action="store_true")
+    p.add_argument("--thinking", action="store_true", help="Part B: random1 streams again with thinking on")
     p.add_argument("--out", default=None)
     args = p.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
@@ -255,6 +328,15 @@ def main():
         raise SystemExit("needs --base-url or --stub")
     out = args.out or os.path.join(G.ROOT, "results", f"scientist_{tag}")
     tasks = [G.make_task(r, d) for r in range(len(G.RULES)) for d in range(G.DRAWS)]
+    if args.thinking:
+        G.THINKING = True
+        G.SAMPLING.update(THINK_SAMPLING)
+        c = check(llm, tasks[0])
+        print(f"check: {json.dumps(c, ensure_ascii=True)}", flush=True)
+        if args.check:
+            raise SystemExit("check done; no run")
+        print("\n".join(thinking_run(llm, tag, tasks, args.workers)), flush=True)
+        return
     R = {"model": tag, "test": test, "settings": {"err_nats": ERR, "cond_nats": COND, "every": G.EVERY,
          "per_round": G.PER_ROUND, "sampling": G.SAMPLING, "good": G.GOOD}, "tasks": [None] * len(tasks)}
     R["check"] = c = check(llm, tasks[0]) if not args.stub else {"stub": True}

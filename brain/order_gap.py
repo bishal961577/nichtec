@@ -59,6 +59,8 @@ ORDERS = ["random1", "random2", "random3", "decoy_first", "decoy_last"]
 RANDOM = ORDERS[:3]
 EVERY, WINDOW, PER_ROUND = 5, 10, 4
 SAMPLING = {"temperature": 0.8, "top_p": 0.95, "top_k": 50, "max_new_tokens": 64}
+THINKING = False                               # rule proposals with thinking on (scientist --thinking); off in every
+                                               # earlier run
 GOOD = 0.95                                   # a proposal agreeing with the hidden rule on 95% of the domain is "good"
 INTRO = ("An inspector accepts or rejects items by a fixed hidden rule. Items have four attributes: color (red, blue, "
          "green, yellow), shape (circle, square, triangle, star), size (1 to 9) and material (wood, metal, glass, "
@@ -306,9 +308,9 @@ class Endpoint:
                     raise SystemExit(f"endpoint {method} {path}: {e}")
             time.sleep(2 ** attempt)
 
-    def chat(self, content, **kw):
+    def chat(self, content, thinking=False, **kw):
         body = {"model": self.model, "messages": [{"role": "user", "content": content}],
-                "chat_template_kwargs": {"enable_thinking": False}, **kw}
+                "chat_template_kwargs": {"enable_thinking": thinking}, **kw}
         return self.request("POST", "/chat/completions", body)
 
     def answer(self, content):
@@ -340,9 +342,13 @@ class Endpoint:
 
     def propose_batch(self, prompts, n, seeds):
         def one(ps):
-            r = self.chat(ps[0], n=n, seed=ps[1], max_tokens=SAMPLING["max_new_tokens"], temperature=SAMPLING["temperature"],
-                          top_p=SAMPLING["top_p"], top_k=SAMPLING["top_k"])
-            return [c["message"].get("content") or "" for c in r["choices"]]
+            r = self.chat(ps[0], thinking=THINKING, n=n, seed=ps[1], max_tokens=SAMPLING["max_new_tokens"],
+                          temperature=SAMPLING["temperature"], top_p=SAMPLING["top_p"], top_k=SAMPLING["top_k"])
+            if not THINKING:
+                return [c["message"].get("content") or "" for c in r["choices"]]
+            # thinking on: the rule is what follows </think>; a reply cut off at the token cap has none
+            return ["" if c.get("finish_reason") == "length" else (c["message"].get("content") or "").split("</think>")[-1]
+                    for c in r["choices"]]
         return self.map(one, list(zip(prompts, seeds)))
 
     def check_cache(self, stream, test, T):
