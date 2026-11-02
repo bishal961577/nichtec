@@ -236,7 +236,7 @@ def write(out, R, test, done, total):
     return L
 
 
-THINK_SAMPLING = {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 6144}
+THINK_SAMPLING = {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 16384}
 WITHDRAW, STANDS, READABLE = 0.10, 0.30, 0.50   # Part B lines: contradiction rate, and readable share of proposals
 
 

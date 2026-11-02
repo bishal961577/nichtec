@@ -1,8 +1,9 @@
 # Notebook reading at shipping size (November 2026)
 
 Test 1 of the expert panel's plan (`reports/Expert panel 2026.md`, section 5). This file was written and committed
-before any model call. The design, pass lines and stop lines below are fixed; the result goes in section 6 and nothing
-above it changes after the run.
+before any model call. Sections 1–5 are the first design. Section 6 is the panel's review of it, and section 7 is
+amendment 1, also committed before any model call; section 7.5 holds the deciding lines. The result goes in section 8,
+and nothing above it changes after the run.
 
 ---
 
@@ -248,6 +249,275 @@ conditions end to end and produced the tables and a verdict. It confirmed:
 
 The stub numbers mean nothing about any model.
 
-## 6. Result
+## 6. The panel's review of sections 1–5
+
+Before any model call, the owner asked whether the design was worth running. Its four reviewers:
+- a founder;
+- a neuroscientist;
+- a machine-learning architect;
+- an AI research scientist.
+
+Their transcripts are in `research_notes/Expert panel 2026/review1_*.md`.
+
+**All four answered "worth running only with changes".** The world-edit arm (A2) and Part B were judged sound as
+written. Part A was judged close to a certain pass that would decide nothing. Three reviewers gave forecasts:
+
+| Reviewer | Forecast for Part A as written |
+|---|---|
+| Neuroscientist | about 80% |
+| Architect | about 80% |
+| Researcher | 85% that reworded single-hop is at least 90% |
+
+The moderator had raised the "full name is the key" concern in the review requests, so agreement on that point is
+not independent. The other findings were the reviewers' own.
+
+| Flaw | Found by |
+|---|---|
+| Every question carries the person's unique full name, so lookup is string search plus answer type. "Reworded" is not NoLiMa's condition, because NoLiMa removes overlap on the key itself. | all four |
+| Name collisions (this project's only measured keyed-memory failure) are impossible by construction. | founder, neuroscientist, architect |
+| The 10-note two-hop denominator is mostly single-hop: in about 5 of 9 groups, A lacks the asked attribute. | architect |
+| Update questions give the answer away ("work as now" / "now works as"). Updates are single, explicit and few. | all four |
+| No fan effects and no near-miss lures; the people who matter most to a user have many notes. | neuroscientist |
+| Plural slips ("peanut") are scored wrong, and A's distractor can equal B's gold. | researcher |
+| The 6,144-token thinking cap mixes running out of budget with reading. | architect, researcher |
+| The decision ignores latency and cost; 4B at 5,000 notes is a question that never arises on a phone. | founder, architect, researcher |
+| A plain single-shot retrieval arm is missing; real chat (LongMemEval) is the comparable test. | architect, researcher |
+
+## 7. Amendment 1 (before any model call)
+
+This section replaces the decision rule of section 3.7. The first design's two lines are kept and reported as an
+**easy reference**; they do not decide anything. Code: `brain/notebook_read.py` (rewritten), `brain/longmem.py` (new),
+`brain/scientist.py` (thinking cap). The first design's code is in git history (commit `225d5e8`). Stub runs of every
+script completed before this commit.
+
+### 7.1 The personal world
+
+**Size.** 420 groups, 840 people, 5,025 notes. The levels are now:
+
+| Level | Notes per pile | Piles |
+|---|---|---|
+| 10 | 9–44 (the group's own notes; close people have 44) | 420 |
+| 100 | 101–207 | 38 |
+| 1,000 | 898–1,106 | 5 |
+| 5,000 | 5,025 (about 53K tokens) | 1 |
+
+**Relations.** Half the relation notes are written from B's side, without the role word. Examples:
+- "Bilal Barbosa lives next door to Signe Larsen." (neighbour)
+- "Paloma Rojas trusts Astrid Ribeiro more than anyone; they have been inseparable since school." (best friend)
+
+**Changes to A's city or job** (135 groups). There are three forms, 45 each, and 30 groups (10 per form) change
+twice:
+
+| Form | Example |
+|---|---|
+| explicit | "has moved to", "has changed careers and now works as" |
+| plain restatement | "Emil Pena works as a carpenter." Only the order tells which note is current. |
+| correction | "Correction: X works as a beekeeper, not as a mechanic." |
+
+**Retractions** (30 groups) give no new value: "Signe Esposito has sold the Subaru and no longer has a car."
+
+**Close people** (30 groups). A has 35 extra notes:
+- 12 near-miss lures, three per attribute: "test-drove a Kia", "is visiting Lyon this week", "trained as a mechanic but
+  never worked as one", "has a friend who is allergic to latex".
+- 23 everyday notes with no attribute values.
+
+The people who matter most to a user have many notes, and perfect page selection then returns 44 notes rather than 9.
+
+### 7.2 Questions (fixed by seed 2)
+
+**Part A: name kept.** This is the easy reference plus the change and relation tests.
+
+| Kind | n | Change from section 3 |
+|---|---|---|
+| reword | 150 | Relabelled "relation paraphrase, name kept" (not NoLiMa) |
+| same | 100 | – |
+| two | 200 | Only where A has a different value of the asked attribute, so even the 10-note pile needs the relation |
+| upd | 135 (all) | Half ask "now", half use the plain question |
+| prev | 20 | New: the value before an explicit change |
+| retract | 30 | New: the right answer is that there is none |
+
+**Part A3: hard reading, no full name in the question.**
+
+| Kind | n | Example | Gold |
+|---|---|---|---|
+| desc | 120 | "What is the favourite food of the person who lives in Krakow and has a pet parrot?" | The described person's third fact |
+| who | 60 | "Who is allergic to sesame and enjoys gardening in their free time?" | The full name |
+| fname | 60 | "Which language is Tomas, the one who has a pet hedgehog, learning?" | The fact of that Tomas |
+| amb | 30 | "Which instrument does Bram play?" when several Brams play different ones | Flagging the ambiguity (reported only) |
+| close | 90 | "Which language is Selin Novak learning?" | The true fact among lures |
+
+How these kinds are built:
+- **desc and who:** described by a pair of facts that no other person has ever had, counting earlier values of changed
+  facts.
+- **fname:** the first name is shared by at least 3 people, and the detail is unique among them.
+- **amb:** asked only where one pile holds all the people with that first name (5,000 notes and the search arms).
+
+**The hard set** is the 695 questions the decision is read on: desc, who, fname, close, two, upd and retract.
+
+### 7.3 Ways of reading
+
+Each question is read in up to four ways:
+1. **Whole pile** at 100, 1,000 and 5,000 notes.
+2. **Perfect page selection:** the 10-level pile, i.e. the question's own group. This is the upper bound for any
+   selector.
+3. **Two-round search ("search2"),** the selector the decision uses:
+   - BM25 returns the top 20 notes of the 5,000-note pile for the question;
+   - the model, thinking off, reads them and replies DONE or writes one follow-up search query;
+   - BM25 returns 20 more notes for that query;
+   - the model answers from the union, in notebook order.
+4. **Plain BM25 top 20 (reference).**
+
+Why the selector has two rounds: before any model call, a recall check showed what plain BM25 can and cannot fetch.
+
+| Question kind | Plain BM25 top 20 returns every needed note |
+|---|---|
+| Single-hop (reword, same, upd, prev, close) | 100% |
+| retract | 96.7% |
+| fname | 45% |
+| two-hop | 0.5% |
+| desc | 0% |
+
+A single-shot selector would therefore fail the hard set by construction, which is a predictable result. Real systems
+search in rounds.
+
+### 7.4 Settings
+
+- **Thinking cap:** 16,384 tokens (was 6,144), with the same sampling as before.
+- **Thinking off:** up to 64 tokens.
+- **Plan for Qwen3.5-27B, in run order:**
+  1. personal, thinking on: 5,000, 10, search2, bm25, 1,000, 100;
+  2. personal, thinking off: 5,000, 10, search2;
+  3. world, thinking on: all, 10; then own facts, thinking on;
+  4. world with no "treat as true" instruction: all, thinking on;
+  5. world, thinking on: 1,000, 100;
+  6. world, thinking off: all, 10; then own facts, thinking off.
+- **Plan for Qwen3.5-4B (phone):**
+  - personal, thinking on: 10, search2, bm25, 100;
+  - personal, thinking off: 10, search2, 100;
+  - world, thinking on: 10, 100;
+  - own facts, thinking on.
+- **Part B** runs concurrently with Part A on each endpoint.
+- **Part C** runs last.
+
+### 7.5 Decision lines (replacing section 3.7)
+
+The lines are read on Qwen3.5-27B, hard set, thinking on. Decisions use point estimates; 95% paired bootstrap
+intervals are reported.
+
+**Viability conditions:**
+- **Whole notebook viable** if all three hold:
+  - accuracy at 5,000 notes is at least 0.8 × perfect page selection;
+  - it is no more than 5 points below two-round search;
+  - a single warm-cache request at 5,000 notes, thinking off, answers within 10 seconds (measured in the preflight).
+- **Selection viable** if two-round search is at least 0.8 × perfect page selection and no more than 5 points below
+  the whole notebook.
+
+**Outcomes:**
+
+| Outcome | Condition | What it means |
+|---|---|---|
+| BOTH VIABLE | both viable | Version 1 = select pages (cheaper, runs on the phone), with the whole notebook as the cloud fallback |
+| WHOLE NOTEBOOK | only the whole notebook is viable | Version 1 in the cloud = the whole notebook in the prompt |
+| SELECTION | only selection is viable | Version 1 = select pages first, everywhere |
+| NEITHER | neither is viable | Reading a 5,000-note notebook is a bottleneck either way, and the memory research has a measured target |
+
+**On Qwen3.5-4B,** two-round search is "phone selection viable" if it reaches at least 0.8 × perfect page
+selection.
+
+**Easy reference (section 3.7's lines), reported only:**
+- reworded single-hop at 5,000 notes: pass ≥ 85%, stop < 70%;
+- two-hop 5,000/10 ratio: pass ≥ 0.8, stop < 0.5.
+
+### 7.6 Part A2 and Part B
+
+- **Part A2** gains a no-instruction arm (at "all", thinking on). It measures conflict resolution without being told
+  to accept the notes. Its thinking-off conditions at 100 and 1,000 are dropped.
+- **Part B** is unchanged except for the 16,384-token cap.
+
+### 7.7 Part C: LongMemEval-S (new; `brain/longmem.py`)
+
+**Data.** LongMemEval-S, the cleaned release (MIT licence):
+
+| File | sha256 |
+|---|---|
+| `longmemeval_s_cleaned.json` | `d6f21ea9…a3c442` |
+| `longmemeval_oracle.json` | `821a2034…38620c` |
+
+**Questions.** 150 questions, 25 from each of the six question types (seed 0). 10 of them are abstention questions.
+
+**Arms:**
+
+| Arm | Contents | Size |
+|---|---|---|
+| full | All ~50 sessions, sorted by date | 129K tokens on average, at most about 134K |
+| oracle | Evidence sessions only | – |
+| bm25 | The top 10 sessions by BM25, sorted by date | Hold every evidence session for 92% of the questions |
+
+- **Who runs what:** 27B runs all three arms; 4B runs oracle and bm25.
+- **Format:** LongMemEval's own answer prompt and json history format.
+- **Answer markers:** LongMemEval's `has_answer` markers are removed from every turn, as its code does; this is
+  checked.
+- **Thinking:** on, with the 16,384-token cap.
+
+**Judge.** LongMemEval's own yes/no prompts, verbatim.
+- If an `OPENAI_API_KEY` is set in the environment, the judge is gpt-4o-2024-08-06, the published judge.
+- Otherwise it is the 27B endpoint with thinking off. This is a stated deviation, and its numbers are then not
+  strictly comparable with published ones.
+
+**Lines:**
+- full ≥ 0.9 × oracle → long context holds on real chat (cloud);
+- also reported: whether BM25 sessions ≥ full.
+
+**Context overflow:** questions that exceed the endpoint's context are excluded from the comparison and counted.
+
+### 7.8 Scoring and audit
+
+- **Plural-insensitive matching (primary):** a trailing "s", and "ies" → "y", are ignored on both sides. The checks
+  assert this merges no two values.
+- **Retractions** are right if the answer names no value and says there is none.
+- **amb** is right if the answer flags the ambiguity or names at least two of the candidates' values.
+- **who** is right if the answer names the person and no one else.
+- **Each wrong personal answer is labelled with its source:**
+  - cut off;
+  - old value;
+  - lure;
+  - the asker's own value (A, two-hop);
+  - group partner;
+  - same first name;
+  - same last name;
+  - another person's value;
+  - made up;
+  - and, for who-questions, a partial match.
+- **Hand audit:** every wrong answer in the primary condition is listed in `errors.md`, and the moderator reads them
+  all.
+  - The verdict uses the automatic score.
+  - If the audit finds scorer errors in more than 2% of primary answers, both versions are reported and the owner
+    decides.
+
+### 7.9 Predictions recorded before the run
+
+- **Neuroscientist,** 27B at 5,000 notes:
+  - described-person questions 60–80%;
+  - close people with lures 10–20 points below people with few facts;
+  - same-form repeated updates 10–25% stale.
+- **Architect and researcher:** the easy reference passes (reworded ≥ 90–95%, ratio ≥ 0.8–0.9).
+- **Researcher:** 4B on the easy lines is a coin flip.
+- **The moderator makes no forecast** (record 0 for 5).
+
+### 7.10 Endpoint requirements and limits
+
+**Context:**
+
+| Endpoint | Needs | Covers |
+|---|---|---|
+| Qwen3.5-27B | 262,144 tokens | Part C's full histories (~134K) plus thinking; 81,920 would cover Parts A, A3, A2 and B only |
+| Qwen3.5-4B | 65,536 tokens | Part C oracle and bm25 arms (up to about 43K with thinking) |
+
+**Not covered by this test:**
+- turning chat into notes (pronouns, "my boss", small talk), except within Part C;
+- money cost;
+- more than one model family.
+
+## 8. Result
 
 (Not yet run.)
