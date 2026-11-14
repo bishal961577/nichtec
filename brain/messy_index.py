@@ -38,26 +38,30 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import messy_world as MW      # noqa: E402
 import order_gap as G         # noqa: E402  (the endpoint client)
-from notebook_read import BM25  # noqa: E402
+from notebook_read import BM25, STOP, pnorm  # noqa: E402
 
 ROOT = G.ROOT
 TODAY = MW.TODAY.isoformat()
-CHUNK, CONTEXT, MAX_NOTES, PER_PERSON, CANDIDATES = 20, 5, 60, 40, 30
+CHUNK, CONTEXT, MAX_NOTES, PER_PERSON, CANDIDATES, LINKED = 20, 5, 60, 40, 30, 25
 THINK = {"max_tokens": 16384, "temperature": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 1.5}
 NOTHINK = {"max_tokens": 256, "temperature": 0}
 WRITE_KW = {"max_tokens": 1500, "temperature": 0}
+WRITE_KW_THINK = {**THINK, "max_tokens": 8192}           # the thinking writer (amendment 1): overnight on a phone
 CUE_KW = {"max_tokens": 200, "temperature": 0}
-AGENT_ROUNDS, AGENT_K = 3, 20
+AGENT_ROUNDS, AGENT_K, AGENT_MORE, AGENT_MAX = 3, 20, 15, 80
+FAN, FACT_TARGETS = 0.03, 5
 BOOT = 10_000
 EMB_MODEL = "BAAI/bge-small-en-v1.5"
 
-# Pre-registered lines (reports/Messy chat index test 2026.md, section 5). Hard set = messy_world.HARD.
+# Pre-registered lines (reports/Messy chat index test 2026.md, section 5 as changed by amendment 1). Hard set =
+# messy_world.HARD.
 PASS_HARD, PASS_ORACLE_RATIO, PASS_ASSOC_EACH, PASS_MARGIN = 85.0, 0.9, 75.0, 5.0
-STOP_HARD, MERGE_PASS, MERGE_NEAR_PASS, MERGE_STOP, WRITE_TOKENS = 70.0, 1.0, 3.0, 3.0, 1000
-EVENTS_LINE, FAST_LINE = 70.0, 85.0
+MERGE_PASS, MERGE_STOP, HARD_MERGE_PASS, HARD_MERGE_STOP = 1.0, 3.0, 5.0, 10.0
+FAST_PASS, FORGET_PASS, WRITE_COMPLETION, WRITE_PROMPT, READ_LIMIT = 80.0, 98.0, 150, 500, 85.0
+EVENTS_LINE = 70.0
 
 WRITE = """You keep the index of a person's private notebook. The person ("I", "me") writes short messages about their \
-life. For every new message, list what it says about people, so it can be found later.
+life. For every new message, list who it is about and what it says about them, so it can be found later.
 
 People already in the index (id: names; how I know them; links):
 {people}
@@ -71,20 +75,22 @@ New messages:
 Write one line per fact, exactly in this form:
 #<message number> | <person id, or NEW: Full Name> | <what the fact is about, in one to three words> | <the value>
 Rules:
-- Use the person's id from the list when a message is about them: by full name, first name, nickname, "my sister", \
-"he"/"she"/"they" for someone just mentioned, or "Kofi's flatmate". Write NEW: and the full name only for someone who \
-is not in the list yet.
-- How I know a person: "relation to me" (for example sister, boss) or "known from" (for example work, a party).
-- A nickname: "nickname", and the nickname as the value.
-- A link between two people: the link (for example "neighbour", "mentor of") as the fact, and the other person's id \
-as the value.
-- Something I did with someone: "event" as the fact, and the value starts with the date it happened (YYYY-MM-DD), \
-then what we did. Work the date out from the message's date ("yesterday", "on Saturday").
-- If a message takes a fact back ("gave the pet away", "doesn't drive any more"), write that fact with the value \
-"none". If it corrects a fact, write the corrected value.
-- Plans, wishes, and facts about someone unnamed ("is thinking about getting a ferret", "her mother is a nurse") are \
-not facts about the person: skip them.
-- Write nothing for messages with no fact about a person."""
+- Use the person's id from the list whenever a message is about them, however they are named: full name, first name, \
+nickname, a relation to me, a pronoun for someone just mentioned, or through another person. Write NEW: and the full \
+name only for someone who is not in the list yet.
+- How I know a person: "relation to me" or "known from", with the value in a few words.
+- Another name for a person: "nickname", with that name as the value.
+- A link between two people: the link in a few words as the fact, and the other person's id as the value.
+- Something I did together with someone: "event" as the fact; the value starts with the date it happened \
+(YYYY-MM-DD; work it out from the message's date), then what we did.
+- If a message says a fact is no longer true, write that fact with the value "none". If it corrects a fact, write the \
+corrected value.
+- Only what the message says is true of the person now. Wishes, plans, guesses, the past, and facts about someone \
+else (an unnamed relative, the person telling me) are not facts about them: skip them.
+- Facts about me, the writer, are not about anyone in the list: skip them.
+- If a message mentions a person but says nothing new about them, write one line for them with the fact "mentioned" \
+and the value "-".
+- Write nothing for a message that mentions no one."""
 
 CUES = """Someone asks their notebook assistant a question. Write the clues needed to look it up, one per line, using \
 only these labels:
@@ -117,10 +123,14 @@ ABSTAIN = ["not in my notes", "don't say", "do not say", "doesn't say", "does no
            "not specified", "unknown", "no record", "can't tell", "cannot tell", "don't know", "not stated"]
 NONE_WORDS = ["none", "no pet", "no longer", "any more", "anymore", "doesn't", "does not", "stopped", "gave", "quit",
               "dropped", "sold", "isn't", "not working", "no car", "no plants", "cleared"]
-ACT_KEYS = {"dinner": ["dinner"], "hike": ["hik"], "cinema": ["film", "movie", "cinema"], "coffee": ["coffee"],
-            "concert": ["concert"], "museum": ["museum"], "swim": ["swim"], "market": ["market"],
-            "football match": ["football"], "game night": ["board game", "game night"], "picnic": ["picnic"],
-            "karaoke": ["karaoke"]}
+ACT_KEYS = {"dinner": ["dinner"], "hike": ["hik", "ridge trail"], "cinema": ["film", "movie", "cinema"],
+            "coffee": ["coffee"], "concert": ["concert"], "museum": ["museum"], "swim": ["swim", "lido"],
+            "market": ["market"], "football match": ["football"],
+            "game night": ["board game", "game night", "games night"], "picnic": ["picnic"], "karaoke": ["karaoke"]}
+OLD_MARK = re.compile(r"(previously|before( that)?|used to|formerly|earlier|originally|from|not|instead of|rather than|"
+                      r"replac\w*|switched|moved|old|until|no longer|had|was|gave|sold|stopped|dropped|swapped)\W*"
+                      r"(\w+\W+){0,3}$")
+HEDGE = re.compile(r"\b(or maybe|maybe|could be|might be|possibly|perhaps|not sure|either|or)\b")
 
 
 # ============================================================================ model calls
@@ -185,7 +195,7 @@ class Index:
         p = self.people[pid]
         if kind == "nickname" and value:
             p["names"].add(value.strip('"').lower())
-        if kind in ("relation to me", "relation") and value:
+        if ("relation" in kind or "role" in kind) and value and not link:
             p["names"].add(f"my {value.lower().replace('my ', '')}")
 
     def delete(self, note_ids):
@@ -202,8 +212,13 @@ class Index:
         return f"{pid}: " + "; ".join(bits)
 
 
+def dshow(iso):
+    """A message's date with its weekday ("on Thursday" needs it)."""
+    return f"{iso} {dt.date.fromisoformat(iso).strftime('%a')}"
+
+
 def note_line(n):
-    return f"#{n['id']} [{n['date']}] {n['text']}"
+    return f"#{n['id']} [{dshow(n['date'])}] {n['text']}"
 
 
 def candidates(ix, chunk, recent):
@@ -221,12 +236,20 @@ def candidates(ix, chunk, recent):
                 score[pid] += 3
             elif len(toks) == 1 and toks[0] in words:
                 score[pid] += 1
+    named = set(score)                                   # matched by a name: their links come along ("Kofi's flatmate")
     for k, pid in enumerate(reversed(recent[-12:])):
         score[pid] += 0.5
-    top = [pid for pid, _ in score.most_common(CANDIDATES)]
-    linked = {r["link"] for r in ix.rows if r["pid"] in top[:10] and r["link"]} | \
-             {r["pid"] for r in ix.rows if r["link"] in top[:10]}
-    return (top + [p for p in linked if p not in top])[:CANDIDATES + 10]
+    num = lambda x: int(x[1:])
+    top = sorted(score, key=lambda x: (-score[x], num(x)))[:CANDIDATES]
+    partner = Counter()
+    for r in ix.rows:
+        if r["link"]:
+            if r["pid"] in named:
+                partner[r["link"]] += 1
+            if r["link"] in named:
+                partner[r["pid"]] += 1
+    extra = sorted((x for x in partner if x not in top), key=lambda x: (-partner[x], num(x)))
+    return top + extra[:LINKED]
 
 
 ROW = re.compile(r"#\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(.+)")
@@ -276,16 +299,17 @@ def resolve(who, ix, new_here):
     hit = ix.find_full(name)
     if hit:
         return hit
-    if not m:                    # a bare name that is not a known full name: treat it as new only if it looks like one
-        if len(name.split()) < 2:
-            return None
-    pid = ix.person(name)
+    if not m:                    # a bare name, nickname or "my sister": a known person if exactly one matches; else unusable
+        same = [pid for pid, p in ix.people.items() if key in p["names"]]
+        return same[0] if len(same) == 1 else None
+    pid = ix.person(name)        # NEW: the writer says this is someone not yet in the index (a split if it is wrong)
     new_here[key] = pid
     return pid
 
 
-def build_index(llm, W, path, log):
-    """B's write side: messages in order, CHUNK at a time, thinking off. Resumable from the log of replies."""
+def build_index(llm, W, path, log, think=False):
+    """B's write side: messages in order, CHUNK at a time (thinking off; on for the thinking writer). Resumable from
+    the log of replies."""
     ix, recent, stats = Index(), [], Counter()
     done = {}
     if os.path.exists(path):
@@ -306,7 +330,7 @@ def build_index(llm, W, path, log):
             prompt = WRITE.format(people="\n".join(ix.summary(p) for p in cands) or "(none yet)",
                                   context="\n".join(note_line(n) for n in ctx) or "(none)",
                                   new="\n".join(note_line(n) for n in chunk))
-            r = ask(llm, prompt, WRITE_KW, False, c0)
+            r = ask(llm, prompt, WRITE_KW_THINK if think else WRITE_KW, think, c0)
             r = {"chunk": c0, "text": r["text"], "cut": r["cut"], "prompt_tokens": r["prompt_tokens"],
                  "completion_tokens": r["completion_tokens"], "sec": r["sec"], "candidates": len(cands)}
             f.write(json.dumps(r, ensure_ascii=True) + "\n")
@@ -341,10 +365,14 @@ def oracle_index(W):
                 if value is None:
                     ix.add(n["id"], x, kind, "none")
                 else:
-                    alt = next(a for c, a, _ in MW.SLOTS[kind]["vals"] if c == value)
-                    ix.add(n["id"], x, kind, value if alt == value else f"{value} ({alt})")
+                    ix.add(n["id"], x, kind, value)
             else:
                 ix.add(n["id"], x, kind, str(value))
+        stated = {pid for pid, _, _ in n["facts"]}
+        for _, pid, _ in n["mentions"]:
+            if pid not in stated:
+                ix.add(n["id"], pid_of[pid], "mentioned", "-")
+                stated.add(pid)
     return ix
 
 
@@ -438,6 +466,42 @@ class Reader:
                 break
         return out
 
+    def penalty(self, pid):
+        """Fan correction: a person with hundreds of rows matches any description a little (ACT-R's S - ln fan)."""
+        return FAN * math.log(1 + len(self.by_pid.get(pid, [])))
+
+    def link_targets(self, anchor, link):
+        """Follow one link from the anchor: the best-matching link rows (kind and message, both directions), no fixed
+        threshold; every partner within 0.05 of the best is shown, so the reader can check the direction."""
+        lv = self.emb([link])[0]
+        cand = []
+        for i, r in enumerate(self.rows):
+            if r["link"] and (r["pid"] == anchor or r["link"] == anchor):
+                other = r["link"] if r["pid"] == anchor else r["pid"]
+                sim = max(float(self.row_vec[i] @ lv), float(self.note_vec[i] @ lv))
+                sim += 0.2 if any(w in r["kind"] for w in norm(link) if len(w) > 3) else 0
+                cand.append((sim, other, r["note"]))
+        if not cand:
+            return []
+        best = max(c[0] for c in cand)
+        return [(o, n) for sim, o, n in sorted(cand, reverse=True) if sim >= best - 0.05][:3]
+
+    def matching_notes(self, pid, cues, k):
+        """A person's naming rows plus the rows that best match the described facts or what is asked."""
+        idx = self.by_pid.get(pid, [])
+        if not idx:
+            return []
+        vs = self.emb(cues)
+        sims = np.max(np.maximum(self.row_vec[idx] @ vs.T, self.note_vec[idx] @ vs.T), axis=1)
+        naming = [i for i in idx if self.rows[i]["kind"] in ("relation to me", "known from", "nickname")][:2]
+        out = []
+        for i in naming + [idx[j] for j in np.argsort(-sims)]:
+            if self.rows[i]["note"] not in out:
+                out.append(self.rows[i]["note"])
+            if len(out) >= k:
+                break
+        return out
+
     def retrieve(self, cues, question):
         names = cues.get("name", []) + [f"my {m.replace('my ', '')}" for m in cues.get("me", [])]
         facts, link = cues.get("fact", []), (cues.get("link") or [None])[0]
@@ -450,8 +514,8 @@ class Reader:
         if facts:
             fs = [self.fact_scores(f) for f in facts]
             pool = list(score) if score else list(self.ix.people)
-            for pid in pool:
-                score[pid] += 5 * min(f.get(pid, 0) for f in fs)      # every described fact must match
+            for pid in pool:                                          # every described fact must match
+                score[pid] += 5 * (min(f.get(pid, 0) for f in fs) - self.penalty(pid))
         notes = []
         ym = month_of(time_cue) if time_cue else None
         if not names and facts and ym:                                # "who did I go hiking with in July 2025?"
@@ -463,43 +527,45 @@ class Reader:
                          max(float(self.row_vec[i] @ fv), float(self.note_vec[i] @ fv)) > 0.5):
                     notes.append(r["note"])
                     notes += self.notes_for(r["pid"], "relation to me known from", "", k=2)
-        anchors = [pid for pid, _ in score.most_common(3)]
-        if not anchors:                                               # no clue matched: rows nearest the question
+        num = lambda x: int(x[1:])
+        ranked = sorted(score, key=lambda x: (-score[x], num(x)))
+        if not ranked:                                                # no clue matched: rows nearest the question
             if self.rows:
                 sims = self.row_vec @ self.emb([question])[0]
                 for i in np.argsort(-sims)[:MAX_NOTES]:
                     if self.rows[i]["note"] not in notes:
                         notes.append(self.rows[i]["note"])
             return sorted(notes)[:MAX_NOTES], []
-        top = anchors[:1]
-        if len(anchors) > 1 and score[anchors[1]] >= score[anchors[0]] - 0.5:
-            top = anchors[:2]                                         # too close to call: show both (ambiguity)
+        if facts and not names:                                       # described people: show the best few, each with
+            targets = ranked[:FACT_TARGETS]                           # only the rows that match (desc / who)
+            for t in targets:
+                notes += self.matching_notes(t, facts + [ask_cue], k=8)
+            out = list(dict.fromkeys(notes))[:MAX_NOTES]
+            return sorted(out), targets
+        top = ranked[:1]
+        if len(ranked) > 1 and score[ranked[1]] >= score[ranked[0]] - 0.5:
+            top = ranked[:2]                                          # too close to call: show both (ambiguity)
         targets = top
         if link and self.links:
-            lv = self.emb([link])[0]
-            tg = []
-            for a in top:
-                for i in self.by_pid.get(a, []):
-                    r = self.rows[i]
-                    if r["link"] and float(self.row_vec[i] @ lv) > 0.75 or (r["link"] and link.lower() in r["kind"]):
-                        tg.append((r["link"], r["note"]))
-                for i, r in enumerate(self.rows):
-                    if r["link"] == a and (link.lower() in r["kind"] or float(self.row_vec[i] @ lv) > 0.75):
-                        tg.append((r["pid"], r["note"]))
+            tg = [x for a in top for x in self.link_targets(a, link)]
             if tg:
                 notes += [n for _, n in tg]
                 targets = list(dict.fromkeys(p for p, _ in tg))[:3]
                 for a in top:
                     notes += self.notes_for(a, "relation to me known from", "", k=3)
         for t in targets:
-            notes += self.notes_for(t, ask_cue, time_cue)
+            if facts:
+                notes += self.matching_notes(t, facts + [ask_cue], k=PER_PERSON)
+            else:
+                notes += self.notes_for(t, ask_cue, time_cue)
         out = list(dict.fromkeys(notes))[:MAX_NOTES]
         return sorted(out), targets
 
 
 def answer_prompt(W, note_ids, q):
     by = {n["id"]: n for n in W.notes}
-    lines = [f"[{by[i]['date']}] {by[i]['text']}" for i in sorted(note_ids) if i in by and i not in W.deleted_ids]
+    lines = [f"[{dshow(by[i]['date'])}] {by[i]['text']}" for i in sorted(note_ids) if i in by and
+             i not in W.deleted_ids]
     return ANSWER.format(notes="\n".join(lines) or "(no notes found)", today=TODAY, q=q["q"])
 
 
@@ -510,10 +576,11 @@ class Search:
         self.bm = BM25([n["text"] for n in self.notes])
         self.vec = emb([n["text"] for n in self.notes])
         self.emb = emb
+        self.date = {n["id"]: n["date"] for n in W.notes}
 
-    def top(self, query, k=AGENT_K):
+    def top(self, query, k=AGENT_K, skip=()):
         b = self.bm.top(query, 100)                                      # (BM25.top returns indices in notebook order)
-        q = [t for t in query.lower().split()]
+        q = [t for t in pnorm(query).split() if t not in STOP]     # the same words BM25 indexed
         bm_scores = []
         for i in b:
             tf, d = self.bm.tf[i], self.bm.toks[i]
@@ -526,14 +593,19 @@ class Search:
         for rank in (bm_rank, em_rank):
             for k_, i in enumerate(rank):
                 rrf[int(i)] += 1 / (60 + k_)
-        return [self.notes[i]["id"] for i, _ in rrf.most_common(k)]
+        out = [self.notes[i]["id"] for i, _ in rrf.most_common()]
+        ym = month_of(query)
+        if ym:                                                           # "... in July 2025": that month only
+            inmonth = [i for i in out if self.date[i].startswith(ym)]
+            out = inmonth + [i for i in out if not self.date[i].startswith(ym)] if inmonth else out
+        return [i for i in out if i not in skip][:k]
 
 
 def run_agent(llm, S, W, q, think, seed):
     found, steps, tokens = list(S.top(q["q"])), [], 0
     by = {n["id"]: n for n in W.notes}
     for left in range(AGENT_ROUNDS, -1, -1):
-        notes = "\n".join(f"[{by[i]['date']}] {by[i]['text']}" for i in sorted(found))
+        notes = "\n".join(f"[{dshow(by[i]['date'])}] {by[i]['text']}" for i in sorted(found))
         if left == 0:
             r = ask(llm, ANSWER.format(notes=notes, today=TODAY, q=q["q"]), THINK if think else NOTHINK, think, seed)
             steps.append({"final": True, **{k: r[k] for k in ("text", "cut", "completion_tokens")}})
@@ -544,15 +616,30 @@ def run_agent(llm, S, W, q, think, seed):
         t = r["text"]
         m = re.search(r"SEARCH:\s*(.+)", t)
         if m and "ANSWER:" not in t.split("SEARCH:")[0]:
-            for i in S.top(m.group(1).strip().splitlines()[0]):
-                if i not in found:
-                    found.append(i)
-            found = found[:MAX_NOTES]
+            found += S.top(m.group(1).strip().splitlines()[0], k=AGENT_MORE, skip=set(found))   # 15 new each time
+            found = found[:AGENT_MAX]
             continue
         a = re.search(r"ANSWER:\s*(.+)", t, re.S)
         r = dict(r, text=(a.group(1).strip() if a else t))
         return r, found, steps
     return r, found, steps
+
+
+def run_ccues(llm, S, W, q, cue_text, think, seed):
+    """Search at B's cost: the question and each of B's clue lines become one search each; their results are merged in
+    turn up to 60 messages; one answer call. No extra thinking steps."""
+    qs = [q["q"]] + [line.split(":", 1)[1].strip() for line in cue_text.splitlines()
+                     if ":" in line and line.split(":", 1)[0].strip().lower() in ("name", "me", "fact", "link", "time")
+                     and line.split(":", 1)[1].strip()]
+    lists = [S.top(x, k=AGENT_K) for x in qs]
+    found = []
+    for i in range(AGENT_K):
+        for L in lists:
+            if i < len(L) and L[i] not in found:
+                found.append(L[i])
+    found = found[:MAX_NOTES]
+    r = ask(llm, answer_prompt(W, found, q), THINK if think else NOTHINK, think, seed)
+    return r, found
 
 
 # ============================================================================ pages (the reading ceiling)
@@ -593,48 +680,82 @@ def dates_in(text):
     t, out = text.lower(), set()
     for m in re.finditer(r"(\d{4})-(\d{1,2})-(\d{1,2})", t):
         out.add((int(m.group(1)), int(m.group(2)), int(m.group(3))))
+    for m in re.finditer(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", t):                  # 28/07/2026 (day first)
+        out.add((int(m.group(3)), int(m.group(2)), int(m.group(1))))
     for i, mn in enumerate(MW.MONTHS):
         mn = mn.lower()
-        for m in re.finditer(r"(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?" + mn + r"(?:\s*,?\s*(\d{4}))?", t):
+        for m in re.finditer(r"(?<!\d)(\d{1,2})(?:st|nd|rd|th)?\s+(?:of\s+)?" + mn + r"(?:\s*,?\s*(\d{4}))?", t):
             out.add((int(m.group(2)) if m.group(2) else None, i + 1, int(m.group(1))))
-        for m in re.finditer(mn + r"\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*(\d{4}))?", t):
+        for m in re.finditer(mn + r"\s+(\d{1,2})(?!\d)(?:st|nd|rd|th)?(?:\s*,?\s*(\d{4}))?", t):
             out.add((int(m.group(2)) if m.group(2) else None, i + 1, int(m.group(1))))
     return out
 
 
+NONE_RE = re.compile(r"\b(no longer|any ?more|gave\b.*\baway|sold|stopped|quit|dropped|cleared|none|no pets?|"
+                     r"no car|no plants|not working|isn't working|got rid|(doesn't|does not|don't|do not) "
+                     r"(have|drive|play|work|own|grow|keep))\b")
+
+
+def history_ok(ans, gold, named, hist):
+    """Earlier values may be named only as earlier ("flute, previously bass guitar"): each one must follow a word that
+    marks it as old, and the current value must not be hedged with "or"."""
+    t = ans.lower()
+    for v in named:
+        if v == gold:
+            continue
+        if v not in hist:
+            return False
+        pos = min((m.start() for k in MW.value_keys_any(v) for m in re.finditer(r"(?<![a-z])" + re.escape(k), t)),
+                  default=None)
+        if pos is None or not OLD_MARK.search(t[max(0, pos - 40):pos]):
+            return False
+    return True
+
+
 def score(W, q, ans):
+    """Strict where leniency would reward a missing or hedged memory: an empty (cut-off) answer is always wrong; a
+    deleted or never-stated fact needs an explicit "not in my notes"; a retraction needs an explicit "no longer"."""
     t = ans.lower()
     k = q["kind"]
     abstain = any(a in t for a in ABSTAIN)
     res = {"correct": False, "leak": False, "stale": False}
+    if not t.strip():
+        return res
     if k in ("named", "role", "nick", "fname_ctx", "desc", "two", "upd"):
         named = named_values(q["slot"], ans)
         hist = set(q.get("old", []))
         res["named"] = named
-        res["correct"] = q["gold"] in named and not (set(named) - {q["gold"]} - hist)
+        res["correct"] = q["gold"] in named and history_ok(ans, q["gold"], named, hist) and not abstain
         res["stale"] = q["gold"] not in named and bool(set(named) & hist)
     elif k == "retract":
         named = named_values(q["slot"], ans)
         res["named"] = named
-        res["correct"] = (abstain or any(w in t for w in NONE_WORDS)) and not (set(named) - set(q.get("old", [])))
-    elif k == "deleted":
+        res["correct"] = (bool(NONE_RE.search(t)) and not abstain and "still" not in t and
+                          not (set(named) - set(q.get("old", []))))
+    elif k in ("deleted", "never"):
         named = named_values(q["slot"], ans)
         res["named"] = named
-        res["leak"] = q["leak"] in named
-        res["correct"] = not named
+        res["leak"] = k == "deleted" and q["leak"] in named
+        res["guess"] = bool(named)
+        res["correct"] = abstain and not named
     elif k == "amb":
         ids = set(q["people"])
-        res["correct"] = "which" in t or len(people_named(W, ans) & ids) >= 2
+        first = W.people[q["people"][0]]["first"].lower()
+        asks = bool(re.search(r"\bwhich (one|of)\b|\bdo you mean\b|\bwhich " + re.escape(first) + r"\b", t))
+        res["correct"] = asks or len(people_named(W, ans) & ids) >= 2
     elif k in ("who", "event_who"):
         got = people_named(W, ans)
-        gold = q["person"]
-        first_ok = W.people[gold]["first"].lower() in norm(ans) and \
-            sum(p["first"] == W.people[gold]["first"] for p in W.people) == 1
-        res["correct"] = (gold in got or first_ok) and not (got - {gold})
+        p = W.people[q["person"]]
+        role = W.role_now(p)
+        ok = (q["person"] in got or
+              (role and re.search(rf"\b(my|your) {re.escape(role)}\b", t)) or
+              (p["nick"] and re.search(rf"\b{re.escape(p['nick'].lower())}\b", t)) or
+              (p["first"].lower() in norm(ans) and sum(x["first"] == p["first"] for x in W.people) == 1))
+        res["correct"] = bool(ok) and not (got - {q["person"]}) and not HEDGE.search(t) and not abstain
     elif k == "event_last":
         y, m, d = map(int, q["gold"].split("-"))
-        res["correct"] = any(dm == (m, d) and (yy in (None, y)) for yy, *dm in
-                             [(a, b, c) for a, b, c in dates_in(ans)] for dm in [(dm[0], dm[1])])
+        ds = {(yy or y, mm, dd) for yy, mm, dd in dates_in(ans)}
+        res["correct"] = (y, m, d) in ds and max(ds) == (y, m, d)        # the gold date, named as the latest
     elif k == "event_what":
         acts = [a for a, keys in ACT_KEYS.items() if any(kk in t for kk in keys)]
         res["correct"] = acts == [q["gold"]]
@@ -642,44 +763,92 @@ def score(W, q, ans):
 
 
 # ============================================================================ filing quality (B's write side)
+ME_NAMES = {"me", "i", "myself", "user", "the user", "the writer", "me (the writer)", "writer"}
+
+
 def write_quality(W, ix):
-    """Who each index person really is (majority of the true people in the messages its rows come from), then:
-    wrong merges = rows filed under an index person who is someone else; split people; facts filed correctly."""
+    """Who each index person really is (the majority of the true people in the single-person messages its rows come
+    from). Merges are counted on fact rows only (not links, not "mentioned" tags, not a "me" person), on messages that
+    state a fact:
+      wrong merges  = fact rows filed under an index person who is not mentioned in the row's message (a "Kofi's
+                      flatmate" row filed under Kofi is not a merge: Kofi is mentioned);
+      hard merges   = the same, on messages that name someone without the full name while a same- or near-name person
+                      was already known (the cases that need telling apart);
+      filing by mention style = of the true facts the writer wrote down, the share filed under the right person, by how
+                      that person was mentioned;
+      link precision, lure intrusion (a row carrying a lure's value), people split into several ids, facts filed."""
     truth_people = {n["id"]: {m[1] for m in n["mentions"]} for n in W.notes}
+    me = {pid for pid, p in ix.people.items() if p["full"].lower().strip(" .") in ME_NAMES}
+    rows = [r for r in ix.rows if r["pid"] not in me]
     votes = defaultdict(Counter)
-    for r in ix.rows:
+    for r in rows:
         ppl = truth_people.get(r["note"], set())
         if len(ppl) == 1:
             votes[r["pid"]][next(iter(ppl))] += 1
     who = {pid: c.most_common(1)[0][0] for pid, c in votes.items()}
-    near = set()
-    firsts = Counter(p["first"] for p in W.people)
-    for p in W.people:
-        if firsts[p["first"]] > 1 or any(p["first"] in pair for pair in MW.NEAR_FIRST):
-            near.add(p["id"])
-    filed = [r for r in ix.rows if r["pid"] in who]
-    wrong = [r for r in filed if who[r["pid"]] not in truth_people.get(r["note"], set())]
-    near_rows = [r for r in filed if who[r["pid"]] in near]
-    near_wrong = [r for r in near_rows if who[r["pid"]] not in truth_people.get(r["note"], set())]
-    ids_per_person = Counter(who.values())
-    facts = [(n["id"], pid, s, v) for n in W.notes for pid, s, v in n["facts"] if s in MW.SLOTS and v is not None]
+    fact_notes = {n["id"] for n in W.notes if n["facts"]}
+    fact_rows = [r for r in rows if r["pid"] in who and not r["link"] and r["kind"] != "mentioned" and
+                 r["note"] in fact_notes]
+    wrong = [r for r in fact_rows if who[r["pid"]] not in truth_people.get(r["note"], set())]
+    conf = {n["id"] for n in W.notes if n.get("confusable")}
+    hard = [r for r in fact_rows if r["note"] in conf]
+    hard_wrong = [r for r in hard if who[r["pid"]] not in truth_people.get(r["note"], set())]
     rows_by_note = defaultdict(list)
-    for r in ix.rows:
+    for r in rows:
         rows_by_note[r["note"]].append(r)
-    got = 0
-    for nid, pid, s, v in facts:
-        keys = MW.value_keys(s, v)
-        if any(who.get(r["pid"]) == pid and any(k.strip() in r["value"].lower() for k in keys)
-               for r in rows_by_note[nid]):
-            got += 1
-    lure_rows = [r for r in ix.rows if W.notes[r["note"]]["type"] == "lure" and r["value"].lower() != "none"]
+    by_style, got, facts = defaultdict(lambda: [0, 0]), 0, 0
+    for n in W.notes:
+        style = {m[1]: m[2] for m in n["mentions"]}
+        for pid, s, v in n["facts"]:
+            if s not in MW.SLOTS or v is None:
+                continue
+            facts += 1
+            keys = MW.value_keys(s, v)
+            match = [r for r in rows_by_note[n["id"]] if any(re.search(r"(?<![a-z])" + re.escape(k.strip()),
+                                                                       r["value"].lower()) for k in keys)]
+            if match:
+                st = style.get(pid, "?")
+                ok = any(who.get(r["pid"]) == pid for r in match)
+                by_style[st][0] += ok
+                by_style[st][1] += 1
+                got += ok
+    links = [r for r in rows if r["pid"] in who and r["link"] and r["link"] in who]
+    pairs = {n["id"]: {frozenset((a, b)) for a, rel, b in n["facts"] if rel in MW.RELS} for n in W.notes}
+    link_ok = sum(frozenset((who[r["pid"]], who[r["link"]])) in pairs.get(r["note"], set()) for r in links)
+    lures = [n for n in W.notes if n.get("lure")]
+    intr = sum(any(r["value"].lower() != "none" and r["kind"] != "mentioned" and
+                   any(k.strip() in r["value"].lower() for k in MW.value_keys(n["lure"][0], n["lure"][1]))
+                   for r in rows_by_note[n["id"]]) for n in lures)
+    ids_per_person = Counter(who.values())
     return {"index_people": len(ix.people), "true_people": len(W.people), "rows": len(ix.rows),
-            "unmapped_rows": len(ix.rows) - len(filed),
-            "wrong_merge_pct": 100 * len(wrong) / max(1, len(filed)),
-            "near_name_wrong_pct": 100 * len(near_wrong) / max(1, len(near_rows)),
+            "me_rows": len(ix.rows) - len(rows), "fact_rows": len(fact_rows),
+            "wrong_merge_pct": 100 * len(wrong) / max(1, len(fact_rows)),
+            "hard_merge_pct": 100 * len(hard_wrong) / max(1, len(hard)), "hard_rows": len(hard),
+            "filed_right_by_style": {k: round(100 * a / b, 1) for k, (a, b) in sorted(by_style.items())},
+            "filed_n_by_style": {k: b for k, (a, b) in sorted(by_style.items())},
             "people_split_into_several_ids": sum(1 for c in ids_per_person.values() if c > 1),
-            "facts_filed_pct": 100 * got / max(1, len(facts)),
-            "lure_rows": len(lure_rows), "lure_notes": sum(n["type"] == "lure" for n in W.notes), "who": who}
+            "facts_filed_pct": 100 * got / max(1, facts),
+            "link_precision_pct": 100 * link_ok / max(1, len(links)), "link_rows": len(links),
+            "lure_intrusion_pct": 100 * intr / max(1, len(lures)), "who": who}
+
+
+def forget_test(W, ix, reader):
+    """'Forget Kofi': find the person by full name in the index, remove every message filed under them. Recall = the
+    share of the messages that truly mention them (any way: name, pronoun, "Kofi's flatmate", as a source) that go;
+    collateral = other messages removed with them. Run on the 10 close people and 10 people with a same first name."""
+    firsts = Counter(p["first"] for p in W.people)
+    targets = [p for p in W.people if p["close"]] + [p for p in W.people if firsts[p["first"]] > 1][:10]
+    rec, coll, tot = [], 0, 0
+    for p in targets:
+        ids = [pid for pid, sc in reader.name_match(p["full"]).items() if sc >= 3]
+        removed = {r["note"] for r in ix.rows if r["pid"] in ids}
+        truth = {n["id"] for n in W.notes if any(m[1] == p["id"] for m in n["mentions"]) and n["id"] not in
+                 W.deleted_ids}
+        rec.append(len(removed & truth) / max(1, len(truth)))
+        coll += len(removed - truth)
+        tot += len(removed)
+    return {"forget_recall_pct": 100 * float(np.mean(rec)), "forget_worst_pct": 100 * float(np.min(rec)),
+            "forget_collateral_pct": 100 * coll / max(1, tot), "forget_people": len(targets)}
 
 
 def deletion_audit(W, ix, who):
@@ -701,7 +870,7 @@ class Stub:
         self.W, self.model, self.served = W, "stub", ["stub"]
         self.byq = {q["q"]: q for q in W.questions}
         self.rng, self.lock = random.Random(7), threading.Lock()
-        self.seen_full = set()
+        self.seen_new = set()
 
     def request(self, method, path, body):
         p = body["messages"][0]["content"]
@@ -716,28 +885,58 @@ class Stub:
                 "usage": {"prompt_tokens": len(p) // 4, "completion_tokens": len(t) // 4 + 5}}
 
     def write(self, p):
+        """A writer that can only use ids for people shown in its list (or named in full in the message). Otherwise it
+        does what a real model would: files "Kofi's flatmate" under Kofi, a bare first name under a listed namesake, or
+        writes a NEW person (a split). Also writes link rows, "mentioned" tags and, sometimes, a row about "me"."""
+        people = p.split("People already in the index", 1)[1].split("Earlier messages", 1)[0]
+        visible = set(re.findall(r"P\d+: ([^;\n]+)", people))
         new = p.split("New messages:\n", 1)[1].split("\n\nWrite one line", 1)[0]
         out = []
         for line in new.splitlines():
             nid = int(line.split()[0][1:])
             n = self.W.notes[nid]
+            style = {m[1]: m[2] for m in n["mentions"]}
+            anchor = next((m[1] for m in n["mentions"] if m[2] == "via_anchor"), None)
+
+            def who_for(pid):
+                full = self.W.people[pid]["full"]
+                if full in visible or full in n["text"] or full in self.seen_new:
+                    return full if (full in visible or full in self.seen_new) else f"NEW: {full}"
+                if style.get(pid) == "via" and anchor is not None and self.W.people[anchor]["full"] in visible:
+                    return self.W.people[anchor]["full"]                       # files the flatmate's fact under Kofi
+                first = self.W.people[pid]["first"]
+                namesakes = [v for v in visible if v.split()[0] == first]
+                if namesakes:
+                    return namesakes[0]                                         # a namesake on the list
+                return f"NEW: {first} ({nid})"                                  # a split
+            stated = set()
             for pid, kind, value in n["facts"]:
                 if self.rng.random() < 0.05:
                     continue
-                who = self.W.people[pid]["full"]
+                w = who_for(pid)
                 if self.rng.random() < 0.01:
-                    who = self.rng.choice(self.W.people)["full"]
-                who = who if who in self.seen_full else f"NEW: {who}"
-                self.seen_full.add(who.replace("NEW: ", ""))
+                    w = self.rng.choice(sorted(visible)) if visible else w
+                if w.startswith("NEW: ") and "(" not in w:
+                    self.seen_new.add(w[5:])
+                stated.add(pid)
                 if kind in MW.RELS:
-                    other = self.W.people[value]["full"]
-                    v = other if other in self.seen_full else f"NEW: {other}"
-                    self.seen_full.add(other)
+                    v = who_for(value)
+                    if v.startswith("NEW: ") and "(" not in v:
+                        self.seen_new.add(v[5:])
                 elif kind == "event":
                     v = f"{value[1]} {value[0]}"
                 else:
                     v = "none" if value is None else str(value)
-                out.append(f"#{nid} | {who} | {kind} | {v}")
+                out.append(f"#{nid} | {w} | {kind} | {v}")
+            if anchor is not None and self.rng.random() < 0.5:                  # the link it used to resolve the name
+                tgt = next(m[1] for m in n["mentions"] if m[2] == "via")
+                out.append(f"#{nid} | {who_for(anchor)} | link | {who_for(tgt)}")
+            for _, pid, st in n["mentions"]:
+                if pid not in stated and st != "via_anchor":
+                    out.append(f"#{nid} | {who_for(pid)} | mentioned | -")
+                    stated.add(pid)
+            if n["type"] == "me" and self.rng.random() < 0.3:
+                out.append(f"#{nid} | NEW: Me | {n['lure'][0]} | {n['lure'][1]}")
         return "\n".join(out)
 
     def cues(self, p):
@@ -793,8 +992,10 @@ class Stub:
         if prompt is not None and not all(self.W.notes[n]["text"] in prompt for n in self.key_notes(q)):
             return "not in my notes"
         k = q["kind"]
-        if k in ("deleted", "retract"):
+        if k in ("deleted", "never"):
             return "not in my notes"
+        if k == "retract":
+            return "None any more - that was taken back."
         if k == "amb":
             return "Which one do you mean?"
         if k in ("who", "event_who"):
@@ -806,24 +1007,38 @@ class Stub:
 
 
 # ============================================================================ runner
-ARMS = [("pages", True), ("B", True), ("oracle", True), ("nolinks", True), ("C", True),
-        ("pages", False), ("B", False), ("C", False)]
+ARMS = [("pages", True), ("B", True), ("oracle", True), ("nolinks", True), ("C", True), ("Ccues", True),
+        ("pages", False), ("B", False), ("C", False), ("Ccues", False)]
+WRITER_THINK_ARMS = [("Bw", True), ("Bw", False)]
+HELDOUT_SHA256 = None        # set by amendment 1 when the sealed wordings are committed by hash (test world only)
+
+
+def load_heldout(path):
+    import hashlib
+    raw = open(path, "rb").read()
+    h = hashlib.sha256(raw).hexdigest()
+    if HELDOUT_SHA256 and h != HELDOUT_SHA256:
+        raise SystemExit(f"held-out wordings {path}: sha256 {h} does not match the committed {HELDOUT_SHA256}")
+    return json.loads(raw)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--split", default="dev", choices=["dev", "test"])
-    ap.add_argument("--test-seed", type=int, default=None, help="the scored run: derived from the freeze commit")
+    ap.add_argument("--test-seed", type=int, default=None, help="the scored run: derived at the freeze (amendment 1)")
+    ap.add_argument("--heldout", default=None, help="test world: the sealed held-out wordings (checked against the hash)")
     ap.add_argument("--base-url")
     ap.add_argument("--model", default="Qwen/Qwen3.5-4B")
     ap.add_argument("--workers", type=int, default=48)
     ap.add_argument("--stub", action="store_true")
+    ap.add_argument("--writer-think", action="store_true", help="also run the thinking writer (pre-registered follow-up)")
     ap.add_argument("--dev-limit", type=int, default=None, help="dev only: use the first N messages")
     ap.add_argument("--arms", default=None, help="comma list, e.g. pages:think,B:think")
+    ap.add_argument("--rescore", action="store_true", help="recompute every saved answer's score; no model calls")
     a = ap.parse_args()
-    if a.split == "test" and not a.stub and a.test_seed is None:
-        raise SystemExit("the scored test run needs --test-seed (derived from the freeze commit; see the report)")
-    W = MW.World(a.split, seed=a.test_seed)
+    if a.split == "test" and not a.stub and (a.test_seed is None or a.heldout is None):
+        raise SystemExit("the scored test run needs --test-seed and --heldout (amendment 1)")
+    W = MW.World(a.split, seed=a.test_seed, heldout=load_heldout(a.heldout) if a.heldout else None)
     if a.dev_limit:
         assert a.split == "dev"
         keep = {n["id"] for n in W.notes[:a.dev_limit]}
@@ -836,14 +1051,14 @@ def main():
     os.makedirs(out, exist_ok=True)
     logf = open(os.path.join(out, "run.log"), "a", encoding="utf-8")
 
-    def log(s):
-        print(s, flush=True)
-        logf.write(s + "\n")
+    def log(s_):
+        print(s_, flush=True)
+        logf.write(s_ + "\n")
         logf.flush()
     log(f"=== {time.strftime('%Y-%m-%d %H:%M:%S')} {tag}: {json.dumps(MW.stats(W))}")
     llm = Stub(W) if a.stub else G.Endpoint(a.base_url, a.model, 1)
     emb = Embedder()
-    # write side: B's index (sequential), then the deletions; the oracle index from the truth
+    # write side: B's index (in order), the deletions, the filing checks; the oracle index from the truth
     ix, wstats = build_index(llm, W, os.path.join(out, "write.jsonl"), log)
     wq = write_quality(W, ix)
     who = wq.pop("who")
@@ -851,8 +1066,24 @@ def main():
     left = deletion_audit(W, ix, who)
     ox = oracle_index(W)
     ox.delete(W.deleted_ids)
-    log(f"index written: {json.dumps(wstats)}; filing: {json.dumps(wq)}; deleted values left in other rows: {left}")
     readers = {"B": Reader(ix, W, emb), "nolinks": Reader(ix, W, emb, links=False), "oracle": Reader(ox, W, emb)}
+    fg = forget_test(W, ix, readers["B"])
+    log(f"index written: {json.dumps(wstats)}; filing: {json.dumps(wq)}; forgetting: {json.dumps(fg)}; "
+        f"deleted values left in other rows: {left}")
+    arms = list(ARMS)
+    extra = {}
+    if a.writer_think:
+        if a.stub:
+            llm.seen_new = set()
+        ixw, wsw = build_index(llm, W, os.path.join(out, "write_think.jsonl"), log, think=True)
+        wqw = write_quality(W, ixw)
+        whow = wqw.pop("who")
+        ixw.delete(W.deleted_ids)
+        readers["Bw"] = Reader(ixw, W, emb)
+        extra["writer_think"] = {"write": wsw, "filing": wqw, "rows_left": deletion_audit(W, ixw, whow),
+                                 "forget": forget_test(W, ixw, readers["Bw"])}
+        log(f"thinking writer: {json.dumps(extra['writer_think'])}")
+        arms += WRITER_THINK_ARMS
     S = Search(W, emb)
     path = os.path.join(out, "answers.jsonl")
     done = {}
@@ -860,29 +1091,46 @@ def main():
         for line in open(path, encoding="utf-8"):
             r = json.loads(line)
             done[r["key"]] = r
+    if a.rescore:
+        qs = {q["qid"]: q for q in W.questions}
+        for r in done.values():
+            r.update(score(W, qs[r["qid"]], r["answer"]))
+        with open(path, "w", encoding="utf-8") as fh:
+            for r in done.values():
+                fh.write(json.dumps(r, ensure_ascii=True) + "\n")
+        log(f"rescored {len(done)} saved answers")
     f, lock = open(path, "a", encoding="utf-8"), threading.Lock()
     cue_cache = {}
-    arms = ARMS if not a.arms else [(x.split(":")[0], x.split(":")[1] == "think") for x in a.arms.split(",")]
+    if a.arms:
+        arms = [(x.split(":")[0], x.split(":")[1] == "think") for x in a.arms.split(",")]
+    by_id = {n["id"]: n for n in W.notes}
     for arm, think in arms:
         key0 = f"{arm}|{'think' if think else 'nothink'}"
         todo = [q for q in W.questions if f"{key0}|{q['qid']}" not in done]
         t0 = time.time()
 
+        def cues_for(q, seed):
+            if q["qid"] not in cue_cache:
+                c = ask(llm, CUES.format(q=q["q"]), CUE_KW, False, seed)
+                cue_cache[q["qid"]] = (parse_cues(c["text"]), c["text"])
+            return cue_cache[q["qid"]]
+
         def one(q, arm=arm, think=think, key0=key0):
             seed = zlib.crc32(f"{key0}|{q['qid']}".encode()) % 2**31
             rec = {"key": f"{key0}|{q['qid']}", "arm": arm, "mode": "think" if think else "nothink", "qid": q["qid"],
-                   "kind": q["kind"], "held_out": q["held_out"]}
+                   "kind": q["kind"], "held_out": q["held_out"], "person": q["person"]}
             if arm == "C":
                 r, found, steps = run_agent(llm, S, W, q, think, seed)
                 rec.update(notes=sorted(found), steps=steps)
+            elif arm == "Ccues":
+                cues, raw = cues_for(q, zlib.crc32(q["qid"].encode()) % 2**31)
+                r, found = run_ccues(llm, S, W, q, raw, think, seed)
+                rec.update(notes=sorted(found), cues=raw)
             else:
                 if arm == "pages":
                     ids = pages(W, q)
                 else:
-                    if q["qid"] not in cue_cache:
-                        c = ask(llm, CUES.format(q=q["q"]), CUE_KW, False, seed)
-                        cue_cache[q["qid"]] = (parse_cues(c["text"]), c["text"])
-                    cues, raw = cue_cache[q["qid"]]
+                    cues, raw = cues_for(q, zlib.crc32(q["qid"].encode()) % 2**31)
                     ids, targets = readers[arm].retrieve(cues, q["q"])
                     rec.update(cues=raw, targets=targets)
                 rec["notes"] = ids
@@ -890,6 +1138,10 @@ def main():
             rec.update(answer=r["text"], thinking=r["thinking"][-4000:], cut=r["cut"],
                        prompt_tokens=r["prompt_tokens"], completion_tokens=r["completion_tokens"], sec=r["sec"],
                        gold_found=sorted(set(q["notes"]) & set(rec["notes"])), gold_total=len(q["notes"]))
+            if q["kind"] == "deleted":                   # a design leak: the deleted value reached the reader in a
+                keys = MW.value_keys(q["slot"], q["leak"])   # message about that person
+                rec["leak_shown"] = any(i in W.deleted_ids or (any(m[1] == q["person"] for m in by_id[i]["mentions"])
+                                        and any(k in by_id[i]["text"].lower() for k in keys)) for i in rec["notes"])
             rec.update(score(W, q, r["text"]))
             with lock:
                 f.write(json.dumps(rec, ensure_ascii=True) + "\n")
@@ -897,11 +1149,11 @@ def main():
                 done[rec["key"]] = rec
             return rec
         with ThreadPoolExecutor(a.workers) as ex:
-            rs = list(ex.map(one, todo))
+            list(ex.map(one, todo))
         allr = [r for r in done.values() if r["key"].startswith(key0 + "|")]
         log(f"{key0}: {len(allr)} answers, {100 * np.mean([r['correct'] for r in allr]):.1f}% right, "
             f"{(time.time() - t0) / 60:.1f} min")
-    summary = write_summary(W, done, wstats, wq, left, out)
+    summary = write_summary(W, done, wstats, wq, fg, left, out, arms, extra)
     log("\n".join(summary))
 
 
@@ -914,95 +1166,134 @@ def boot(xs, n=BOOT, seed=0):
     return 100 * xs.mean(), 100 * np.percentile(m, 2.5), 100 * np.percentile(m, 97.5)
 
 
-def write_summary(W, done, wstats, wq, left, out):
+def clustered_diff(done, a1, a2, mode, kinds, seed=1):
+    """A1 - A2 on the same questions, with a 95% interval from a bootstrap that resamples PEOPLE (a misfiled close
+    person spreads to several questions, so questions are not independent)."""
+    A = {r["qid"]: r for r in done.values() if r["arm"] == a1 and r["mode"] == mode and r["kind"] in kinds}
+    B = {r["qid"]: r for r in done.values() if r["arm"] == a2 and r["mode"] == mode and r["kind"] in kinds}
+    ids = sorted(set(A) & set(B))
+    if not ids:
+        return float("nan"), float("nan"), float("nan"), 0
+    groups = defaultdict(list)
+    for i in ids:
+        groups[A[i]["person"]].append(A[i]["correct"] - B[i]["correct"])
+    keys = list(groups)
+    rng = np.random.default_rng(seed)
+    est = 100 * np.mean([d for k in keys for d in groups[k]])
+    bs = []
+    for _ in range(BOOT // 5):
+        pick = rng.choice(len(keys), len(keys))
+        vals = [d for j in pick for d in groups[keys[j]]]
+        bs.append(100 * np.mean(vals))
+    return est, float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5)), len(ids)
+
+
+def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
     def acc(arm, mode, kinds):
         rs = [r for r in done.values() if r["arm"] == arm and r["mode"] == mode and r["kind"] in kinds]
-        return rs, (100 * np.mean([r["correct"] for r in rs]) if rs else float("nan"))
+        return 100 * np.mean([r["correct"] for r in rs]) if rs else float("nan")
     kinds = sorted({q["kind"] for q in W.questions})
-    L = [f"# Messy chat index test: {W.split} (seed {W.seed})", "",
-         "Pre-registration: reports/Messy chat index test 2026.md. Accuracy in %; hard set = " + ", ".join(MW.HARD),
-         ""]
-    L += ["| Kind | n | " + " | ".join(f"{a} {'think' if t else 'off'}" for a, t in ARMS) + " |",
-          "|---|---|" + "---|" * len(ARMS)]
+    L = [f"# Messy chat index test: {W.split} (seed {W.seed}{', held-out wordings' if W.heldout else ''})", "",
+         "Pre-registration: reports/Messy chat index test 2026.md (with amendment 1). Accuracy in %; hard set = " +
+         ", ".join(MW.HARD), ""]
+    L += ["| Kind | n | " + " | ".join(f"{a} {'think' if t else 'off'}" for a, t in arms) + " |",
+          "|---|---|" + "---|" * len(arms)]
     for k in kinds + ["HARD", "ASSOC", "EVENTS", "held-out"]:
         ks = {"HARD": MW.HARD, "ASSOC": MW.ASSOC, "EVENTS": MW.EVENT_KINDS}.get(k, [k])
         cells, n = [], 0
-        for a, t in ARMS:
-            rs = [r for r in done.values() if r["arm"] == a and r["mode"] == ("think" if t else "nothink") and
-                  (r["held_out"] if k == "held-out" else r["kind"] in ks)]
+        for a_, t in arms:
+            rs = [r for r in done.values() if r["arm"] == a_ and r["mode"] == ("think" if t else "nothink") and
+                  ((r["held_out"] and r["kind"] in MW.HARD) if k == "held-out" else r["kind"] in ks)]
             n = max(n, len(rs))
             cells.append(f"{100 * np.mean([r['correct'] for r in rs]):.1f}" if rs else "-")
         L.append(f"| {k} | {n} | " + " | ".join(cells) + " |")
-    # the decision
-    B, b = acc("B", "think", MW.HARD)
-    O, o = acc("oracle", "think", MW.HARD)
-    per = {k: acc("B", "think", [k])[1] for k in MW.ASSOC}
-    Bd = {r["qid"]: r["correct"] for r in done.values() if r["arm"] == "B" and r["mode"] == "think" and
-          r["kind"] in MW.ASSOC}
-    Cd = {r["qid"]: r["correct"] for r in done.values() if r["arm"] == "C" and r["mode"] == "think" and
-          r["kind"] in MW.ASSOC}
-    ids = sorted(set(Bd) & set(Cd))
-    diff = [Bd[i] - Cd[i] for i in ids]
-    rng = np.random.default_rng(1)
-    if ids:
-        d = np.asarray(diff, float)
-        bs = rng.choice(d, (BOOT, len(d))).mean(1)
-        margin, lo, hi = 100 * d.mean(), 100 * np.percentile(bs, 2.5), 100 * np.percentile(bs, 97.5)
-    else:
-        margin = lo = hi = float("nan")
-    leaks = sum(r.get("leak", False) for r in done.values() if r["arm"] == "B" and r["mode"] == "think")
+    # the decision (amendment 1)
+    b, o, bf = acc("B", "think", MW.HARD), acc("oracle", "think", MW.HARD), acc("B", "nothink", MW.HARD)
+    per = {k: acc("B", "think", [k]) for k in MW.ASSOC}
+    searches = {}
+    for sa in ("C", "Ccues"):
+        searches[sa] = {"hard": acc(sa, "think", MW.HARD), "assoc": acc(sa, "think", MW.ASSOC),
+                        "each": {k: acc(sa, "think", [k]) for k in MW.ASSOC},
+                        "margin": clustered_diff(done, "B", sa, "think", MW.ASSOC)}
+    strong = max(searches, key=lambda x: (searches[x]["assoc"] if searches[x]["assoc"] == searches[x]["assoc"] else -1))
+    mg = searches[strong]["margin"]
+    design_leaks = sum(1 for r in done.values() if r["kind"] == "deleted" and r.get("leak") and r.get("leak_shown"))
+    shown = sum(1 for r in done.values() if r["kind"] == "deleted" and r.get("leak_shown"))
+    guesses = {a_: 100 * np.mean([r.get("guess", False) for r in done.values() if r["arm"] == a_ and
+                                  r["mode"] == "think" and r["kind"] == "never"] or [0]) for a_, t in arms if t}
+    leaks = {a_: 100 * np.mean([r.get("leak", False) for r in done.values() if r["arm"] == a_ and
+                                r["mode"] == "think" and r["kind"] == "deleted"] or [0]) for a_, t in arms if t}
     wtok = wstats.get("completion_tokens", 0) / max(1, wstats.get("notes", 1))
-    cond = {"hard": b >= PASS_HARD, "oracle_ratio": o > 0 and b / o >= PASS_ORACLE_RATIO,
+    ptok = wstats.get("prompt_tokens", 0) / max(1, wstats.get("notes", 1))
+    cond = {"B_hard": b >= PASS_HARD, "oracle_ratio": o > 0 and b / o >= PASS_ORACLE_RATIO,
             "assoc_each": all(v >= PASS_ASSOC_EACH for v in per.values()),
-            "margin": lo > 0 and margin >= PASS_MARGIN, "merges": wq["wrong_merge_pct"] <= MERGE_PASS and
-            wq["near_name_wrong_pct"] <= MERGE_NEAR_PASS, "no_leak": leaks == 0, "write_cost": wtok <= WRITE_TOKENS}
+            "margin": mg[1] > 0 and mg[0] >= PASS_MARGIN,
+            "merges": wq["wrong_merge_pct"] <= MERGE_PASS, "hard_merges": wq["hard_merge_pct"] <= HARD_MERGE_PASS,
+            "fast_path": bf >= FAST_PASS, "write_cost": wtok <= WRITE_COMPLETION and ptok <= WRITE_PROMPT,
+            "forget": fg["forget_recall_pct"] >= FORGET_PASS}
     cond = {k: bool(x) for k, x in cond.items()}
-    if all(cond.values()):
-        v = "PASS (choose B: the index written as messages arrive)"
-    elif all(x for k, x in cond.items() if k != "margin"):
-        v = "C (B passes everything except the margin over search: the simpler search agent is enough)"
-    elif b < STOP_HARD or wq["wrong_merge_pct"] > MERGE_STOP or leaks > 0:
-        v = "STOP (the 4B cannot keep its own index: a bigger model writes it overnight, or A as a window)"
+    search_wins = [sa for sa, v in searches.items() if v["hard"] >= PASS_HARD and
+                   all(x >= PASS_ASSOC_EACH for x in v["each"].values()) and
+                   acc("B", "think", MW.ASSOC) - v["assoc"] < PASS_MARGIN]
+    if design_leaks or shown or left:
+        v = ("STOP: a deleted value survived (in an index row elsewhere, or in a message shown to the reader). "
+             "Nothing ships until the design is fixed.")
+    elif all(cond.values()):
+        v = "PASS: build B, the index the phone writes as messages arrive"
+    elif search_wins:
+        v = f"SEARCH: build search ({' and '.join(search_wins)} reaches the bar and the index adds less than 5 points)"
+    elif o < READ_LIMIT:
+        v = "READ-LIMITED: even a perfect index is not found well enough; fix the reading side first"
+    elif b < PASS_ORACLE_RATIO * o or wq["wrong_merge_pct"] > MERGE_STOP or wq["hard_merge_pct"] > HARD_MERGE_STOP:
+        v = ("WRITER-LIMITED: the reading works on a perfect index, the 4B's filing does not; next is the thinking "
+             "writer (pre-registered), a bigger writer only if that fails too")
     else:
-        v = "BETWEEN (neither line met)"
-    ev = acc("B", "think", MW.EVENT_KINDS)[1]
-    fast = acc("B", "nothink", MW.HARD)[1]
-    L += ["", "## Verdict", "",
-          f"- **{v}**",
-          f"- B hard {b:.1f}% (pass >= {PASS_HARD}, stop < {STOP_HARD}); oracle {o:.1f}%, ratio "
+        v = "BETWEEN: neither line met"
+    ev = acc("B", "think", MW.EVENT_KINDS)
+    L += ["", "## Verdict", "", f"- **{v}**",
+          f"- B hard {b:.1f}% (>= {PASS_HARD}); oracle {o:.1f}% (read-limited below {READ_LIMIT}); B/oracle "
           f"{(b / o if o else float('nan')):.2f} (>= {PASS_ORACLE_RATIO}); " +
           ", ".join(f"{k} {x:.1f}%" for k, x in per.items()) + f" (each >= {PASS_ASSOC_EACH})",
-          f"- B minus C on {', '.join(MW.ASSOC)} pooled: {margin:.1f} points [{lo:.1f}, {hi:.1f}] (n = {len(ids)}; "
-          f"pass >= {PASS_MARGIN} with the interval above 0)",
-          f"- Filing: wrong merges {wq['wrong_merge_pct']:.2f}% (<= {MERGE_PASS}), near names "
-          f"{wq['near_name_wrong_pct']:.2f}% (<= {MERGE_NEAR_PASS}); facts filed {wq['facts_filed_pct']:.1f}%; "
-          f"{wq['index_people']} index people for {wq['true_people']} real; "
-          f"{wq['people_split_into_several_ids']} people split into several ids; lure rows {wq['lure_rows']} of "
-          f"{wq['lure_notes']} lure messages",
-          f"- Deletion: answers naming a deleted value {leaks}; rows elsewhere still carrying a deleted value {left}",
-          f"- Writing cost: {wtok:.0f} completion tokens per message (<= {WRITE_TOKENS}); "
-          f"{wstats.get('prompt_tokens', 0) / max(1, wstats.get('notes', 1)):.0f} prompt tokens per message",
-          f"- Events (reported line): B {ev:.1f}% on {', '.join(MW.EVENT_KINDS)} (>= {EVENTS_LINE})",
-          f"- Fast path (reported line): B with thinking off {fast:.1f}% on the hard set (>= {FAST_LINE})",
-          f"- Conditions: {json.dumps(cond)}"]
-    gold_rec = {}
-    for arm in ("B", "oracle", "nolinks", "C"):
+          f"- Fast path: B with thinking off {bf:.1f}% on the hard set (>= {FAST_PASS})"]
+    for sa, sv in searches.items():
+        L.append(f"- {sa}: hard {sv['hard']:.1f}%, {', '.join(MW.ASSOC)} {sv['assoc']:.1f}% (" +
+                 ", ".join(f"{k} {x:.1f}" for k, x in sv['each'].items()) + f"); B minus {sa} on them "
+                 f"{sv['margin'][0]:.1f} points [{sv['margin'][1]:.1f}, {sv['margin'][2]:.1f}] (people resampled, "
+                 f"n = {sv['margin'][3]})" + (" <- the stronger search, used for the margin" if sa == strong else ""))
+    L += [f"- Filing: wrong merges {wq['wrong_merge_pct']:.2f}% (<= {MERGE_PASS}; writer-limited above {MERGE_STOP}); "
+          f"hard cases {wq['hard_merge_pct']:.2f}% of {wq['hard_rows']} (<= {HARD_MERGE_PASS}; writer-limited above "
+          f"{HARD_MERGE_STOP}); facts filed {wq['facts_filed_pct']:.1f}%; filed right by mention style "
+          f"{json.dumps(wq['filed_right_by_style'])} (n {json.dumps(wq['filed_n_by_style'])}); link precision "
+          f"{wq['link_precision_pct']:.1f}% of {wq['link_rows']}; lure intrusion {wq['lure_intrusion_pct']:.1f}%; "
+          f"{wq['index_people']} index people for {wq['true_people']}, {wq['people_split_into_several_ids']} split; "
+          f"{wq['me_rows']} rows about me",
+          f"- Forgetting a whole person: {fg['forget_recall_pct']:.1f}% of their messages removed (>= {FORGET_PASS}); "
+          f"worst person {fg['forget_worst_pct']:.1f}%; collateral {fg['forget_collateral_pct']:.1f}% of removed",
+          f"- Deletion: rows elsewhere still carrying a deleted value {left}; deleted values shown to a reader {shown}; "
+          f"answers naming a deleted value (thinking on) " + ", ".join(f"{k} {x:.1f}%" for k, x in leaks.items()) +
+          "; guessing rate on never-stated facts " + ", ".join(f"{k} {x:.1f}%" for k, x in guesses.items()),
+          f"- Writing cost: {wtok:.0f} completion and {ptok:.0f} prompt tokens per message (<= {WRITE_COMPLETION} and "
+          f"<= {WRITE_PROMPT})",
+          f"- Events (reported line): B {ev:.1f}% (>= {EVENTS_LINE})",
+          f"- Conditions for PASS: {json.dumps(cond)}"]
+    for arm in ("B", "oracle", "nolinks", "C", "Ccues"):
         rs = [r for r in done.values() if r["arm"] == arm and r["mode"] == "think" and r.get("gold_total")]
         if rs:
-            gold_rec[arm] = 100 * np.mean([len(r["gold_found"]) == r["gold_total"] for r in rs])
-    L += [f"- Found every needed message (retrieval, thinking on): " +
-          ", ".join(f"{k} {v:.1f}%" for k, v in gold_rec.items())]
-    for arm, mode in (("B", "think"), ("C", "think"), ("pages", "think"), ("B", "nothink")):
-        rs = [r for r in done.values() if r["arm"] == arm and r["mode"] == mode]
-        if rs:
-            L.append(f"- Cost {arm} {mode}: median completion {np.median([r['completion_tokens'] for r in rs]):.0f} "
-                     f"tokens, cut off {100 * np.mean([r['cut'] for r in rs]):.1f}%")
+            L.append(f"- {arm}: found every needed message for {100 * np.mean([len(r['gold_found']) == r['gold_total'] for r in rs]):.1f}% "
+                     f"of questions; median completion {np.median([r['completion_tokens'] for r in rs]):.0f} tokens; "
+                     f"cut off {100 * np.mean([r['cut'] for r in rs]):.1f}%")
+    if extra.get("writer_think"):
+        x = extra["writer_think"]
+        L.append(f"- Thinking writer: B-w hard {acc('Bw', 'think', MW.HARD):.1f}% (off {acc('Bw', 'nothink', MW.HARD):.1f}%); "
+                 f"merges {x['filing']['wrong_merge_pct']:.2f}%, hard {x['filing']['hard_merge_pct']:.2f}%; forgetting "
+                 f"{x['forget']['forget_recall_pct']:.1f}%; {x['write']['completion_tokens'] / max(1, x['write']['notes']):.0f} "
+                 "completion tokens per message")
     with open(os.path.join(out, "summary.md"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(L) + "\n")
     with open(os.path.join(out, "result.json"), "w", encoding="utf-8") as fh:
-        json.dump({"verdict": v, "conditions": cond, "B_hard": b, "oracle_hard": o, "assoc": per,
-                   "margin": [margin, lo, hi], "filing": wq, "write": wstats, "leaks": leaks, "rows_left": left},
-                  fh, indent=1, default=str)
+        json.dump({"verdict": v, "conditions": cond, "B_hard": b, "oracle_hard": o, "B_off_hard": bf, "assoc": per,
+                   "searches": searches, "filing": wq, "forget": fg, "write": wstats, "rows_left": left,
+                   "deleted_shown": shown, "extra": extra}, fh, indent=1, default=str)
     return L
 
 

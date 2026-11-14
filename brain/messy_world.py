@@ -22,6 +22,7 @@ What makes it messy (the panel's list, reports/Memory road panel 2026.md section
     python brain/messy_world.py --split test
 """
 import argparse
+import copy
 import datetime as dt
 import json
 import os
@@ -49,14 +50,15 @@ JOBS = [("pharmacist", "fills prescriptions at the chemist's", ["pharmacist", "p
         ("vet", "treats sick animals at a clinic", ["vet", "veterinar", "sick animals", "animal clinic"]),
         ("translator", "translates books into English", ["translat"]),
         ("accountant", "does other people's taxes", ["accountant", "taxes", "accounting", "bookkeep"]),
-        ("firefighter", "works at the fire station", ["firefighter", "fire station", "fireman", "firewoman"]),
+        ("firefighter", "works at the fire station", ["firefighter", "fire fighter", "fire station", "fireman",
+                                                      "firewoman"]),
         ("baker", "gets up at four to bake bread", ["baker", "bake bread", "bakery"]),
         ("pilot", "flies planes for an airline", ["pilot", "flies planes", "airline"]),
         ("geologist", "studies rocks for a mining company", ["geologist", "studies rocks", "geology"]),
         ("chef", "cooks in a restaurant kitchen", ["chef", "restaurant kitchen", "cook "]),
         ("architect", "designs buildings", ["architect", "designs buildings"]),
         ("dentist", "fixes people's teeth", ["dentist", "teeth", "dental"]),
-        ("mechanic", "repairs cars at a garage", ["mechanic", "repairs cars", "garage"]),
+        ("mechanic", "repairs cars at a garage", ["mechanic", "repairs cars", "car repair"]),
         ("primary school teacher", "teaches six-year-olds to read", ["primary school", "school teacher", "teaches six",
                                                                     "teacher"]),
         ("optician", "tests people's eyesight", ["optician", "eyesight", "eye test"]),
@@ -70,8 +72,8 @@ HOBBIES = [("climbing", "spends evenings bouldering at the climbing wall", ["cli
            ("sailing", "takes a small sailboat out on weekends", ["sail"]),
            ("salsa dancing", "dances salsa twice a week", ["salsa"]),
            ("fishing", "goes fishing at the lake", ["fishing", "fish at the lake", "angling"]),
-           ("marathon running", "trains for marathons", ["marathon", "running"]),
-           ("watercolour painting", "paints watercolours", ["watercolour", "watercolor", "painting"]),
+           ("marathon running", "trains for marathons", ["marathon"]),
+           ("watercolour painting", "paints watercolours", ["watercolour", "watercolor", "painting", "paints"]),
            ("photography", "takes photos with an old film camera", ["photograph", "film camera", "photos"]),
            ("surfing", "surfs whenever the waves are good", ["surf"]),
            ("archery", "shoots arrows at the archery club", ["archery", "arrows"]),
@@ -92,8 +94,14 @@ PLANTS = ["tomatoes", "chillies", "basil", "orchids", "cacti", "bonsai trees", "
 LANGS = ["Finnish", "Japanese", "Portuguese", "Welsh", "Korean", "Arabic", "Greek", "Swahili", "Icelandic", "Turkish"]
 
 
+EXTRA_KEYS = {"tabby cat": ["cat"], "corn snake": ["snake"], "bass guitar": ["bass"], "bee stings": ["bee"],
+              "house dust": ["dust"], "bonsai trees": ["bonsai"], "peanuts": ["peanut"], "eggs": ["egg"],
+              "drums": ["drum"], "cacti": ["cactus"], "chillies": ["chilli", "chili"], "tomatoes": ["tomato"],
+              "orchids": ["orchid"], "sunflowers": ["sunflower"], "ferns": ["fern"]}
+
+
 def simple(vals):
-    return [(v, v, [v.lower()]) for v in vals]
+    return [(v, v, [v.lower()] + EXTRA_KEYS.get(v, [])) for v in vals]
 
 
 # Each slot: values; note templates (initial, plain restatement, explicit change, correction, retraction); lures; the
@@ -110,21 +118,21 @@ SLOTS = {
                 q="What does {m} do for a living?", desc="{alt}", who_desc="{alt}"),
     "city": dict(vals=simple(CITIES),
                  init=["{M} lives in {v}.", "{M} has a flat in {v}."],
-                 plain=["{M} lives in {v}.", "{M}'s place in {v} is lovely."],
+                 plain=["{M} lives in {v}.", "{M} says {pos} street in {v} is lovely."],
                  change=["{M} moved to {v}.", "{M} just relocated to {v}."],
                  fix=["Correction: {M} lives in {v}, not {old}. I got that wrong."],
                  retract=None,
                  lures=["{M} is visiting {v} this week.", "{M} grew up in {v}.", "{M} flew to {v} for a wedding."],
                  q="Which city does {m} live in?", desc="lives in {v}", who_desc="lives in {v}"),
     "pet": dict(vals=simple(PETS),
-                init=["{M} has a pet {v}.", "{M} adopted a {v}."],
+                init=["{M} has a pet {v}.", "{M} adopted {a} {v}."],
                 plain=["{M} has a pet {v}.", "{M}'s {v} is adorable."],
-                change=["{M} rehomed {pos} old pet and adopted a {v}."],
-                fix=["Correction: {M}'s pet is a {v}, not a {old}."],
+                change=["{M} rehomed {pos} old pet and adopted {a} {v}."],
+                fix=["Correction: {M}'s pet is {a} {v}, not {a2} {old}."],
                 retract=["{M} gave {pos} pet away; no pets at the moment."],
-                lures=["{M} is thinking about getting a {v}.", "{M} looked after a neighbour's {v} last month.",
-                       "{M}'s childhood pet was a {v}."],
-                q="What pet does {m} have?", desc="has a {v}", who_desc="has a pet {v}"),
+                lures=["{M} is thinking about getting {a} {v}.", "{M} looked after a neighbour's {v} last month.",
+                       "{M}'s childhood pet was {a} {v}."],
+                q="What pet does {m} have?", desc="has {a} {v}", who_desc="has a pet {v}"),
     "hobby": dict(vals=HOBBIES,
                   init=["In {pos} free time, {M} loves {v}.", "{M} {alt}."],
                   plain=["{M} {alt}.", "{M} is really into {v}."],
@@ -142,7 +150,7 @@ SLOTS = {
                                                                 "negative."],
                     q="What is {m} allergic to?", desc="is allergic to {v}", who_desc="is allergic to {v}"),
     "car": dict(vals=simple(CARS),
-                init=["{M} drives a {v}.", "{M} picked me up in {pos} {v}."],
+                init=["{M} drives a {v}.", "{M} owns a {v}."],
                 plain=["{M} drives a {v}.", "{M}'s {v} is in the shop again."],
                 change=["{M} sold {pos} old car and bought a {v}."],
                 fix=["Correction: {M} drives a {v}, not a {old}."],
@@ -151,7 +159,7 @@ SLOTS = {
                 q="What car does {m} drive?", desc="drives a {v}", who_desc="drives a {v}"),
     "instrument": dict(vals=simple(INSTRUMENTS),
                        init=["{M} plays the {v}.", "{M} has been practising the {v} every evening."],
-                       plain=["{M} plays the {v}.", "{M} played the {v} at the party."],
+                       plain=["{M} plays the {v}.", "{M} played the {v} at a friend's wedding, apparently."],
                        change=["{M} switched to the {v}."],
                        fix=["Correction: {M} plays the {v}, not the {old}."],
                        retract=["{M} stopped playing music altogether."],
@@ -172,6 +180,8 @@ SLOTS = {
                      lures=["{M} watched a film in {v} with subtitles."],
                      q="Which language is {m} learning?", desc="is learning {v}", who_desc="is learning {v}"),
 }
+# Second wordings, used for half the test world's questions only (no dev question ever uses them)
+Q2 = {'job': "What's {m}'s line of work?", 'city': 'Where is {m} living these days?', 'pet': 'Which animal lives with {m}?', 'hobby': 'How does {m} spend {pos} spare time?', 'allergy': 'What does {m} have to avoid because of an allergy?', 'car': "Which make of car is {m}'s?", 'instrument': 'Which instrument is {m} into?', 'plant': "What is growing on {m}'s balcony?", 'language': 'What language has {m} been studying?'}
 DEV_SLOTS = ["job", "city", "pet", "hobby", "allergy", "car", "instrument"]
 HELD_OUT_SLOTS = ["plant", "language"]
 
@@ -244,8 +254,8 @@ ACTIVITIES = [("dinner", "had dinner with {W} at the Georgian place"), ("hike", 
               ("game night", "had a board game night with {W}"), ("picnic", "had a picnic in the park with {W}"),
               ("karaoke", "did karaoke with {W}")]
 SMALL = ["{M} sent me a funny video.", "Called {M} for a bit, all good.", "{M} says hi.", "{M} is so busy lately.",
-         "{M} recommended a podcast.", "Need to text {M} back.", "{M} complained about the weather again.",
-         "{M} forwarded me a recipe.", "{M} was in a great mood today.", "Forgot to reply to {M}."]
+         "{M} recommended a podcast.", "Need to text {M} back.", "{M} texted to complain about the weather again.",
+         "{M} forwarded me a recipe.", "{M} sounded in a great mood on the phone.", "Forgot to reply to {M}."]
 NOISE = ["Long day at work.", "Ugh, Mondays.", "Remind me to buy milk.", "The rain won't stop.", "Slept badly.",
          "Finally finished that book.", "Need a holiday.", "Cleaned the whole flat today.", "Tried a new pasta recipe.",
          "The bus was late again."]
@@ -254,12 +264,156 @@ MONTHS = ["January", "February", "March", "April", "May", "June", "July", "Augus
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
+# Wordings outside SLOTS/RELS that the generator uses. All of these (and SLOTS' templates, RELS' phrasings, SMALL,
+# ACTIVITIES' phrases) can be replaced for the test world by a sealed file of held-out wordings (load_heldout), written
+# by someone other than the author of the reading code (reports/Messy chat index test 2026.md, amendment 1).
+FRAMES = {
+    "fname_ctx": {c: [f"{{first}} {v[0]}"] for c, v in CIRCLES.items()},   # "Mira from work"
+    "via": ["{anchor}'s {noun}"],
+    "openers": ["Got a message from {m}.", "Heard from {m} today.", "{m} texted me."],
+    "secondhand": ["{src} says {fact}", "{src} told me that {fact}"],
+    "intro_role": ["My {role} {full} called today.", "Having lunch with my {role}, {full}, this weekend."],
+    "intro_new_role": ["My new {role} is {full}."],
+    "intro_circle": ["Met {full} {at} today.", "{full} is {who}."],
+    "intro_party": ["Got introduced to {full} at a party.", "Met {full}, a friend of a friend."],
+    "q_desc": ["the person who {d1} and {d2}"],
+    "q_who": ["Who {d1} and {d2}?"],
+    "q_two": ["{anchor}'s {noun}"],
+    "q_upd": ["{q} now?"],
+    "q_event_last": ["When did I last meet up with {m}?"],
+    "q_event_what": ["What did {m} and I do together in {month} {year}?"],
+    "q_event_who": ["Who did I {verb} with in {month} {year}?"],
+}
+
+
 def art(w):
     return "an" if w[0].lower() in "aeiou" else "a"
 
 
+# ------------------------------------------------------------------ held-out wordings (test world only)
+SLOT_FIELDS = {"init": "{M} {v} {a} {alt} {pos} {pfx}", "plain": "{M} {v} {a} {alt} {pos} {pfx}",
+               "change": "{M} {v} {a} {alt} {pos} {pfx}", "fix": "{M} {v} {a} {alt} {pos} {pfx} {old} {a2}",
+               "retract": "{M} {pos} {pfx}", "lures": "{M} {v} {a} {alt} {pos} {pfx}", "q": "{m} {pos}"}
+FRAME_FIELDS = {"via": "{anchor} {noun}", "openers": "{m}", "secondhand": "{src} {fact}", "intro_role": "{role} {full}",
+                "intro_new_role": "{role} {full}", "intro_circle": "{full} {at} {who}", "intro_party": "{full}",
+                "q_desc": "{d1} {d2}", "q_who": "{d1} {d2}", "q_two": "{anchor} {noun}", "q_upd": "{q}",
+                "q_event_last": "{m}", "q_event_what": "{m} {month} {year}", "q_event_who": "{verb} {month} {year}"}
+
+
+def _fields(t):
+    return set(re.findall(r"{(\w+)}", t))
+
+
+def check_heldout(h):
+    """Every template may use only the placeholders the generator fills; every list must be non-empty."""
+    errs = []
+
+    def ok(where, ts, allowed):
+        if not isinstance(ts, list) or not ts or not all(isinstance(t, str) and t.strip() for t in ts):
+            errs.append(f"{where}: needs a non-empty list of strings")
+            return
+        for t in ts:
+            bad = _fields(t) - _fields(allowed)
+            if bad:
+                errs.append(f"{where}: {t!r} uses {sorted(bad)}")
+            try:
+                t.format(**{k: "x" for k in _fields(t)})
+            except (KeyError, ValueError, IndexError) as e:
+                errs.append(f"{where}: {t!r} does not format ({e})")
+    for slot, d in h.get("slots", {}).items():
+        if slot not in SLOTS:
+            errs.append(f"slots: unknown slot {slot}")
+            continue
+        for f, ts in d.items():
+            if f not in SLOT_FIELDS:
+                errs.append(f"slots.{slot}: unknown field {f}")
+            elif f == "retract" and SLOTS[slot]["retract"] is None:
+                errs.append(f"slots.{slot}: this slot has no retractions")
+            else:
+                ok(f"slots.{slot}.{f}", ts, SLOT_FIELDS[f])
+    for k, ts in h.get("frames", {}).items():
+        if k == "fname_ctx":
+            for c, tl in ts.items():
+                if c in CIRCLES:
+                    ok(f"frames.fname_ctx.{c}", tl, "{first}")
+                else:
+                    errs.append(f"fname_ctx: unknown circle {c}")
+        elif k in FRAME_FIELDS:
+            ok(f"frames.{k}", ts, FRAME_FIELDS[k])
+        else:
+            errs.append(f"frames: unknown frame {k}")
+    for rel, d in h.get("rels", {}).items():
+        if rel not in RELS:
+            errs.append(f"rels: unknown relation {rel}")
+            continue
+        for f in ("fwd", "rev"):
+            if f in d:
+                ok(f"rels.{rel}.{f}", d[f], "{A} {B}")
+    if "small" in h:
+        ok("small", h["small"], "{M}")
+    for act, ts in h.get("activities", {}).items():
+        if act in dict(ACTIVITIES):
+            ok(f"activities.{act}", ts, "{W}")
+        else:
+            errs.append(f"activities: unknown activity {act}")
+    return errs
+
+
+class heldout_wordings:
+    """Use the held-out wordings while one world is built (the generator reads the module's tables), then restore."""
+
+    def __init__(self, h):
+        self.h = h
+
+    def __enter__(self):
+        self.saved = (copy.deepcopy(SLOTS), copy.deepcopy(FRAMES), copy.deepcopy(RELS), list(SMALL), list(ACTIVITIES),
+                      dict(Q2))
+        h = self.h
+        for slot, d in h.get("slots", {}).items():
+            for f, ts in d.items():
+                if f == "q":                     # held-out question wordings: used for every question on this slot
+                    SLOTS[slot]["q"], Q2[slot] = ts[0], ts[-1]
+                else:
+                    SLOTS[slot][f] = list(ts)
+        for k, v in h.get("frames", {}).items():
+            FRAMES[k] = copy.deepcopy(v)
+        for rel, d in h.get("rels", {}).items():
+            sym, fwd, rev, noun = RELS[rel]
+            RELS[rel] = (sym, list(d.get("fwd", fwd)), list(d.get("rev", rev)), noun)
+        if "small" in h:
+            SMALL[:] = h["small"]
+        acts = dict(ACTIVITIES)
+        for act, ts in h.get("activities", {}).items():
+            acts[act] = ts[0]
+        ACTIVITIES[:] = [(a, acts[a]) for a, _ in ACTIVITIES]
+        return self
+
+    def __exit__(self, *a):
+        sl, fr, rl, sm, ac, q2 = self.saved
+        SLOTS.clear()
+        SLOTS.update(sl)
+        FRAMES.clear()
+        FRAMES.update(fr)
+        RELS.clear()
+        RELS.update(rl)
+        SMALL[:] = sm
+        ACTIVITIES[:] = ac
+        Q2.clear()
+        Q2.update(q2)
+
+
 class World:
-    def __init__(self, split="test", seed=None):
+    def __init__(self, split="test", seed=None, heldout=None):
+        """heldout: the sealed wordings (a dict, test world only): checked, then used while this world is built."""
+        if heldout is not None:
+            errs = check_heldout(heldout)
+            if errs:
+                raise SystemExit("held-out wordings rejected:\n" + "\n".join(errs[:20]))
+            with heldout_wordings(heldout):
+                self.__init__(split, seed)
+            self.heldout = True
+            return
+        self.heldout = False
         assert split in SEEDS
         self.seed = SEEDS[split] if seed is None else seed
         self.split, self.rng = split, random.Random(self.seed)
@@ -308,8 +462,16 @@ class World:
         circles = list(CIRCLES)
         for k, p in enumerate(self.people[N_CLOSE:]):
             p["circle"] = circles[k % len(circles)] if k < 170 else None    # 80 known only through someone
+        # role turnover: "my boss" and "my flatmate" change who they mean partway through (the old holders become
+        # "my old boss"; questions about "my boss" mean the new one)
+        late = [p for p in self.people[N_CLOSE:] if p["circle"] is None]
+        for (role, day), new in zip((("boss", 300), ("flatmate", 420)), late[:2]):
+            old = next(q for q in self.people[:N_CLOSE] if q["role"] == role)
+            t = START + dt.timedelta(days=day)
+            old["role_until"], new["role"], new["role_from"] = t, role, t
+        nicks = list(NICKS)                                     # a copy: building a second world must not lose names
         for p in r.sample(self.people, N_NICK):
-            p["nick"] = NICKS.pop(r.randrange(len(NICKS))) if NICKS else None
+            p["nick"] = nicks.pop(r.randrange(len(nicks)))
         # attributes: each person gets 4-7 slots (close people: all), each with a value history
         for p in self.people:
             k = len(self.slots) if p["close"] else r.randint(4, min(7, len(self.slots)))
@@ -345,6 +507,8 @@ class World:
         self.intro_day = {}
         for p in self.people:                                   # introductions: close people early, others spread
             d = self._day(0, 40) if p["close"] else self._day(0, span - 200)
+            if p.get("role_from"):
+                d = p["role_from"]
             self.intro_day[p["id"]] = d
             A.append({"date": d, "type": "intro", "p": p["id"], "order": 0})
             if p["nick"]:
@@ -402,6 +566,9 @@ class World:
                           "when": r.choice(["today", "yesterday", "weekday", "explicit"])})
         for _ in range(250):
             A.append({"date": self._day(), "type": "noise"})
+        for _ in range(150):                                    # facts about the user: must not be filed under anyone
+            sl = r.choice(self.slots)
+            A.append({"date": self._day(), "type": "me", "slot": sl, "vi": r.randrange(len(SLOTS[sl]["vals"]))})
         for a in A:
             if a["date"] > END:
                 a["date"] = END
@@ -412,8 +579,11 @@ class World:
         """Pick how a person is mentioned, given what has been said so far; returns (text, style)."""
         r, p = self.rng, self.people[pid]
         styles = [("full", 25)]
-        if p["role"]:
+        role = self.role_at(p, ctx["date"])
+        if role:
             styles.append(("role", 30))
+        if p["role"] and p.get("role_until") and ctx["date"] >= p["role_until"]:
+            styles.append(("old_role", 12))
         if p["nick"] and p["nick_known"]:
             styles.append(("nick", 12))
         fc = (p["first"], p["circle"])
@@ -421,11 +591,14 @@ class World:
             styles.append(("fname_ctx", 15))
         recent = [x for x in ctx["recent"][-3:]]
         same_first_recent = [q for q in ctx["recent"][-10:] if self.people[q]["first"] == p["first"] and q != pid]
-        if self.known_first[p["first"]] == {pid} or (pid in recent and not same_first_recent):
+        if self.known_first[p["first"]] == {pid}:
             styles.append(("fname", 15))
-        via = [(rel, b) for rel, b, way in p["links"] if self.link_known.get((b, rel, pid)) and
-               self.unique_link(b, rel)]
-        if via and via_ok:
+        elif pid in recent and not same_first_recent:
+            styles.append(("fname", 40))                       # clear only from what was just said
+        # "Kofi's mentor" names the person who IS Kofi's mentor: pid -> b for one-way relations
+        via = [(rel, b) for rel, b, way in p["links"] if self.link_known.get((pid, rel, b)) and
+               (RELS[rel][0] or way == "out") and self.unique_role(b, rel)]
+        if via and via_ok and not p["close"]:
             styles.append(("via", 6))
         names, weights = zip(*styles)
         st = r.choices(names, weights)[0]
@@ -433,21 +606,44 @@ class World:
             t = p["full"]
         elif st == "role":
             t = f"my {p['role']}"
+        elif st == "old_role":
+            t = f"my old {p['role']}"
         elif st == "nick":
             t = p["nick"]
         elif st == "fname_ctx":
-            t = f"{p['first']} {CIRCLES[p['circle']][0]}"
+            t = r.choice(FRAMES["fname_ctx"][p["circle"]]).format(first=p["first"])
         elif st == "fname":
             t = p["first"]
         else:
             rel, b = r.choice(via)
-            bt, _ = self._mention(b, ctx, via_ok=False)
-            t = f"{bt}'s {RELS[rel][3]}"
+            bt, bst = self._mention(b, ctx, via_ok=False)
+            t = r.choice(FRAMES["via"]).format(anchor=bt, noun=RELS[rel][3])
             st = "via"
+            self.last_anchor = (bt, b, "via_anchor")
         return (t[0].upper() + t[1:] if cap else t), st
 
     def unique_link(self, b, rel):
         return sum(1 for rr, _, _ in self.people[b]["links"] if rr == rel) == 1
+
+    def unique_role(self, b, rel):
+        """b has exactly one <rel> (for one-way relations: exactly one person who is b's <rel>)."""
+        if RELS[rel][0]:
+            return self.unique_link(b, rel)
+        return sum(1 for rr, _, way in self.people[b]["links"] if rr == rel and way == "in") == 1
+
+    def role_at(self, p, d):
+        if not p["role"] or (p.get("role_from") and d < p["role_from"]) or (p.get("role_until") and
+                                                                           d >= p["role_until"]):
+            return None
+        return p["role"]
+
+    def role_now(self, p):
+        return self.role_at(p, TODAY)
+
+    def call(self, pid):
+        """How a question names a person: "my boss" for a current role, else the full name."""
+        r = self.role_now(self.people[pid])
+        return f"my {r}" if r else self.people[pid]["full"]
 
     def _render(self):
         r = self.rng
@@ -456,27 +652,49 @@ class World:
         for p in self.people:
             p["nick_known"] = False
         ctx = {"recent": []}
-        self.notes = []
+        self.notes, self.last_anchor = [], None
+        near = {a: b for x, y in NEAR_FIRST for a, b in ((x, y), (y, x))}
+
+        def emit(text, facts, mentions, typ, form, extra=None):
+            text = text[0].upper() + text[1:]
+            if any(st == "via" for _, _, st in mentions) and self.last_anchor:
+                mentions = mentions + [self.last_anchor]
+            conf = set()                                # said without the full name while a same/near name was known
+            for _, q, st in mentions:
+                if st in ("full", "via_anchor"):
+                    continue
+                f = self.people[q]["first"]
+                if self.known_first[f] - {q} or self.known_first.get(near.get(f), set()):
+                    conf.add(q)
+            self.notes.append({"id": len(self.notes), "date": d.isoformat(), "text": text, "facts": facts,
+                               "mentions": mentions, "type": typ, "form": form, "confusable": sorted(conf),
+                               **(extra or {})})
+            self.last_anchor = None
+            for _, q, _ in mentions:
+                ctx["recent"].append(q)
+            ctx["recent"] = ctx["recent"][-20:]
         for a in self.abstract:
             pid = a.get("p")
             p = self.people[pid] if pid is not None else None
             facts, mentions = [], []
             d = a["date"]
+            ctx["date"] = d
             if a["type"] == "intro":
                 self.known_first[p["first"]].add(pid)
                 if p["circle"]:
                     self.known_fc[(p["first"], p["circle"])].add(pid)
-                if p["role"]:
-                    text = r.choice([f"My {p['role']} {p['full']} called today.",
-                                     f"Having lunch with my {p['role']}, {p['full']}, this weekend."])
+                if p.get("role_from"):
+                    text = r.choice(FRAMES["intro_new_role"]).format(role=p["role"], full=p["full"])
+                    facts.append((pid, "relation to me", p["role"]))
+                elif p["role"]:
+                    text = r.choice(FRAMES["intro_role"]).format(role=p["role"], full=p["full"])
                     facts.append((pid, "relation to me", p["role"]))
                 elif p["circle"]:
                     c = CIRCLES[p["circle"]]
-                    text = r.choice([f"Met {p['full']} {c[2]} today.", f"{p['full']} is {c[1]}."])
+                    text = r.choice(FRAMES["intro_circle"]).format(full=p["full"], at=c[2], who=c[1])
                     facts.append((pid, "known from", p["circle"]))
                 else:
-                    text = r.choice([f"Got introduced to {p['full']} at a party.",
-                                     f"Met {p['full']}, a friend of a friend."])
+                    text = r.choice(FRAMES["intro_party"]).format(full=p["full"])
                     facts.append((pid, "known from", "a party"))
                 mentions.append((p["full"], pid, "full"))
             elif a["type"] == "nick":
@@ -500,8 +718,10 @@ class World:
                     S = SLOTS[a["slot"]]
                     slot = a["slot"]
                     canon, alt, _ = S["vals"][a["vi"]]
-                    if a["type"] == "lure":
-                        tmpl = r.choice(S["lures"])
+                    if a["type"] == "lure":                # no "my sister's mother" lures (that is mum)
+                        ok = [t for t in S["lures"] if "{M}'s" not in t] if (p["close"] or st in (
+                            "role", "old_role")) else S["lures"]
+                        tmpl = r.choice(ok or S["lures"])
                     else:
                         form = {"init": "init", "repeat": "plain", "plain": "plain", "change": "change",
                                 "fix": "fix"}[a["form"]]
@@ -514,21 +734,42 @@ class World:
                 if a["type"] == "fact" and a["form"] == "fix":
                     old = SLOTS[slot]["vals"][a["old"]][0]
                     fill["old"], fill["a2"] = old, art(old)
-                if use_pron:                                    # "Ran into Mira. She works as a pharmacist."
-                    opener = r.choice(["Ran into {m} at the shops.", "Caught up with {m}.", "Saw {m} earlier."])
+                if use_pron:                                    # "Heard from Mira. She works as a pharmacist."
+                    opener = r.choice(FRAMES["openers"])
                     body = tmpl.replace("{M}'s", pr[2].capitalize()).replace("{M}", pr[0].capitalize())
                     if p["pron"] == "they":
                         body = (body.replace("They is", "They are").replace("They has", "They have")
                                 .replace("They works", "They work").replace("They lives", "They live")
                                 .replace("They drives", "They drive").replace("They plays", "They play")
                                 .replace("They grows", "They grow").replace("They takes", "They take")
-                                .replace("They switched", "They switched").replace("They quit", "They quit"))
-                    text = opener.format(m=m if st not in ("role",) else m.lower()) + " " + body.format(**fill)
-                    mentions.append((m, pid, st))
-                    mentions.append((pr[0], pid, "pronoun"))
+                                .replace("They switched", "They switched").replace("They quit", "They quit")
+                                .replace("now works", "now work").replace("They rehomed", "They rehomed")
+                                .replace("They gave", "They gave").replace("They stopped", "They stopped")
+                                .replace("They sold", "They sold").replace("They dropped", "They dropped")
+                                .replace("They replaced", "They replaced").replace("They owns", "They own")
+                                .replace("They says", "They say").replace("They adopted", "They adopted")
+                                .replace("They has", "They have").replace("They loves", "They love"))
+                    first_part = opener.format(m=m)
+                    if r.random() < 0.4:                        # the pronoun in the next message, not this one
+                        emit(first_part, [], [(m, pid, st)], "small", None)
+                        text = body.format(**fill)
+                        mentions.append((pr[0], pid, "pronoun_prev"))
+                    else:
+                        text = first_part + " " + body.format(**fill)
+                        mentions.append((m, pid, st))
+                        mentions.append((pr[0], pid, "pronoun"))
                 else:
                     text = tmpl.replace("{M}", m).format(**fill) if "{M}" in tmpl else tmpl.format(M=m, **fill)
                     mentions.append((m, pid, st))
+                    src = [b for rel, b, way in p["links"] if self.link_known.get((pid, rel, b)) or
+                           self.link_known.get((b, rel, pid))]
+                    if a["type"] == "fact" and src and st != "via" and r.random() < 0.12:
+                        q = self.people[r.choice(src)]
+                        if not text.startswith("Correction"):
+                            fact = text[0].lower() + text[1:] if st in ("role", "old_role") else text
+                            text = r.choice(FRAMES["secondhand"]).format(src=q["full"], fact=fact)
+                        if q["full"] in text:
+                            mentions.append((q["full"], q["id"], "source"))
             elif a["type"] == "rel":
                 b, rel = a["q"], a["rel"]
                 sym, fwd, rev, noun = RELS[rel]
@@ -567,15 +808,12 @@ class World:
                 text = r.choice([f"{when[0].upper() + when[1:]} I {body}.", f"I {body} {when}."])
                 facts.append((pid, "event", (act, ed.isoformat())))
                 mentions.append((m, pid, st))
+            elif a["type"] == "me":
+                text = {'job': "I've been thinking I'd make a decent {v}.", 'city': 'I might move to {v} one day.', 'pet': "I'd love {a} {v} of my own.", 'hobby': 'I tried {v} myself this week.', 'allergy': "Turns out I'm a bit allergic to {v} too.", 'car': 'Test-drove a {v} myself today.', 'instrument': 'I picked up the {v} again for an hour.', 'plant': 'Bought some {v} for my own windowsill.', 'language': 'Downloaded an app to learn some {v} myself.'}[a["slot"]].format(v=SLOTS[a["slot"]]["vals"][a["vi"]][0], a=art(SLOTS[a["slot"]]["vals"][a["vi"]][0]))
             else:
                 text = r.choice(NOISE)
-            text = text[0].upper() + text[1:]
-            nid = len(self.notes)
-            self.notes.append({"id": nid, "date": d.isoformat(), "text": text, "facts": facts,
-                               "mentions": mentions, "type": a["type"], "form": a.get("form")})
-            for _, q, _ in mentions:
-                ctx["recent"].append(q)
-            ctx["recent"] = ctx["recent"][-20:]
+            emit(text, facts, mentions, a["type"], a.get("form"),
+                 {"lure": [a["slot"], SLOTS[a["slot"]]["vals"][a["vi"]][0]]} if a["type"] in ("lure", "me") else None)
 
     # ------------------------------------------------------------------ deletions
     def _delete(self):
@@ -585,7 +823,14 @@ class World:
             for pid, slot, v in n["facts"]:
                 if slot in SLOTS:
                     src[(pid, slot)].append(n["id"])
-        # a lure or any other note naming the same value for the same person would keep the fact alive: exclude
+        # a lure or any other note naming the same value for the same person would keep the fact alive: exclude;
+        # so would a same- or near-name person with that value (a mix-up would look like a leak)
+        near = {a: b for x, y in NEAR_FIRST for a, b in ((x, y), (y, x))}
+        partners = defaultdict(set)
+        for p in self.people:
+            for q in self.people:
+                if q["id"] != p["id"] and (q["first"] == p["first"] or near.get(p["first"]) == q["first"]):
+                    partners[p["id"]].add(q["id"])
         cands = []
         for (pid, slot), ids in src.items():
             if len(ids) != 1 or self.people[pid].get("retracted", {}).get(slot):
@@ -596,7 +841,9 @@ class World:
             keys = SLOTS[slot]["vals"][[c for c, _, _ in SLOTS[slot]["vals"]].index(val)][2]
             other = [n for n in self.notes if n["id"] != ids[0] and any(m[1] == pid for m in n["mentions"]) and
                      any(k in n["text"].lower() for k in keys)]
-            if not other:
+            vi = [c for c, _, _ in SLOTS[slot]["vals"]].index(val)
+            twin = any(vi in self.people[q]["attrs"].get(slot, []) for q in partners[pid])
+            if not other and not twin:
                 cands.append((pid, slot, ids[0], val))
         self.rng.shuffle(cands)
         self.deleted = cands[:N_DELETE]
@@ -641,10 +888,12 @@ class World:
         def ask(kind, text, gold, pid, slot=None, notes=(), **extra):
             Q.append({"qid": f"{kind}-{sum(q['kind'] == kind for q in Q):03d}", "kind": kind, "q": text, "gold": gold,
                       "person": pid, "slot": slot, "notes": sorted(set(n for n in notes if n is not None)),
-                      "held_out": slot in HELD_OUT_SLOTS or extra.get("rel") in HELD_OUT_RELS, **extra})
+                      "held_out": (slot in HELD_OUT_SLOTS or extra.get("rel") in HELD_OUT_RELS or
+                                   any(x in HELD_OUT_SLOTS for x in extra.get("uses", []))), **extra})
 
         def qtext(slot, m, pid):     # pid None: the person is not named, so no pronoun hint ("their")
-            return SLOTS[slot]["q"].format(m=m, pos=PRON[P[pid]["pron"]][2] if pid is not None else "their")
+            tmpl = Q2[slot] if (self.split == "test" and r.random() < 0.5) else SLOTS[slot]["q"]
+            return tmpl.format(m=m, pos=PRON[P[pid]["pron"]][2] if pid is not None else "their")
 
         def facts_of(pid):
             return [(s, cur[(pid, s)]) for s in self.slots if cur[(pid, s)][0] is not None]
@@ -654,25 +903,27 @@ class World:
         # named: full name (easy reference)
         for pid, s in live[:150]:
             v, h, n = cur[(pid, s)]
-            ask("named", qtext(s, P[pid]["full"], pid), v, pid, s, n[-1:] + [self.intro_note(pid)])
-        # role: "my sister"
-        for p in P[:N_CLOSE]:
+            ask("named", qtext(s, P[pid]["full"], pid), v, pid, s, n[-1:] + [self.intro_note(pid)], old=h)
+        # role: "my sister" (the people who hold a role today; "my boss" means the new boss)
+        for p in [q for q in P if self.role_now(q)]:
             for s, (v, h, n) in facts_of(p["id"]):
-                ask("role", qtext(s, f"my {p['role']}", p["id"]), v, p["id"], s, n[-1:] + [self.intro_note(p["id"])])
+                ask("role", qtext(s, f"my {self.role_now(p)}", p["id"]), v, p["id"], s,
+                    n[-1:] + [self.intro_note(p["id"])], old=h)
         # nick
         nicked = [p for p in P if p["nick"]]
         for p in nicked:
             for s, (v, h, n) in r.sample(facts_of(p["id"]), min(2, len(facts_of(p["id"])))):
                 ask("nick", qtext(s, p["nick"], p["id"]), v, p["id"], s, n[-1:] + [self.nick_note(p["id"]),
-                                                                                     self.intro_note(p["id"])])
+                                                                                     self.intro_note(p["id"])], old=h)
         # fname_ctx: first name shared, circle tells them apart
         fc = Counter((p["first"], p["circle"]) for p in P if p["circle"])
         firsts = Counter(p["first"] for p in P)
         for p in P:
             if p["circle"] and firsts[p["first"]] > 1 and fc[(p["first"], p["circle"])] == 1:
                 for s, (v, h, n) in r.sample(facts_of(p["id"]), min(3, len(facts_of(p["id"])))):
-                    ask("fname_ctx", qtext(s, f"{p['first']} {CIRCLES[p['circle']][0]}", p["id"]), v, p["id"], s,
-                        n[-1:] + [self.intro_note(p["id"])])
+                    ask("fname_ctx", qtext(s, r.choice(FRAMES["fname_ctx"][p["circle"]]).format(first=p["first"]),
+                                           p["id"]), v, p["id"], s,
+                        n[-1:] + [self.intro_note(p["id"])], old=h)
         # amb: first name alone, two people share it
         for f, c in firsts.items():
             if c > 1:
@@ -684,7 +935,7 @@ class World:
         def descr(s, v):
             canon = [c for c, _, _ in SLOTS[s]["vals"]]
             alt = SLOTS[s]["vals"][canon.index(v)][1]
-            return SLOTS[s]["desc"].format(v=v, alt=alt)
+            return SLOTS[s]["desc"].format(v=v, alt=alt, a=art(v))
         pairs = []
         for p in P:
             fs = facts_of(p["id"])
@@ -700,17 +951,20 @@ class World:
             rest = [(s, c) for s, c in facts_of(pid) if s not in (s1, s2)]
             if rest and sum(q["kind"] == "desc" for q in Q) < 150:
                 s3, (v3, h3, n3) = r.choice(rest)
-                m = f"the person who {descr(s1, c1[0])} and {descr(s2, c2[0])}"
-                ask("desc", qtext(s3, m, None), v3, pid, s3, c1[2][-1:] + c2[2][-1:] + n3[-1:] + [self.intro_note(pid)])
+                m = r.choice(FRAMES["q_desc"]).format(d1=descr(s1, c1[0]), d2=descr(s2, c2[0]))
+                ask("desc", qtext(s3, m, None), v3, pid, s3, c1[2][-1:] + c2[2][-1:] + n3[-1:] + [self.intro_note(pid)],
+                    old=h3, uses=[s1, s2])
                 used[pid] += 1
             elif sum(q["kind"] == "who" for q in Q) < 150:
-                ask("who", f"Who {descr(s1, c1[0])} and {descr(s2, c2[0])}?", P[pid]["full"], pid, None,
-                    c1[2][-1:] + c2[2][-1:] + [self.intro_note(pid)])
+                ask("who", r.choice(FRAMES["q_who"]).format(d1=descr(s1, c1[0]), d2=descr(s2, c2[0])), P[pid]["full"],
+                    pid, None,
+                    c1[2][-1:] + c2[2][-1:] + [self.intro_note(pid)], uses=[s1, s2])
                 used[pid] += 1
         # two-hop: "What pet does my sister's neighbour have?" (the anchor by role, full name or nickname)
         for p in r.sample(P, len(P)):
             for rel, b, way in p["links"]:
-                if not self.unique_link(p["id"], rel) or (way == "in" and not RELS[rel][0]):
+                # "p's mentor" is the person who mentors p: for one-way relations b -> p ("in" for p)
+                if not self.unique_role(p["id"], rel) or (way == "out" and not RELS[rel][0]):
                     continue
                 if sum(q["kind"] == "two" for q in Q) >= 180:
                     break
@@ -718,20 +972,21 @@ class World:
                 if not fs:
                     continue
                 s, (v, h, n) = r.choice(fs)
-                anchor = f"my {p['role']}" if p["role"] else (p["nick"] if p["nick"] and r.random() < 0.3 else p["full"])
+                anchor = (f"my {self.role_now(p)}" if self.role_now(p) else
+                          (p["nick"] if p["nick"] and r.random() < 0.3 else p["full"]))
                 noun = RELS[rel][3]
                 pid_note = self.rel_note(p["id"], rel, b) if way == "out" else self.rel_note(b, rel, p["id"])
-                ask("two", qtext(s, f"{anchor}'s {noun}", b), v, b, s, n[-1:] + [pid_note, self.intro_note(p["id"]),
+                ask("two", qtext(s, r.choice(FRAMES["q_two"]).format(anchor=anchor, noun=noun), None), v, b, s, n[-1:] + [pid_note, self.intro_note(p["id"]),
                                                                                   self.intro_note(b)],
-                    anchor=p["id"], rel=rel)
+                    anchor=p["id"], rel=rel, old=h)
         # updates: the current value after at least one change
         upd = [(pid, s) for pid, s in live if cur[(pid, s)][1]]
         for pid, s in upd[:180]:
             v, h, n = cur[(pid, s)]
-            m = f"my {P[pid]['role']}" if P[pid]["role"] else P[pid]["full"]
+            m = self.call(pid)
             form = next(nn["form"] for nn in reversed(self.notes) if nn["id"] in n and nn["form"] in
                         ("plain", "change", "fix", "repeat", "init"))
-            ask("upd", qtext(s, m, pid).replace("?", " now?"), v, pid, s, n[-2:] + [self.intro_note(pid)], old=h,
+            ask("upd", r.choice(FRAMES["q_upd"]).format(q=qtext(s, m, pid).rstrip("?")), v, pid, s, n[-2:] + [self.intro_note(pid)], old=h,
                 form=form)
         # retractions
         for p in P:
@@ -739,28 +994,34 @@ class World:
                 v, h, n = self.current(p["id"], s)
                 if v is not None:                               # never ask a retraction the notes later undo
                     continue
-                m = f"my {p['role']}" if p["role"] else p["full"]
+                m = self.call(p["id"])
                 last = [x for x in self.notes if x["id"] in n]
                 ask("retract", qtext(s, m, p["id"]), "", p["id"], s, [x["id"] for x in last[-2:]] +
                     [self.intro_note(p["id"])], old=[f[2] for x in last for f in x["facts"] if f[2]])
         # deleted facts: the right answer is that the notes don't say; naming the value is a leak
         for pid, s, nid, val in self.deleted:
-            m = f"my {P[pid]['role']}" if P[pid]["role"] else P[pid]["full"]
+            m = self.call(pid)
             ask("deleted", qtext(s, m, pid), "", pid, s, [self.intro_note(pid)], leak=val)
+        # never stated (control, not in the hard set): how often does a reader name a value nobody ever gave?
+        never = [(p["id"], s) for p in P for s in self.slots if s not in p["attrs"]]
+        r.shuffle(never)
+        for pid, s in never[:100]:
+            ask("never", qtext(s, self.call(pid), pid), "", pid, s, [self.intro_note(pid)])
         # events
         for p in P:
             ev = sorted(self.events(p["id"]))
             if not ev:
                 continue
-            m = f"my {p['role']}" if p["role"] else p["full"]
+            m = self.call(p["id"])
             last = ev[-1]
-            ask("event_last", f"When did I last meet up with {m}?", last[0], p["id"], "event",
+            ask("event_last", r.choice(FRAMES["q_event_last"]).format(m=m), last[0], p["id"], "event",
                 [last[2], self.intro_note(p["id"])])
             months = Counter(e[0][:7] for e in ev)
             for e in ev:
                 if months[e[0][:7]] == 1 and r.random() < 0.6:
                     y, mo = e[0][:7].split("-")
-                    ask("event_what", f"What did {m} and I do together in {MONTHS[int(mo) - 1]} {y}?", e[1], p["id"],
+                    ask("event_what", r.choice(FRAMES["q_event_what"]).format(m=m, month=MONTHS[int(mo) - 1], year=y),
+                        e[1], p["id"],
                         "event", [e[2], self.intro_note(p["id"])])
         by_act_month = defaultdict(list)
         for p in P:
@@ -770,7 +1031,8 @@ class World:
             if len(lst) == 1 and r.random() < 0.8:
                 pid, e = lst[0]
                 y, mo = ym.split("-")
-                ask("event_who", f"Who did I {dict(ACTIVITY_VERB)[act]} with in {MONTHS[int(mo) - 1]} {y}?",
+                ask("event_who", r.choice(FRAMES["q_event_who"]).format(verb=dict(ACTIVITY_VERB)[act],
+                                                                       month=MONTHS[int(mo) - 1], year=y),
                     P[pid]["full"], pid, "event", [e[2], self.intro_note(pid)], act=act)
         return Q
 
@@ -783,6 +1045,15 @@ HARD = ["role", "nick", "fname_ctx", "desc", "who", "two", "upd", "retract", "de
         "event_who"]
 ASSOC = ["desc", "who", "two"]                  # the kinds the owner's association idea is judged on
 EVENT_KINDS = ["event_last", "event_what", "event_who"]
+
+
+def value_keys_any(v):
+    """The answer keys of a value, whatever its slot."""
+    for S in SLOTS.values():
+        for c, alt, keys in S["vals"]:
+            if c == v:
+                return keys
+    return [v.lower()]
 
 
 def value_keys(slot, v):

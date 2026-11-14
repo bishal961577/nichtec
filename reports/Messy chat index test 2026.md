@@ -247,3 +247,162 @@ python brain/messy_index.py --base-url URL/v1 --split dev --dev-limit 1500     #
 python brain/messy_index.py --base-url URL/v1 --split test --test-seed N       # the scored run, after the freeze
 modal app stop nichtec-qwen4b
 ```
+
+## 14. Amendment 1: the expert review (before any model call)
+
+All four reviewers (`research_notes/Messy chat test review 2026/`) said **run with changes, not as is**. Every change
+below was made before any model call. Each was checked with the offline stub on the dev world. Where this section and
+sections 1–13 differ, this section decides.
+
+### 14.1 Bugs that would have decided the result
+
+| Bug | Found by | Fix (checked) |
+|---|---|---|
+| **One-way relations were reversed.** "Agnes's landlord" had Agnes's tenant as the answer (23 of 180 two-hop questions in dev, up to 39 in test worlds). 41 "X's mentor" mentions also pointed the wrong way. | all four | Two-hop uses the incoming link for one-way relations. Mentions check the right direction. Script check: 0 of 33 two-hop and 0 of 65 mentions wrong. |
+| **The writer's list of known people missed the person behind "Kofi's flatmate"** about 45% of the time, and the list was not reproducible. | architect, neuroscientist | Every name-matched person's link partners are added, sorted deterministically, up to 25 extra. |
+| **The scorer marked right answers wrong:** "Your mum"; an earlier value given as context; "a cat", "peanut", "egg", "fire fighter", "28/07/2026", "the lido", "games night". | neuroscientist, researcher | Accepted. The earlier values of every attribute question are allowed when marked as earlier. Extra short keys. Day-first dates. |
+| **The scorer marked wrong answers right:** an empty, cut-off answer on deleted questions; "Still Tesla – she sold her old one"; "bass guitar, previously flute" when flute is current; "Could be Pia"; any "which"; any list of dates. | neuroscientist, researcher | An empty answer is always wrong. Deleted and never-stated questions need an explicit "not in my notes". A retraction needs an explicit "no longer" and no "still". An earlier value must follow a word marking it as earlier. Hedged who-answers are wrong. "which" must ask which person. event_last must name the right date as the latest. 34 adversarial cases all scored right (dev check). A date-reading bug found by the stub ("October 20" read out of "October 2026") is fixed. |
+| **The wrong-merge count punished correct rows:** a "Kofi's flatmate" link row filed under Kofi, rows about "me", and small-talk rows diluting the rate. | founder, researcher | The anchor of "Kofi's flatmate" counts as mentioned. Merges are counted on fact rows only (not links, not "mentioned" tags, not a "me" person), on messages that state a fact. |
+| **Busy people won description searches** (hub capture: the right person was first only 74% of the time on the truth index). | architect, neuroscientist | Fan correction: −0.03 × ln(rows) per person (ACT-R). Described-person questions show the best 5 people, each with only the rows matching the description. |
+| **Link following used a fixed 0.75 threshold** that paraphrased kinds miss ("works with" vs colleague: 0.53). | architect, neuroscientist | The best-matching link rows of the anchor, compared on the kind and the message; every partner within 0.05 of the best is shown, so the reader can check direction. |
+| **C's third follow-up search added nothing** (cut at 60), and its word search used different words from the index. | architect, neuroscientist, researcher | Each follow-up adds 15 new messages, up to 80. Same tokenizer as BM25. A month in a query restricts the search to that month (a date tool). |
+| **Messages implied unrecorded meetings** ("ran into", "picked me up") that change "when did I last meet". | neuroscientist, researcher | Openers and templates no longer imply an in-person meeting. Messages show their weekday ("on Thursday" needs it). |
+| **Kinship lures were facts about someone else** ("My sister's mother works as a pharmacist" is mum). | all four | No "X's relative" lures for close family. Close family is never named through a stranger. |
+| **Deletions whose value a same- or near-name person has** would turn a mix-up into a "leak". | architect | Excluded. |
+| **Building the dev and then the test world in one program lost every nickname.** | moderator, while fixing | The nickname list is copied per world. |
+
+### 14.2 A messier world (closer to real chat)
+
+| Change | Asked by | Dev world |
+|---|---|---|
+| Pronouns in the next message ("Heard from Mira today." / "She adopted a ferret.") | neuroscientist, founder, researcher | 137 |
+| Bare first names clear only from what was just said | neuroscientist | more frequent (weight 40) |
+| Roles change hands: a new boss and a new flatmate partway through; the old ones become "my old boss" | neuroscientist, founder | 2 changes, 34 "old" mentions |
+| Second-hand news ("Kofi says Mira moved to Lyon": Mira's fact, Kofi only the source) | founder | 107 |
+| Facts about the user ("I'd love a ferret of my own"), which must not be filed under anyone | founder | 150 |
+| Test-only question wordings for half the test world's attribute questions | founder | test world only |
+| **Sealed held-out wordings** (14.4) | researcher | test world only |
+| A "never stated" control: 100 questions about a fact nobody ever gave, to measure guessing (not in the hard set) | researcher | 100 |
+
+The dev world now has 6,292 messages. Questions are as in section 3, plus "never". The writer prompt was rewritten so that
+none of its examples echoes the generator's own sentences.
+
+**The writer also tags every person a message mentions, even with no fact** ("mentioned"). This supports "forget this
+person" and measures mention resolution by style (founder).
+
+### 14.3 New arms and measures
+
+- **Ccues** (founder): the equal-cost search opponent. B's own clue call, then one hybrid search per clue, merged up to 60
+  messages, then the same single answer call. Thinking on and off.
+- **The thinking writer** (architect, founder): the same writer prompt with thinking on (8K cap). It runs on the same
+  test world if the verdict is WRITER-LIMITED or BETWEEN. Its arms are Bw (think/off). If Bw meets every PASS condition,
+  the verdict is "PASS with an overnight thinking writer".
+- **Forgetting a whole person** (founder): "forget Kofi" finds Kofi by full name in the index and removes every message
+  filed under him. Scored on the 10 close people and 10 with a same first name: the share of the messages that truly
+  mention them (any way) that go, and the collateral.
+- **Filing measures** (neuroscientist, researcher):
+  - wrong merges on the hard subset: messages naming someone without the full name while a same- or near-name person was
+    already known;
+  - facts filed right by mention style;
+  - link precision;
+  - lure intrusion;
+  - rows about "me";
+  - guessing rate on never-stated facts against naming rate on deleted facts.
+- **Oracle** (architect): canonical value wording only. The question's alternative phrase is no longer handed to it.
+- **The B − search margin** uses a bootstrap that resamples people, not questions (researcher: one misfiled close person
+  spreads over many questions). It is measured against the stronger of C and Ccues.
+
+### 14.4 Designer's advantage: sealed wordings and a beacon seed
+
+**Sealed held-out wordings.** A separate agent, not the author of the reading code, wrote new wordings for the test world:
+- question wordings for every attribute, and frames for described, who, two-hop, update and event questions;
+- mention frames ("Mira from work"-style, "Kofi's flatmate"-style), openers, second-hand frames, introductions;
+- fact sentences, changes, corrections, retractions and lures for every attribute;
+- relation phrasings;
+- small talk and activity phrases.
+
+The file stays outside the repository. Only its SHA-256 is committed (14.6). The author of the reading code does not read
+it before the freeze. `messy_world.check_heldout` checks its placeholders. The scored run refuses any file whose SHA-256
+differs (`load_heldout`). Values and the scorer's keys do not change, so scoring is unaffected.
+
+**Seed.** The freeze commit names a drand round R at least one hour in the future: the public randomness beacon, default
+chain, 30-second rounds. The test seed is `int(sha256("<freeze commit hash>:<randomness of round R>")[:8], 16)`. The
+randomness does not exist when the freeze is committed, so retrying commits cannot pick a friendly world (researcher's
+fix).
+
+### 14.5 The lines (replacing section 5)
+
+Read on the test world with the held-out wordings. B with thinking on, hard set, automatic score unless stated. Checked in
+this order:
+
+| Outcome | Condition | What the team does next |
+|---|---|---|
+| **STOP** | any row elsewhere still carries a deleted value, or a deleted value reaches a reader in a message about that person | nothing ships until the design is fixed |
+| **PASS** | all of: B ≥ 85%; B ≥ 0.9 × oracle; desc, who and two each ≥ 75%; B beats the stronger search arm (C or Ccues) by ≥ 5 points on desc + who + two, with the people-resampled 95% interval above 0; wrong merges ≤ 1%; hard-subset merges ≤ 5%; **B with thinking off ≥ 80%**; writing ≤ 150 completion and ≤ 500 prompt tokens per message; forgetting a whole person ≥ 98% | build B, the index written as messages arrive |
+| **SEARCH** | a search arm (C or Ccues) has ≥ 85% on the hard set, each of desc, who and two ≥ 75%, and B leads it by less than 5 points on them | build search; drop the index |
+| **READ-LIMITED** | oracle < 85% | the reading side fails even on a perfect index: fix retrieval first |
+| **WRITER-LIMITED** | oracle ≥ 85% and (B < 0.9 × oracle, or wrong merges > 3%, or hard-subset merges > 10%) | the thinking writer next (pre-registered); a bigger writer only if that fails too |
+| **BETWEEN** | anything else | reported as is |
+
+**Reported only:**
+- events (B ≥ 70% on the three event kinds);
+- held-out questions;
+- the thinking-off scores of every arm;
+- C's costs.
+
+**Hand audit (researcher, neuroscientist):**
+- blind to arm;
+- 100 answers each from B and from the stronger search arm;
+- half scored right, half scored wrong.
+
+If more than 2% of either arm's audited answers are scorer errors, both scores are reported and the audited ones decide.
+A scorer fix found this way is applied to every arm with `--rescore`.
+
+**Development phase (section 8):** C's retrieval code (fusion, k, the month filter, the agent's rounds up to 4) may be
+tuned on the dev world as B's may (researcher, architect).
+
+### 14.6 Commitments
+
+- Sealed held-out wordings, SHA-256: *(added when the agent delivers the file, in the commit that records it)*.
+- Freeze: a later commit that says FREEZE, names drand round R and lists the code files.
+
+### 14.7 Asked for and not done (honest list)
+
+| Request | Why not now |
+|---|---|
+| A no-model "code index" (regex filer) as a control for template parsing (researcher) | The sealed wordings remove most of what a regex could exploit. Worth adding if B passes, to show how much is parsing. |
+| Multi-fact and multi-person messages, the AI's own replies, typos, birthdays and plans (founder, researcher) | Larger generator changes. Section 11's limits stand: a PASS here would still overstate real chat. |
+| A model-paraphrased slice (panel, researcher) | No 27B endpoint. The sealed wordings are the partial substitute. |
+| Richer events: where, multi-message episodes, order and frequency (neuroscientist) | Events stay single-message date lookups. Reported without a line. |
+| 100 questions written by the owner after the test world exists (founder) | Optional: if the owner wants to, before the scored run, as an extra reported set. |
+| A 4-bit arm (researcher, earlier panel) | Not part of this test's question. |
+
+### 14.8 The panel's forecasts (recorded before any model call)
+
+| | Wrong merges | B hard | C hard | B − C on desc + who + two | Verdict probabilities (as reviewed, before the fixes) |
+|---|---|---|---|---|---|
+| Architect | 2.5% (1.2–5) | 70–82% | 55–70% | +10 to +30 | PASS 8, C 2, BETWEEN 55, STOP 35 |
+| Neuroscientist | 2.5% (1.5–4) | 76% (70–82) | 55–70% | +5 to +20 | STOP 50, BETWEEN 40, PASS 6, C 4 |
+| Founder | 3–6% | 65% (58–74) | 55% (45–65) | +5 to +20 | STOP 70, BETWEEN 25, PASS 4, C 1 |
+| Researcher | 2–6% | 70% (62–78) | 64% (55–75) | +12 (+5 to +25) | STOP 55, BETWEEN 38, PASS 4, C 3 |
+| Moderator (section 12) | 2–5% | 65–80% | 70–85% | −5 to +10 | STOP 40, BETWEEN 35, C 15, PASS 10 |
+
+Three of four reviewers expect B to beat search on the association questions, and a 4B writer with thinking off to miss
+the merge line. Under the new outcome map that result reads **WRITER-LIMITED**, which points to the thinking writer. The
+old map would have read STOP.
+
+### 14.9 Offline check after the amendment (stub, dev world)
+
+The stub is a perfect reader, so its accuracy measures retrieval. Its writer now behaves like a model: it uses ids only
+for people on its list. Otherwise it files "Kofi's flatmate" under Kofi, uses a listed namesake, or writes a new person.
+It misses 5% of facts and misfiles 1%.
+
+| | Result |
+|---|---|
+| pages | 100.0% on every kind (bookkeeping and scorer agree with the truth) |
+| oracle | 96.6% on the hard set |
+| B (stub writer) | 92.2%: desc 80.7, who 91.3, two 92.8; filing by style 94–100%, "Kofi's flatmate" 94.4%; link precision 86.4%; forgetting 98.0% (worst person 88.5%) |
+| nolinks | 81.8% (two-hop 3.3%) |
+| C, Ccues | not meaningful (the stub's searches only repeat the question) |
+| Deletion | 0 rows left; 0 deleted values shown to a reader |
+| Writing cost | 11 completion and 98 prompt tokens per message (the stub's; a model will write more) |
