@@ -1,0 +1,38 @@
+{
+ "served": [
+  "Qwen/Qwen3.5-4B"
+ ],
+ "model": "Qwen/Qwen3.5-4B",
+ "cold": {
+  "prompt_tokens": 60185,
+  "cached_tokens": null,
+  "completion_tokens": 10,
+  "sec": 4.73,
+  "truncated": false
+ },
+ "warm_other_question": {
+  "prompt_tokens": 60184,
+  "cached_tokens": null,
+  "completion_tokens": 11,
+  "sec": 0.55,
+  "truncated": false
+ },
+ "warm_same": {
+  "prompt_tokens": 60184,
+  "cached_tokens": null,
+  "completion_tokens": 11,
+  "sec": 0.63,
+  "truncated": false
+ },
+ "warm_thinking": {
+  "prompt_tokens": 60182,
+  "cached_tokens": null,
+  "completion_tokens": 638,
+  "sec": 10.18,
+  "truncated": false
+ },
+ "bm25_pages": {
+  "prompt_tokens": 277,
+  "sec": 0.39
+ }
+}
