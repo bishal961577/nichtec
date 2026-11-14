@@ -522,3 +522,14 @@ writer.
 2. **FREEZE commit**, naming drand round R (15.2).
 3. **The scored run** on the beacon-seeded test world with the sealed wordings. Then the blind hand audit (14.5), the
    hand checks in 15.2 and the n-gram audit.
+
+Commands (replacing section 13's last two lines; the endpoint now needs a Modal proxy auth token, see
+`brain/modal_qwen4b.py`):
+
+```
+python brain/messy_coverage.py                                                  # the list check (15.1), no model
+python brain/messy_index.py --base-url URL/v1 --split dev --dev-limit 1500      # development (allowed)
+python brain/messy_index.py --base-url URL/v1 --split test \
+    --freeze-commit <FREEZE hash> --beacon-round <R> \
+    --heldout "research_notes/Messy chat test review 2026/sealed/messy_heldout.json.gz.b64"   # the scored run
+```
