@@ -1,0 +1,44 @@
+# Wrong answers in the primary condition (hard set, thinking on, whole pile), for the hand audit
+
+- fname-001 [no value] Q: Where does Jovan, the one who is learning Vietnamese, live? | gold: Lisbon | answer: "The notes don't say where Jovan Rossi lives."
+- retract-000 [old value] Q: What car does Signe Esposito drive? | gold: none | answer: 'Signe Esposito no longer has a car. She sold her Subaru.'
+- retract-001 [old value] Q: What does Hana Aydin enjoy doing in their free time? | gold: none | answer: 'Hana Aydin has given up sailing and has no hobby at the moment.'
+- retract-002 [old value] Q: What pet does Omar Pena have? | gold: none | answer: 'Omar Pena has no pet now. His canary went to a new home.'
+- retract-003 [old value] Q: What pet does Annika Asante have? | gold: none | answer: 'Annika Asante has no pet now. Her cockatiel has gone to a new home.'
+- retract-004 [old value] Q: What car does Amara Eriksen drive? | gold: none | answer: 'Amara Eriksen no longer has a car. She sold her Citroen.'
+- retract-005 [old value] Q: Which instrument does Agnes Wojcik play? | gold: none | answer: 'Agnes Wojcik no longer plays any instrument. She gave up the harmonica.'
+- retract-006 [old value] Q: What pet does Milan Blom have? | gold: none | answer: 'Milan Blom has no pet now. The corn snake was rehomed.'
+- retract-007 [old value] Q: Which instrument does Elena Cardoso play? | gold: none | answer: 'Elena Cardoso no longer plays an instrument. She had played the oboe, but has given it up.'
+- retract-008 [old value] Q: Which language is Gideon Kristensen learning? | gold: none | answer: "Gideon Kristensen isn't learning any language now. He stopped learning Icelandic."
+- retract-009 [old value] Q: Which instrument does Darius Lombardi play? | gold: none | answer: 'Darius Lombardi no longer plays any instrument. He had played the flute, but a later note says he gave it up.'
+- retract-010 [old value] Q: Which language is Yara Pena learning? | gold: none | answer: 'Yara Pena is not learning any language now. She had been learning Hebrew, but stopped.'
+- retract-011 [old value] Q: What pet does Isolde Romano have? | gold: none | answer: 'Isolde Romano has no pet now. Her hamster has gone to a new home.'
+- retract-012 [old value] Q: What does Kwame Quintero enjoy doing in their free time? | gold: none | answer: 'Kwame Quintero has given up archery and has no hobby at the moment.'
+- retract-013 [old value] Q: Which instrument does Oscar Ribeiro play? | gold: none | answer: 'He no longer plays any instrument. He gave up the bagpipes.'
+- retract-014 [old value] Q: What pet does Alma Ozturk have? | gold: none | answer: 'Alma Ozturk has no pet now. Her pet gecko was rehomed.'
+- retract-015 [old value] Q: Which instrument does Selin Vega play? | gold: none | answer: 'Selin Vega no longer plays any instrument. They had played the accordion, but later notes say they gave it up.'
+- retract-016 [old value] Q: Which instrument does Sofia Racz play? | gold: none | answer: 'Sofia Racz no longer plays an instrument. She gave up the violin.'
+- retract-017 [old value] Q: What car does Shirin Fuentes drive? | gold: none | answer: 'Shirin Fuentes no longer has a car. She sold her Volvo.'
+- retract-018 [old value] Q: What does Chloe Ofori enjoy doing in their free time? | gold: none | answer: 'Chloe Ofori has given up fencing and has no hobby at the moment.'
+- retract-019 [old value] Q: What does Noor Takahashi enjoy doing in their free time? | gold: none | answer: 'Noor Takahashi has no hobby at the moment; they gave up fishing.'
+- retract-020 [old value] Q: What does Lena Nagy enjoy doing in their free time? | gold: none | answer: 'Lena Nagy has given up birdwatching and has no hobby at the moment.'
+- retract-021 [old value] Q: Which language is Teo Moreau learning? | gold: none | answer: 'Teo Moreau is no longer learning a language. They stopped learning Greek.'
+- retract-022 [old value] Q: Which instrument does Lars Holm play? | gold: none | answer: 'Lars Holm no longer plays any instrument. He had given up the trombone.'
+- retract-023 [old value] Q: Which language is Ciaran Okafor learning? | gold: none | answer: "Ciaran Okafor isn't learning any language now. They stopped learning Dutch."
+- retract-024 [old value] Q: What does Bilal Carvalho enjoy doing in their free time? | gold: none | answer: 'Nothing at the moment. Bilal Carvalho has given up orienteering and has no hobby right now.'
+- retract-025 [old value] Q: What pet does Teo Kaplan have? | gold: none | answer: 'No pet. His iguana has gone to a new home.'
+- retract-026 [old value] Q: What car does Wren Halvorsen drive? | gold: none | answer: 'Wren Halvorsen no longer has a car. They sold their Lexus.'
+- retract-027 [old value] Q: What car does Leila Horvath drive? | gold: none | answer: 'Leila Horvath no longer has a car. She sold her Kia.'
+- retract-028 [old value] Q: Which language is Carmen Horvath learning? | gold: none | answer: "She isn't learning any language now. She stopped learning Turkish."
+- retract-029 [old value] Q: What does Faisal Cardoso enjoy doing in their free time? | gold: none | answer: 'Faisal Cardoso has given up orienteering and has no hobby at the moment.'
+- two-041 [no value] Q: Where does Elif Fontana's personal trainer live? | gold: Lyon | answer: "The notes don't say where Pablo Polat, Elif Fontana's personal trainer, lives."
+- two-146 [another person's value] Q: What does Joaquin Caruso's cousin enjoy doing in their free time? | gold: gardening | answer: 'Maya Velez enjoys gardening, and Viktor Nyberg enjoys cycling. Both are listed as cousins of Joaquin Caruso.'
+- two-190 [no value] Q: Which language is Ludo Delgado's personal trainer learning? | gold: Swahili | answer: "The notes don't say who Ludo Delgado's personal trainer is, so I can't tell which language that person is learning."
+- upd-009 [old value] Q: What does Elif Cruz work as? | gold: cartographer | answer: 'Journalist'
+- upd-026 [old value] Q: What does Leah Eriksen work as now? | gold: butcher | answer: 'Beekeeper'
+- upd-044 [old value] Q: What does Sven Nagy work as now? | gold: physiotherapist | answer: 'Economist'
+- upd-052 [old value] Q: Which city does Mirela Rojas live in now? | gold: Riga | answer: 'Edinburgh'
+- upd-075 [old value] Q: Where does Akira Fischer live? | gold: Vilnius | answer: 'Lyon'
+- upd-125 [old value] Q: What does Petra Fischer work as? | gold: physiotherapist | answer: 'Translator'
+- upd-132 [old value] Q: Which city does Rui Ionescu live in now? | gold: Dresden | answer: 'Brno'
+- who-038 [no name] Q: Who enjoys woodcarving in their free time and is learning Portuguese? | gold: Ksenia Greco | answer: 'No one in the notes is both a woodcarver and learning Portuguese.'
