@@ -1,0 +1,51 @@
+{
+ "tag": "Qwen3.5-4B",
+ "meta": {
+  "people": 840,
+  "groups": 420,
+  "notes": 5025,
+  "personal_questions": {
+   "reword": 150,
+   "same": 100,
+   "two": 200,
+   "upd": 135,
+   "prev": 20,
+   "retract": 30,
+   "desc": 120,
+   "who": 60,
+   "fname": 60,
+   "amb": 30,
+   "close": 90
+  },
+  "hard_set": 695,
+  "bm25_recall": {
+   "reword": 1.0,
+   "same": 1.0,
+   "two": 0.005,
+   "upd": 1.0,
+   "prev": 1.0,
+   "retract": 0.967,
+   "desc": 0.0,
+   "fname": 0.45,
+   "close": 1.0
+  },
+  "world_edits": 2764
+ },
+ "verdict": "PHONE SELECTION NOT VIABLE: hard set (695 questions), thinking on: two-round search 50.2%, perfect page selection 99.9%, search/selected 0.50 [0.46, 0.54] (viable >= 0.8)",
+ "primary": {
+  "whole": 99.85611510791367,
+  "bm25": 50.21582733812949,
+  "selected": 99.85611510791367,
+  "ratio_whole": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "ratio_bm25": [
+   0.5028818443804034,
+   0.46464646464646464,
+   0.539568345323741
+  ],
+  "latency": 0.55
+ }
+}

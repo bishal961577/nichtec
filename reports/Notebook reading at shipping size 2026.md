@@ -619,7 +619,10 @@ The search failed where it has to find a person without their name:
 | who | 33% | 98% |
 | two-hop | 68.5% | 98.5% |
 
-**Accuracy is flat across notebook size** (all questions, thinking on): 95.9% at 100 notes, 95.7% at 1,000, 95.3% at 5,000.
+~~**Accuracy is flat across notebook size** (all questions, thinking on): 95.9% at 100 notes, 95.7% at 1,000, 95.3% at 5,000.~~
+**Corrected (section 9.7):** those three numbers compare different question sets. On the same 635 name-keyed questions
+accuracy slides from 97.5% (perfect pages) to 95.9% (100 notes), 95.7% (1,000) and 93.4% (5,000). The hard kinds were
+never run at 100 or 1,000 notes.
 
 ### 9.2 Hand audit
 
@@ -737,6 +740,29 @@ LongMemEval-S (cleaned), thinking on, judged by Claude Haiku 5.5 with thinking o
 - composition without thinking;
 - notebooks well beyond 100K–180K tokens (years of use);
 - the two weaknesses found here: plain restatement updates and similar names.
+
+### 9.7 Corrections found by the memory road panel (after the result)
+
+The panel (`reports/Memory road panel 2026.md`) audited this section. The moderator checked each point below against
+the code or the answers.
+
+1. **Two-round search was weaker than its name suggests.** Its "enough, or search again?" step ran with thinking off, 64
+   tokens, greedy, as registered in section 7.3.
+   - Claude Haiku 5.5 said DONE, so did not search again, on 44 of 120 described-person questions, 46 of 60 who-is
+     questions and 19 of 200 two-hop questions.
+   - When it searched again, two-hop scored 75% and who-is 64%, against 5% and 24% when it stopped.
+   - The verdict WHOLE NOTEBOOK stands as registered. "Two-round search is not enough" applies to this design, with
+     word search over single notes, not to search in general.
+   - Word search over one page per person finds the right person 97.5–100% of the time on the same questions (panel
+     report, section 3).
+2. **"Flat with size" compared different question sets.** Corrected in section 9.1.
+3. **Part C is weaker than its line.**
+   - The judge was Claude Haiku 5.5 grading its own model's answers.
+   - The budget ran out on 28 full-history questions, 21 of them temporal-reasoning questions, so "full = evidence-only"
+     rests on a subset that is not random.
+   - Section 1 quotes LongMemEval's own "about 115K tokens". In Claude tokens the histories average about 181K.
+4. **The thinking text was not saved** for any Claude answer: the Claude API path keeps only the text blocks. Nor was it
+   saved for the 4B answers before the 15:23 UTC restart.
 
 ## 10. Amendment 3: the phone-sized model on a Modal GPU (before any Qwen3.5-4B call)
 
@@ -875,6 +901,124 @@ sample.
 tokens against 1,418 allowed. Those answers came from the first batch to finish, so the true median can only be as long
 or longer. A PASS is therefore already ruled out. The sample decides between FAIL, BETWEEN and READS BUT TOO SLOW.
 
-## 11. Result: Qwen3.5-4B
+## 11. Result: Qwen3.5-4B (14 November 2026)
 
-(Not yet run.)
+**Serving.** Qwen/Qwen3.5-4B on vLLM 0.33.0 on one L40S (Modal), 16-bit, Qwen's thinking sampling (amendment 3).
+
+**Run notes:**
+- Run in four resumable segments. The answers file keeps every answer exactly once.
+- The thinking text is saved from 15:23 UTC.
+- The whole-notebook arm with thinking on ran on a fixed 220-question sample (amendment 5).
+- Summary: `results/notebook_read_Qwen3.5-4B/summary.md`; sample line: `python brain/whole_sample.py --report`.
+
+### 11.1 Phone line (section 7.5): PHONE SELECTION NOT VIABLE, as registered
+
+| Hard set (695), thinking on | Accuracy | Median completion tokens |
+|---|---|---|
+| Perfect pages | **99.9%** | 709 |
+| Two-round search | **50.2%** | 2,605 |
+| BM25 top 20 | 41.9% | 3,574 |
+
+Two-round search / perfect pages = **0.50 [0.46, 0.54]**, below the 0.8 line.
+
+**As section 9.7 shows for Claude, this measures the registered search design.** The 4B said DONE without searching
+again on:
+- 117 of 120 described-person questions;
+- 59 of 60 who-is questions;
+- 105 of 200 two-hop questions.
+
+When it did search again, it scored 54% on two-hop (1% when it stopped) and 89% on first-name questions (49% when it
+stopped).
+
+Word search over one page per person finds the right person 97.5–100% of the time on these questions (panel report,
+section 3). But in this world every note carries the full name, so filing is trivial.
+
+### 11.2 Whole notebook on the phone-sized model (amendment 4's line, on amendment 5's sample): FAIL
+
+**Thinking on, all 5,025 notes:**
+- **Hard set 20.4% [13.0, 28.0]** (weighted to the full set's kind counts; pass ≥ 90, fail ≤ 75);
+- described 0%, who-is 0%, two-hop 30% (n = 20 each);
+- median completion **16,384 tokens**, which is the cap (1,418 allowed);
+- **72.9% of hard answers cut off** at the 16K cap. A cut-off answer has no answer and is scored wrong.
+
+**Why** (thinking text, 159 cut-off answers saved): the model is not looping. Only a median 2% of its thinking sentences
+repeat. It **copies the notebook into its thinking, note by note**, looking for the name, and reaches the cap long before
+it has gone through 5,025 notes. It does this even when the question names the person ("Teo Ofori's favourite dish").
+
+**Thinking off (256-token cap, all 995 questions):**
+- whole notebook: 42.2% overall and **24.7% on the hard set**;
+- by kind: name given, worded like the note 92–94%; close people 90%; latest value 42%; two-hop 5%; described 2.5%;
+  who-is 3.3%; retracted 3.3%.
+- Answers are short (median 3 tokens) and none were cut off.
+
+So on name-keyed lookups the 4B's attention **does** find the fact in 60K tokens without thinking (reword 92%, against
+15% with thinking on in the sample). Thinking makes it **worse** here, because it switches to a serial scan it cannot
+finish. Everything that needs more than a direct lookup fails both ways: which value is newest, a link, a description.
+
+**The neuroscientist's prediction, recorded before the result:** "much longer [thinking] means the model is searching
+serially in its thinking, and that cost grows with the notebook." It did.
+
+**Forecasts recorded before the result:** 72–80%. All four were too high.
+
+**What a FAIL means (amendment 4):** road A is out as the phone's reader at 5,000 notes, and selection is the critical
+path. This is at 16-bit on a server GPU, and a phone would do no better.
+
+### 11.3 Reported without lines
+
+**Size, name-keyed questions (the same 635), thinking on:**
+- perfect pages 99.7%;
+- 100 notes 99.4%;
+- the 5,000-note sample: reword 15%, same 20%, updates 25% (n = 20 each).
+
+Claude Haiku 5.5 on the same 635: 97.5% / 95.9% / 93.4% (pages / 100 / 5,000).
+
+**Thinking off, 64-token cap (registered):**
+
+| Pages | All kinds | Hard set |
+|---|---|---|
+| Perfect pages | 96.4% | 95.1% |
+| 100 notes | 77.0% | – |
+| Two-round search | 55.9% | 42.6% |
+
+Answers were not cut off: the 256-token arm at perfect pages scored the same 96.4% (hard 95.1%). **With the right pages
+the 4B answers almost as well without thinking (95.1%) as with it (99.9%), in about 3 tokens instead of about 700.**
+
+**Updates, thinking on:**
+- 0% stale at perfect pages;
+- 2% stale for plain restatements at 100 notes;
+- on the 5,000-note sample, mostly cut off rather than stale.
+
+**World edits (MQuAKE-CF-3k-v2), thinking on:**
+
+| Questions | 10 edits | 100 edits |
+|---|---|---|
+| Single-hop | 100% | 100% |
+| Two-hop | 86.7% | 80.8% |
+
+- Two-hop on the model's own facts, with no notes: 55.8%.
+- Use ratio (two-hop with edits / own facts) **1.55** at 10 edits. Claude Haiku 5.5: 1.08.
+- With the edits as notes in front of it, the 4B composes them *better* than it composes what it already knows.
+
+**Cost per answer under load** (48 at a time on one L40S):
+
+| Pages | Seconds | Completion tokens |
+|---|---|---|
+| Perfect pages | 23 | 891 |
+| 100 notes | 63 | 2,327 |
+| 5,000 notes | 902 | 13,278 |
+
+### 11.4 Part B on the 4B
+
+(Running.)
+
+### 11.5 What this changes
+
+- **Reading is solved at phone size; finding is not.** With the right pages the 4B scores 99.9% with thinking and 95.1%
+  without. The model is not the bottleneck; selection is.
+- **Road A (the whole notebook in working memory) is out for the phone at 5,000 notes.**
+  - With thinking on, it scans and runs out of room.
+  - With thinking off, it handles only direct name lookups.
+  - Large context is a cloud tool (Claude Haiku 5.5: 94%), not a phone tool.
+- **The memory road panel's design is now the critical path:** an index written as notes arrive, pointing back to raw
+  notes, so that the 4B reads only a few pages. On those pages it can answer without thinking, about 3 tokens per answer.
+- **Not tested here:** 4-bit weights, real phone timing, messy chat and events/time. These go to the panel's next test.
