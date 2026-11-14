@@ -29,6 +29,7 @@ import sys
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -301,12 +302,36 @@ class Endpoint:
                 with urllib.request.urlopen(req, timeout=600) as r:
                     return json.loads(r.read().decode("utf-8"))
             except urllib.error.HTTPError as e:
+                if e.code == 303 and e.headers.get("Location"):
+                    # Modal answers a request that runs past 150 s with "303, poll here"; urllib follows only a few
+                    # of these before raising. Keep polling the result URL (GET) for up to 2 hours.
+                    return self.poll(urllib.parse.urljoin(self.base + path, e.headers["Location"]), method, path)
                 if e.code not in (408, 429, 500, 502, 503, 504) or attempt == 5:
                     raise SystemExit(f"endpoint {method} {path}: HTTP {e.code}: {e.read().decode('utf-8', 'replace')[:500]}")
             except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
                 if attempt == 5:
                     raise SystemExit(f"endpoint {method} {path}: {e}")
             time.sleep(2 ** attempt)
+
+    def poll(self, url, method, path, limit_s=7200):
+        """Follow Modal's 303 'result not ready, poll here' redirects until the answer arrives."""
+        t0 = time.time()
+        while time.time() - t0 < limit_s:
+            try:
+                req = urllib.request.Request(url, headers=self.headers, method="GET")
+                with urllib.request.urlopen(req, timeout=600) as r:
+                    return json.loads(r.read().decode("utf-8"))
+            except urllib.error.HTTPError as e:
+                if e.code == 303 and e.headers.get("Location"):
+                    url = urllib.parse.urljoin(url, e.headers["Location"])
+                    continue
+                if e.code not in (408, 429, 500, 502, 503, 504):
+                    raise SystemExit(f"endpoint {method} {path} (polling): HTTP {e.code}: "
+                                     f"{e.read().decode('utf-8', 'replace')[:500]}")
+            except (urllib.error.URLError, TimeoutError, ConnectionError):
+                pass
+            time.sleep(5)
+        raise SystemExit(f"endpoint {method} {path}: no result after {limit_s} s of polling")
 
     def chat(self, content, thinking=False, **kw):
         body = {"model": self.model, "messages": [{"role": "user", "content": content}],
