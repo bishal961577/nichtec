@@ -6,3 +6,4 @@ Claude API, claude-haiku-5-5; spent so far $0.14 of $25.00
 ('personal', 'think', 'bm25'): 995 answers, 57.7% right, 0.7 min (total 3.7 min)
 ('personal', 'think', 1000): 635 answers, 95.7% right, 0.8 min (total 4.6 min)
 ('personal', 'think', 100): 635 answers, 95.9% right, 0.4 min (total 4.9 min)
+('personal', 'nothink', 5000): 995 answers, 28.8% right, 0.7 min (total 5.7 min)
