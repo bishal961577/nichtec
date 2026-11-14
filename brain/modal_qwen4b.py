@@ -15,7 +15,14 @@ Stop it when the test is done (it also stops by itself after 5 idle minutes):
 Cost: Modal bills the GPU per second while a container runs (an L40S is roughly $2 per hour; check your dashboard).
 If your plan does not allow an L40S, set GPU below to "A100-40GB", "A10G" or "L4" (24 GB is enough for 4B, with a
 shorter context: set MAX_LEN to 81920 on a 24 GB card).
-The URL has no password: anyone who knows it could use your GPU while it is up, so stop the app after the test.
+Access: the endpoint requires a Modal proxy auth token (requires_proxy_auth=True). A request without one is refused by
+Modal's own proxy, before any GPU starts. (Until this change the URL had no password, and it was written into run logs
+in a public repository; anyone who found it could have kept the GPU busy at the owner's cost.)
+    1. Modal dashboard -> Settings -> Proxy Auth Tokens -> create one. It has a key (wk-...) and a secret (ws-...).
+    2. Give them to the client as the headers Modal-Key and Modal-Secret: either as a network secret of the cloud
+       environment (the session asks with a secure form; never paste them in a chat), or as the environment variables
+       MODAL_KEY and MODAL_SECRET, which brain/order_gap.py's Endpoint sends.
+    3. modal deploy brain/modal_qwen4b.py   (replaces the open endpoint).
 """
 import subprocess
 
@@ -42,7 +49,7 @@ app = modal.App("nichtec-qwen4b")
 @app.function(image=image, gpu=GPU, volumes={"/root/.cache/huggingface": hf_cache, "/root/.cache/vllm": vllm_cache},
               scaledown_window=5 * 60, timeout=6 * 60 * 60, max_containers=1)
 @modal.concurrent(max_inputs=64)
-@modal.web_server(port=8000, startup_timeout=20 * 60)
+@modal.web_server(port=8000, startup_timeout=20 * 60, requires_proxy_auth=True)
 def serve():
     # OpenAI-compatible API at <URL>/v1. --reasoning-parser qwen3 returns the thinking separately from the answer;
     # --language-model-only skips the vision tower (text-only test, more memory for the context).
