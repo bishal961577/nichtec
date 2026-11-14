@@ -2,8 +2,9 @@
 
 Test 1 of the expert panel's plan (`reports/Expert panel 2026.md`, section 5). This file was written and committed
 before any model call. Sections 1–5 are the first design. Section 6 is the panel's review of it, and section 7 is
-amendment 1, also committed before any model call; section 7.5 holds the deciding lines. The result goes in section 8,
-and nothing above it changes after the run.
+amendment 1, also committed before any model call; section 7.5 holds the deciding lines. Section 8 is amendment 2
+(serving on the Claude API), also committed before any model call. The result goes in section 9, and nothing above it
+changes after the run.
 
 ---
 
@@ -518,6 +519,73 @@ selection.
 - money cost;
 - more than one model family.
 
-## 8. Result
+## 8. Amendment 2: serving on the Claude API (before any model call)
+
+**Why.** Modal no longer allows H100 GPUs on free credit, so the Qwen3.5 endpoints can't be started. The owner has
+Claude API credit. Nothing has been run on any model.
+
+**Models:**
+- The cloud model becomes **Claude Haiku 5.5** (`claude-haiku-5-5`). It replaces Qwen3.5-27B in Parts A, A3, A2 and
+  C, under the 27B plan of section 7.4.
+- **Not run now:** the phone-sized Qwen3.5-4B arms (Parts A, A3, A2 and C) and Part B on Qwen. They wait for a Qwen
+  endpoint or a provider key.
+- **Part B on Claude Haiku 5.5:** the random1 streams with thinking off (`--random1-off`) and with thinking on
+  (`--thinking`), same prompts and seeds. The section 7.6 lines apply to the thinking-on arm; the thinking-off arm
+  replaces the earlier Qwen run as the comparison.
+
+**Settings** (`brain/claude_client.py`, official Anthropic SDK):
+- **Thinking on:** adaptive thinking at the model's default effort, up to 16,384 tokens.
+- **Thinking off:** `{"type": "disabled"}`, up to 64 tokens.
+- **No temperature, top_p, top_k or seed:** current Claude models reject them. One answer per question.
+- **Reasoning text is not returned;** the answer is the reply's text. A refusal counts as a wrong answer, and
+  refusals are counted.
+- **Caching:** the notes part of each prompt (everything before the last "Question: ") is sent as its own block with
+  a 5-minute cache marker. This changes cost only, not what the model reads. It is off in Part C, where each history is
+  read once.
+- **Large piles:** the first question of each pile at 1,000+ notes runs alone, then the rest run together. This
+  replaces amendment 1's unscored warm-up call: on the Claude API, a warm-up in a different thinking mode would not
+  share the cache.
+- **Part C judge:** if no `OPENAI_API_KEY` is set, Claude Haiku 5.5 with thinking off judges, using LongMemEval's own
+  prompts verbatim. This is a stated deviation from the published GPT-4o judge.
+- **Context:** the model takes 1M tokens, so Part C's full histories fit.
+
+**Budget.** Every reply's reported usage is priced at list prices (Claude Haiku 5.5: $0.10 / $0.50 per million input
+/ output tokens for prompts up to 100K tokens, $0.50 / $2.50 above; cache reads 0.1×, cache writes 1.25×). The total
+is kept in `results/claude_spend.json` across all parts, and no new request starts once it reaches **$25**. The
+account's own spend limit is the hard cap behind that. If the budget stops a run, unfinished conditions are reported
+as not run.
+
+| Estimate | Cost |
+|---|---|
+| Realistic, all parts | $20–25 |
+| Hard set at the decision levels (runs first) | $3–5 |
+| Worst case if every answer used its whole thinking allowance and nothing cached | about $110 |
+
+**Run order** (key from the `NICHTEC_CLAUDE_KEY` variable):
+1. `brain/notebook_read.py --claude claude-haiku-5-5 --preflight`, which records latency and the account's rate
+   limits.
+2. `brain/notebook_read.py --claude claude-haiku-5-5 --workers 8`, in section 7.4's order (deciding conditions first).
+3. `brain/scientist.py --claude claude-haiku-5-5 --random1-off`, then `--thinking`.
+4. `brain/longmem.py --claude claude-haiku-5-5` (oracle, bm25, full).
+
+**Lines.** Section 7.5's decision lines are unchanged and are read on Claude Haiku 5.5. No phone verdict is produced.
+The easy reference lines and Part B's lines are unchanged.
+
+**Limits added by this amendment:**
+- Claude Haiku 5.5 is an API model of undisclosed size. The result says whether this cloud model reads a
+  5,000-note notebook, not whether the open Qwen3.5 models would.
+- The Part C judge differs from the published one.
+
+**Offline check before commit.** A fake API confirmed the following, with no model call:
+- the notes are sent as a cached block and the question is not;
+- thinking on is sent as adaptive and thinking off as disabled;
+- no sampling parameters are sent;
+- refusals and cut-off answers score as wrong;
+- the priced cost of a call matches the list prices;
+- the budget stops new requests at the cap.
+
+The stub run of the whole test still completes.
+
+## 9. Result
 
 (Not yet run.)

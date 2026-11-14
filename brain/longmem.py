@@ -162,6 +162,19 @@ class EndpointJudge:
         return r["choices"][0]["message"].get("content") or ""
 
 
+class ClaudeJudge:
+    """Amendment 2: the judge when the run is on the Claude API and no OPENAI_API_KEY is set. LongMemEval's own
+    prompts, Claude Haiku 5.5 with thinking off; a stated deviation from the published GPT-4o judge."""
+
+    def __init__(self, llm):
+        self.llm = llm
+        self.model = llm.model + " (thinking off)"
+
+    def __call__(self, text):
+        r = self.llm.chat(text, thinking=False, max_tokens=10)
+        return r["choices"][0]["message"].get("content") or ""
+
+
 class Stub:
     model = "stub"
 
@@ -192,11 +205,17 @@ def main():
     p.add_argument("--workers", type=int, default=16)
     p.add_argument("--arms", default=None, help="default: oracle,bm25,full for 27B; oracle,bm25 for 4B")
     p.add_argument("--stub", action="store_true")
+    p.add_argument("--claude", default=None, help="amendment 2: run on the Claude API, e.g. claude-haiku-5-5")
+    p.add_argument("--budget", type=float, default=25.0, help="Claude API: stop at this estimated total spend ($)")
     args = p.parse_args()
     S, O = load()
     ids = sample(S)
     if args.stub:
         llm, tag, judge = Stub(S), "stub", stub_judge
+    elif args.claude:
+        from claude_client import Budget, ClaudeEndpoint
+        llm, tag = ClaudeEndpoint(args.claude, Budget(args.budget), cache=False), args.claude
+        judge = OpenAIJudge() if os.environ.get("OPENAI_API_KEY") else ClaudeJudge(llm)
     else:
         llm, tag = G.Endpoint(args.base_url, args.model, 1), args.model.split("/")[-1]
         judge = (OpenAIJudge() if os.environ.get("OPENAI_API_KEY") else

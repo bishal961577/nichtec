@@ -759,6 +759,7 @@ def ask(llm, prompt, mode, seed):
         content = ""
     u = r.get("usage") or {}
     return {"answer": content.strip(), "truncated": truncated, "think_chars": len(reasoning),
+            "finish": ch.get("finish_reason"),
             "prompt_tokens": u.get("prompt_tokens"), "completion_tokens": u.get("completion_tokens"),
             "cached_tokens": (u.get("prompt_tokens_details") or {}).get("cached_tokens"), "sec": round(time.time() - t0, 2)}
 
@@ -858,14 +859,13 @@ def run(llm, conds, D, path, workers, budget_min, stub):
 
         with ThreadPoolExecutor(workers) as ex:
             big = cond[2] in ("all", 1000, 5000)
-            if big and not stub:                      # one pile at a time, its prefix cached by a first call
-                by_pile = defaultdict(list)
-                for it in todo:
-                    by_pile[it[1]].append(it)
+            if big:                                   # one pile at a time; its first question, sent alone, writes the
+                by_pile = defaultdict(list)           # pile into the server's cache (amendment 2: replaces the
+                for it in todo:                       # unscored warm-up call, which a different thinking mode would
+                    by_pile[it[1]].append(it)         # not share on the Claude API)
                 for its in by_pile.values():
-                    ask(llm, its[0][2].rsplit("Question: ", 1)[0] + "Question: How many notes are there?\nAnswer "
-                        "with a number only.", "nothink", 1)
-                    list(ex.map(one, its))
+                    one(its[0])
+                    list(ex.map(one, its[1:]))
             else:
                 list(ex.map(one, todo))
         rs = [done[key(cond, it[0])] for it in items]
@@ -1059,6 +1059,8 @@ def preflight(llm, D):
     r = ask(llm, PERSONAL.format(notes="\n".join("- " + x["text"] for x in D["BMP"][q["qid"]]), q="Which note comes "
                                  "first?"), "nothink", 1)
     out["bm25_pages"] = {x: r[x] for x in ("prompt_tokens", "sec")}
+    if hasattr(llm, "create"):                        # Claude API: the account's rate limits decide the run time
+        _, out["rate_limits"] = llm.create("Reply with OK.", False, 8, raw=True)
     return out
 
 
@@ -1071,6 +1073,8 @@ def main():
     p.add_argument("--preflight", action="store_true")
     p.add_argument("--stub", action="store_true")
     p.add_argument("--stub-tag", default="stub", help="stub only: name the run like a model, e.g. stub-4B")
+    p.add_argument("--claude", default=None, help="amendment 2: run on the Claude API, e.g. claude-haiku-5-5")
+    p.add_argument("--budget", type=float, default=25.0, help="Claude API: stop at this estimated total spend ($)")
     args = p.parse_args()
     groups, P, PQ, PP, BMP, texts, WQ, WP, clash, bm = build()
     D = {"P": P, "PQ": PQ, "PP": PP, "BMP": BMP, "WQ": WQ, "WP": WP, "BM": bm}
@@ -1097,11 +1101,15 @@ def main():
         for q in WQ:
             gold[q["q"]] = (q["new"][0], [q["old"][0], "unknown"])
         llm, tag = Stub(gold), args.stub_tag
+    elif args.claude:
+        from claude_client import Budget, ClaudeEndpoint
+        llm, tag = ClaudeEndpoint(args.claude, Budget(args.budget)), args.claude
+        print(f"Claude API, {tag}; spent so far ${llm.budget.spent:.2f} of ${args.budget:.2f}", flush=True)
     elif args.base_url:
         llm, tag = G.Endpoint(args.base_url, args.model, 1), args.model.split("/")[-1]
         print(f"endpoint {args.base_url}, serving {llm.served}; using {llm.model}", flush=True)
     else:
-        raise SystemExit("needs --base-url or --stub")
+        raise SystemExit("needs --claude, --base-url or --stub")
     out = os.path.join(ROOT, "results", f"notebook_read_{tag}")
     os.makedirs(out, exist_ok=True)
     if args.preflight:

@@ -250,9 +250,10 @@ def stream_stats(streams):
             "pool_good_rate": G.mean([s["pool_has_good_rule"] for s in streams])}
 
 
-def thinking_run(llm, tag, tasks, workers):
-    """Part B: the scientist's random1 streams again, thinking on. Returns the summary lines."""
-    out = os.path.join(G.ROOT, "results", f"scientist_{tag}_thinking")
+def thinking_run(llm, tag, tasks, workers, think=True):
+    """Part B: the scientist's random1 streams again, thinking on. Returns the summary lines. With think=False
+    (amendment 2, a model with no earlier run) the same streams with thinking off, as the comparison."""
+    out = os.path.join(G.ROOT, "results", f"scientist_{tag}_thinking" if think else f"scientist_{tag}_random1_off")
     res = [None] * len(tasks)
     with ThreadPoolExecutor(workers) as ex:
         futs = {ex.submit(run_stream, llm, task, "random1", 1_000_000 * k): k for k, task in enumerate(tasks)}
@@ -263,7 +264,22 @@ def thinking_run(llm, tag, tasks, workers):
     new["D_acc"] = G.mean([r["D"]["test_acc"] for r in res])
     new["D_rule_good"] = G.mean([r["D"]["rule_good"] for r in res])
     orig_path = os.path.join(G.ROOT, "results", f"scientist_{tag}", "result.json")
+    off_path = os.path.join(G.ROOT, "results", f"scientist_{tag}_random1_off", "result.json")
     old = None
+    if not think:
+        os.makedirs(out, exist_ok=True)
+        with open(os.path.join(out, "result.json"), "w", encoding="utf-8") as f:
+            json.dump({"model": tag, "sampling": dict(G.SAMPLING), "new": new, "streams": res}, f, indent=1,
+                      ensure_ascii=True)
+        line = (f"{tag}, random1, thinking off: {100 * new['contradict_rate']:.1f}% of {new['guesses']} guesses "
+                f"contradict the cases shown; {100 * new['readable_rate']:.0f}% of proposals readable; D test accuracy "
+                f"{new['D_acc']:.1f}")
+        with open(os.path.join(out, "summary.md"), "w", encoding="utf-8") as f:
+            f.write(f"# Agent D, the scientist, thinking off (comparison for Part B): {tag}\n\n- {line}\n")
+        return [line]
+    if not os.path.exists(orig_path) and os.path.exists(off_path):
+        old = json.load(open(off_path, encoding="utf-8"))["new"]
+        old["contradict_rate_all_orders"] = old["contradict_rate"]
     if os.path.exists(orig_path):
         O = json.load(open(orig_path, encoding="utf-8"))
         ts = [t for t in O["tasks"] if t is not None]
@@ -314,6 +330,9 @@ def main():
     p.add_argument("--check", action="store_true")
     p.add_argument("--stub", action="store_true")
     p.add_argument("--thinking", action="store_true", help="Part B: random1 streams again with thinking on")
+    p.add_argument("--random1-off", action="store_true", help="Part B comparison: random1 streams with thinking off")
+    p.add_argument("--claude", default=None, help="amendment 2: run on the Claude API, e.g. claude-haiku-5-5")
+    p.add_argument("--budget", type=float, default=25.0, help="Claude API: stop at this estimated total spend ($)")
     p.add_argument("--out", default=None)
     args = p.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
@@ -321,13 +340,20 @@ def main():
     test = args.test or (2 if "4B" in args.model else 1)
     if args.stub:
         llm, tag = Stub(), "stub"
+    elif args.claude:
+        from claude_client import Budget, ClaudeEndpoint
+        llm, tag = ClaudeEndpoint(args.claude, Budget(args.budget)), args.claude
+        print(f"Claude API, {tag}; spent so far ${llm.budget.spent:.2f} of ${args.budget:.2f}", flush=True)
     elif args.base_url:
         llm, tag = G.Endpoint(args.base_url, args.model, 1), args.model.split("/")[-1]
         print(f"endpoint {args.base_url}, serving {llm.served}; using {llm.model}", flush=True)
     else:
-        raise SystemExit("needs --base-url or --stub")
+        raise SystemExit("needs --claude, --base-url or --stub")
     out = args.out or os.path.join(G.ROOT, "results", f"scientist_{tag}")
     tasks = [G.make_task(r, d) for r in range(len(G.RULES)) for d in range(G.DRAWS)]
+    if args.random1_off:
+        print("\n".join(thinking_run(llm, tag, tasks, args.workers, think=False)), flush=True)
+        return
     if args.thinking:
         G.THINKING = True
         G.SAMPLING.update(THINK_SAMPLING)
