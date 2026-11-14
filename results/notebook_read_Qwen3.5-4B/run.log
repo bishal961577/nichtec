@@ -22,3 +22,5 @@ endpoint https://volansaquilae-com--nichtec-qwen4b-serve.us-east.modal.run/v1, s
 endpoint POST /chat/completions: HTTP 303: 
 === 16:28:01 303 redirect fix in order_gap.Endpoint; running amendment 4's 256-token thinking-off arms first (out of plan order) ===
 === 16:28:17 stopped: the owner had closed the Modal app ===
+=== 16:31:14 amendment 5: brain/whole_sample.py (256-token arms in full, then the 220-question sample of the 5,000-note arm) ===
+('personal', 'nothink256', 10): 965 answers, 96.4% right, 0.3 min (total 0.3 min)
