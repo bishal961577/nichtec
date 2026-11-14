@@ -750,6 +750,12 @@ owner's computer) lets us choose the GPU.
 - If the plan doesn't allow an L40S, an A100-40GB, A10G or L4 can be used instead (context 81,920 on 24 GB cards).
 - Context 131,072 tokens. The 5,000-note notebook is 60,122 Qwen tokens, plus up to 16,384 of thinking.
 - `--reasoning-parser qwen3` and `--language-model-only`.
+- **Serving note, added after the first deploy and before any scored 4B answer.** The first deploy crashed at vLLM's
+  warm-up. vLLM 0.33.0's default top-k/top-p sampler (FlashInfer) compiles GPU code on first use, and the slim image
+  had no CUDA compiler. The fix uses NVIDIA's `cuda:13.0.3-devel` image (the CUDA version of vLLM's pinned torch
+  2.14.0) and sets `VLLM_USE_FLASHINFER_SAMPLER=0`, so vLLM uses its plain PyTorch sampler. Both samplers draw from
+  the same top-k/top-p/min-p distribution, so the sampling settings below are unchanged. Only the implementation
+  differs: the random draws are not identical.
 
 **Sampling with thinking on: Qwen's model-card settings for thinking mode on general tasks** (amendment 1 had 0.6 /
 0.95 / 20 with no presence penalty):
