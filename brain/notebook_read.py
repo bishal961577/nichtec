@@ -758,14 +758,15 @@ def ask(llm, prompt, mode, seed):
     r = llm.request("POST", "/chat/completions", body)
     ch = r["choices"][0]
     msg = ch.get("message") or {}
-    content, reasoning = msg.get("content") or "", msg.get("reasoning_content") or ""
+    # vLLM >= 0.33 returns the thinking as "reasoning" (older: "reasoning_content"); logged only, never scored
+    content, reasoning = msg.get("content") or "", msg.get("reasoning") or msg.get("reasoning_content") or ""
     if "</think>" in content:
         reasoning, content = reasoning + content.split("</think>")[0], content.split("</think>")[-1]
     truncated = ch.get("finish_reason") == "length"
     if mode == "think" and truncated:
         content = ""
     u = r.get("usage") or {}
-    return {"answer": content.strip(), "truncated": truncated, "think_chars": len(reasoning),
+    return {"answer": content.strip(), "truncated": truncated, "think_chars": len(reasoning), "thinking": reasoning,
             "finish": ch.get("finish_reason"),
             "prompt_tokens": u.get("prompt_tokens"), "completion_tokens": u.get("completion_tokens"),
             "cached_tokens": (u.get("prompt_tokens_details") or {}).get("cached_tokens"), "sec": round(time.time() - t0, 2)}
