@@ -55,7 +55,7 @@ JOBS = [("pharmacist", "fills prescriptions at the chemist's", ["pharmacist", "p
         ("baker", "gets up at four to bake bread", ["baker", "bake bread", "bakery"]),
         ("pilot", "flies planes for an airline", ["pilot", "flies planes", "airline"]),
         ("geologist", "studies rocks for a mining company", ["geologist", "studies rocks", "geology"]),
-        ("chef", "cooks in a restaurant kitchen", ["chef", "restaurant kitchen", "cook "]),
+        ("chef", "cooks in a restaurant kitchen", ["chef", "restaurant kitchen", "cook", "cooks", "cooking"]),
         ("architect", "designs buildings", ["architect", "designs buildings"]),
         ("dentist", "fixes people's teeth", ["dentist", "teeth", "dental"]),
         ("mechanic", "repairs cars at a garage", ["mechanic", "repairs cars", "car repair"]),
@@ -68,14 +68,14 @@ HOBBIES = [("climbing", "spends evenings bouldering at the climbing wall", ["cli
            ("pottery", "throws pots on a wheel", ["pottery", "pots", "ceramic"]),
            ("chess", "plays chess in the park", ["chess"]),
            ("birdwatching", "goes out with binoculars to spot birds", ["birdwatch", "spot birds", "birding", "binoculars"]),
-           ("knitting", "knits scarves for everyone", ["knit"]),
-           ("sailing", "takes a small sailboat out on weekends", ["sail"]),
+           ("knitting", "knits scarves for everyone", ["knit", "knits", "knitting", "knitted"]),
+           ("sailing", "takes a small sailboat out on weekends", ["sail", "sails", "sailing", "sailboat"]),
            ("salsa dancing", "dances salsa twice a week", ["salsa"]),
            ("fishing", "goes fishing at the lake", ["fishing", "fish at the lake", "angling"]),
            ("marathon running", "trains for marathons", ["marathon"]),
            ("watercolour painting", "paints watercolours", ["watercolour", "watercolor", "painting", "paints"]),
            ("photography", "takes photos with an old film camera", ["photograph", "film camera", "photos"]),
-           ("surfing", "surfs whenever the waves are good", ["surf"]),
+           ("surfing", "surfs whenever the waves are good", ["surf", "surfs", "surfing", "surfer"]),
            ("archery", "shoots arrows at the archery club", ["archery", "arrows"]),
            ("woodcarving", "carves little wooden animals", ["woodcarv", "carves", "carving"]),
            ("juggling", "juggles in the park on Sundays", ["juggl"]),
@@ -304,22 +304,37 @@ def _fields(t):
     return set(re.findall(r"{(\w+)}", t))
 
 
+# The placeholders each kind of wording MUST contain (any one of a "|" group), so a fact cannot lose its value, a
+# question its person, a correction its old value (the review's fix: checking extras only is not enough).
+SLOT_NEEDS = {"init": ["M", "v|alt"], "plain": ["M", "v|alt"], "change": ["M", "v|alt"], "fix": ["M", "v", "old"],
+              "retract": ["M"], "lures": ["M", "v|alt"], "q": ["m"]}
+FRAME_NEEDS = {"via": ["anchor", "noun"], "openers": ["m"], "secondhand": ["src", "fact"], "intro_role": ["role", "full"],
+               "intro_new_role": ["role", "full"], "intro_circle": ["full"], "intro_party": ["full"],
+               "q_desc": ["d1", "d2"], "q_who": ["d1", "d2"], "q_two": ["anchor", "noun"], "q_upd": ["q"],
+               "q_event_last": ["m"], "q_event_what": ["m", "month", "year"], "q_event_who": ["verb", "month", "year"]}
+
+
 def check_heldout(h):
-    """Every template may use only the placeholders the generator fills; every list must be non-empty."""
+    """Every template may use only the placeholders the generator fills, and must contain the ones its kind needs;
+    every list must be non-empty. Errors name the place and the index, never the wording (the file may be sealed)."""
     errs = []
 
-    def ok(where, ts, allowed):
+    def ok(where, ts, allowed, needs=()):
         if not isinstance(ts, list) or not ts or not all(isinstance(t, str) and t.strip() for t in ts):
             errs.append(f"{where}: needs a non-empty list of strings")
             return
-        for t in ts:
-            bad = _fields(t) - _fields(allowed)
+        for i, t in enumerate(ts):
+            f = _fields(t)
+            bad = f - _fields(allowed)
             if bad:
-                errs.append(f"{where}: {t!r} uses {sorted(bad)}")
+                errs.append(f"{where}[{i}]: uses {sorted(bad)}")
+            for need in needs:
+                if not f & set(need.split("|")):
+                    errs.append(f"{where}[{i}]: lacks {{{need}}}")
             try:
-                t.format(**{k: "x" for k in _fields(t)})
+                t.format(**{k: "x" for k in f})
             except (KeyError, ValueError, IndexError) as e:
-                errs.append(f"{where}: {t!r} does not format ({e})")
+                errs.append(f"{where}[{i}]: does not format ({type(e).__name__})")
     for slot, d in h.get("slots", {}).items():
         if slot not in SLOTS:
             errs.append(f"slots: unknown slot {slot}")
@@ -330,16 +345,16 @@ def check_heldout(h):
             elif f == "retract" and SLOTS[slot]["retract"] is None:
                 errs.append(f"slots.{slot}: this slot has no retractions")
             else:
-                ok(f"slots.{slot}.{f}", ts, SLOT_FIELDS[f])
+                ok(f"slots.{slot}.{f}", ts, SLOT_FIELDS[f], SLOT_NEEDS[f])
     for k, ts in h.get("frames", {}).items():
         if k == "fname_ctx":
             for c, tl in ts.items():
                 if c in CIRCLES:
-                    ok(f"frames.fname_ctx.{c}", tl, "{first}")
+                    ok(f"frames.fname_ctx.{c}", tl, "{first}", ["first"])
                 else:
                     errs.append(f"fname_ctx: unknown circle {c}")
         elif k in FRAME_FIELDS:
-            ok(f"frames.{k}", ts, FRAME_FIELDS[k])
+            ok(f"frames.{k}", ts, FRAME_FIELDS[k], FRAME_NEEDS[k])
         else:
             errs.append(f"frames: unknown frame {k}")
     for rel, d in h.get("rels", {}).items():
@@ -348,12 +363,12 @@ def check_heldout(h):
             continue
         for f in ("fwd", "rev"):
             if f in d:
-                ok(f"rels.{rel}.{f}", d[f], "{A} {B}")
+                ok(f"rels.{rel}.{f}", d[f], "{A} {B}", ["A", "B"])
     if "small" in h:
-        ok("small", h["small"], "{M}")
+        ok("small", h["small"], "{M}", ["M"])
     for act, ts in h.get("activities", {}).items():
         if act in dict(ACTIVITIES):
-            ok(f"activities.{act}", ts, "{W}")
+            ok(f"activities.{act}", ts, "{W}", ["W"])
         else:
             errs.append(f"activities: unknown activity {act}")
     return errs

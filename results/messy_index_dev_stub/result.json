@@ -1,105 +1,108 @@
 {
- "verdict": "BETWEEN: neither line met",
+ "verdict": "WRITER-LIMITED: the reading works on a perfect index, the 4B's filing does not; next is the thinking writer (pre-registered), a bigger writer only if that fails too",
+ "verdict_without_stop": "WRITER-LIMITED: the reading works on a perfect index, the 4B's filing does not; next is the thinking writer (pre-registered), a bigger writer only if that fails too",
  "conditions": {
-  "B_hard": true,
-  "oracle_ratio": true,
-  "assoc_each": true,
+  "B_hard": false,
+  "oracle_ratio": false,
+  "assoc_each": false,
   "margin": true,
-  "merges": true,
-  "hard_merges": true,
-  "fast_path": true,
+  "merges": false,
+  "hard_merges": false,
+  "fast_path": false,
   "write_cost": true,
   "forget": false
  },
- "B_hard": 92.2279792746114,
+ "B_hard": 77.720207253886,
  "oracle_hard": 96.56735751295336,
- "B_off_hard": 92.2279792746114,
+ "B_off_hard": 77.720207253886,
  "assoc": {
-  "desc": 80.66666666666666,
-  "who": 91.33333333333333,
-  "two": 92.77777777777779
+  "desc": 64.0,
+  "who": 75.33333333333333,
+  "two": 63.33333333333333
  },
  "searches": {
   "C": {
    "hard": 55.634715025906736,
    "assoc": 22.708333333333332,
+   "hard_off": 55.634715025906736,
    "each": {
     "desc": 2.0,
     "who": 61.33333333333333,
     "two": 7.777777777777778
    },
    "margin": [
-    65.83333333333333,
-    60.66218991344664,
-    70.67034011707509,
+    44.583333333333336,
+    38.38028300245982,
+    50.34760233492753,
     480
    ]
   },
   "Ccues": {
    "hard": 52.84974093264248,
    "assoc": 18.75,
+   "hard_off": 52.84974093264248,
    "each": {
     "desc": 1.3333333333333335,
     "who": 53.333333333333336,
     "two": 4.444444444444445
    },
    "margin": [
-    69.79166666666666,
-    64.91587424443462,
-    74.52239356352665,
+    48.541666666666664,
+    42.576163519775164,
+    54.18410041841004,
     480
    ]
   }
  },
  "filing": {
-  "index_people": 303,
+  "index_people": 710,
   "true_people": 260,
-  "rows": 6857,
-  "me_rows": 42,
-  "fact_rows": 2644,
-  "wrong_merge_pct": 0.9077155824508321,
-  "hard_merge_pct": 0.5970149253731343,
-  "hard_rows": 335,
+  "rows": 6869,
+  "me_rows": 49,
+  "fact_rows": 2626,
+  "wrong_merge_pct": 3.427265803503427,
+  "hard_merge_pct": 10.144927536231885,
+  "hard_rows": 483,
   "filed_right_by_style": {
-   "fname": 99.5,
-   "fname_ctx": 99.6,
-   "full": 99.2,
+   "fname": 97.1,
+   "fname_ctx": 93.6,
+   "full": 98.8,
    "nick": 100.0,
    "old_role": 100.0,
-   "pronoun": 99.5,
-   "pronoun_prev": 98.2,
-   "role": 100.0,
-   "via": 94.4
+   "pronoun": 98.3,
+   "pronoun_prev": 99.1,
+   "role": 99.1,
+   "via": 77.8
   },
   "filed_n_by_style": {
-   "fname": 367,
-   "fname_ctx": 223,
-   "full": 744,
-   "nick": 42,
-   "old_role": 1,
-   "pronoun": 184,
-   "pronoun_prev": 112,
-   "role": 112,
-   "via": 107
+   "fname": 373,
+   "fname_ctx": 219,
+   "full": 739,
+   "nick": 43,
+   "old_role": 2,
+   "pronoun": 181,
+   "pronoun_prev": 115,
+   "role": 111,
+   "via": 108
   },
-  "people_split_into_several_ids": 8,
-  "facts_filed_pct": 93.7937937937938,
-  "link_precision_pct": 86.35204081632654,
-  "link_rows": 784,
-  "lure_intrusion_pct": 0.0
+  "people_split_into_several_ids": 109,
+  "facts_filed_pct": 91.49149149149149,
+  "link_precision_pct": 93.65781710914455,
+  "link_rows": 678,
+  "lure_intrusion_pct": 0.26525198938992045
  },
  "forget": {
-  "forget_recall_pct": 97.95832310267556,
-  "forget_worst_pct": 88.46153846153845,
-  "forget_collateral_pct": 0.276327909118821,
+  "forget_recall_pct": 93.04767403014175,
+  "forget_worst_pct": 54.54545454545454,
+  "forget_collateral_pct": 0.5282784338098198,
   "forget_people": 20
  },
  "write": {
-  "rows": 6857,
+  "rows": 6869,
   "bad_lines": 0,
   "cut": 0,
-  "prompt_tokens": 614552,
-  "completion_tokens": 69122,
+  "prompt_tokens": 698259,
+  "completion_tokens": 69822,
   "notes": 6292
  },
  "rows_left": 0,
@@ -107,55 +110,55 @@
  "extra": {
   "writer_think": {
    "write": {
-    "rows": 6873,
+    "rows": 6848,
     "bad_lines": 0,
     "cut": 0,
-    "prompt_tokens": 617967,
-    "completion_tokens": 69302,
+    "prompt_tokens": 699205,
+    "completion_tokens": 69510,
     "notes": 6292
    },
    "filing": {
-    "index_people": 310,
+    "index_people": 674,
     "true_people": 260,
-    "rows": 6873,
-    "me_rows": 53,
-    "fact_rows": 2641,
-    "wrong_merge_pct": 0.9087466868610374,
-    "hard_merge_pct": 0.8695652173913043,
-    "hard_rows": 345,
+    "rows": 6848,
+    "me_rows": 36,
+    "fact_rows": 2635,
+    "wrong_merge_pct": 3.681214421252372,
+    "hard_merge_pct": 12.704918032786885,
+    "hard_rows": 488,
     "filed_right_by_style": {
-     "fname": 98.7,
-     "fname_ctx": 99.6,
-     "full": 99.2,
-     "nick": 100.0,
+     "fname": 97.6,
+     "fname_ctx": 94.2,
+     "full": 99.5,
+     "nick": 95.6,
      "old_role": 100.0,
-     "pronoun": 99.5,
-     "pronoun_prev": 100.0,
-     "role": 100.0,
-     "via": 98.2
+     "pronoun": 98.4,
+     "pronoun_prev": 98.3,
+     "role": 99.1,
+     "via": 69.2
     },
     "filed_n_by_style": {
-     "fname": 371,
-     "fname_ctx": 223,
-     "full": 740,
-     "nick": 43,
-     "old_role": 1,
-     "pronoun": 184,
-     "pronoun_prev": 107,
-     "role": 110,
-     "via": 113
+     "fname": 370,
+     "fname_ctx": 225,
+     "full": 742,
+     "nick": 45,
+     "old_role": 2,
+     "pronoun": 182,
+     "pronoun_prev": 115,
+     "role": 111,
+     "via": 107
     },
-    "people_split_into_several_ids": 9,
-    "facts_filed_pct": 93.94394394394395,
-    "link_precision_pct": 86.20689655172414,
-    "link_rows": 783,
-    "lure_intrusion_pct": 0.0
+    "people_split_into_several_ids": 107,
+    "facts_filed_pct": 91.69169169169169,
+    "link_precision_pct": 94.38377535101404,
+    "link_rows": 641,
+    "lure_intrusion_pct": 0.13262599469496023
    },
-   "rows_left": 1,
+   "rows_left": 0,
    "forget": {
-    "forget_recall_pct": 97.86830635006443,
-    "forget_worst_pct": 90.5982905982906,
-    "forget_collateral_pct": 0.12262415695892091,
+    "forget_recall_pct": 94.61280854350991,
+    "forget_worst_pct": 59.09090909090909,
+    "forget_collateral_pct": 0.8294930875576036,
     "forget_people": 20
    }
   }

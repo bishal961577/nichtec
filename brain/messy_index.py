@@ -42,7 +42,7 @@ from notebook_read import BM25, STOP, pnorm  # noqa: E402
 
 ROOT = G.ROOT
 TODAY = MW.TODAY.isoformat()
-CHUNK, CONTEXT, MAX_NOTES, PER_PERSON, CANDIDATES, LINKED = 20, 5, 60, 40, 30, 25
+CHUNK, CONTEXT, MAX_NOTES, PER_PERSON, CANDIDATES, LINKED = 20, 5, 60, 40, 40, 40
 THINK = {"max_tokens": 16384, "temperature": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 1.5}
 NOTHINK = {"max_tokens": 256, "temperature": 0}
 WRITE_KW = {"max_tokens": 1500, "temperature": 0}
@@ -57,7 +57,9 @@ EMB_MODEL = "BAAI/bge-small-en-v1.5"
 # messy_world.HARD.
 PASS_HARD, PASS_ORACLE_RATIO, PASS_ASSOC_EACH, PASS_MARGIN = 85.0, 0.9, 75.0, 5.0
 MERGE_PASS, MERGE_STOP, HARD_MERGE_PASS, HARD_MERGE_STOP = 1.0, 3.0, 5.0, 10.0
-FAST_PASS, FORGET_PASS, WRITE_COMPLETION, WRITE_PROMPT, READ_LIMIT = 80.0, 98.0, 150, 500, 85.0
+FAST_PASS, FORGET_PASS, WRITE_COMPLETION, WRITE_PROMPT, READ_LIMIT = 80.0, 95.0, 150, 500, 85.0
+WRITE_COMPLETION_THINK = 400            # the thinking writer's cap (overnight on the charger)
+PHONE_DECODE, PHONE_PREFILL = 20, 200   # tokens per second assumed for a phone (reported as minutes per 100 messages)
 EVENTS_LINE = 70.0
 
 WRITE = """You keep the index of a person's private notebook. The person ("I", "me") writes short messages about their \
@@ -120,17 +122,19 @@ person if the question could mean more than one). Otherwise reply SEARCH: and on
 {left} more time(s)."""
 
 ABSTAIN = ["not in my notes", "don't say", "do not say", "doesn't say", "does not say", "no information", "not mention",
-           "not specified", "unknown", "no record", "can't tell", "cannot tell", "don't know", "not stated"]
+           "n't mention", "no mention", "not mentioned", "nothing about", "not specified", "unknown", "no record",
+           "can't tell", "cannot tell", "don't know", "not stated", "not recorded", "nothing recorded"]
 NONE_WORDS = ["none", "no pet", "no longer", "any more", "anymore", "doesn't", "does not", "stopped", "gave", "quit",
               "dropped", "sold", "isn't", "not working", "no car", "no plants", "cleared"]
 ACT_KEYS = {"dinner": ["dinner"], "hike": ["hik", "ridge trail"], "cinema": ["film", "movie", "cinema"],
             "coffee": ["coffee"], "concert": ["concert"], "museum": ["museum"], "swim": ["swim", "lido"],
             "market": ["market"], "football match": ["football"],
             "game night": ["board game", "game night", "games night"], "picnic": ["picnic"], "karaoke": ["karaoke"]}
-OLD_MARK = re.compile(r"(previously|before( that)?|used to|formerly|earlier|originally|from|not|instead of|rather than|"
-                      r"replac\w*|switched|moved|old|until|no longer|had|was|gave|sold|stopped|dropped|swapped)\W*"
-                      r"(\w+\W+){0,3}$")
-HEDGE = re.compile(r"\b(or maybe|maybe|could be|might be|possibly|perhaps|not sure|either|or)\b")
+OLD_MARK = re.compile(r"\b(previously|before( that)?|used to( be| have| play| drive| live in)?|formerly|earlier|"
+                      r"originally|from|instead of|rather than|no longer|old|until|replacing)\W*"
+                      r"((a|an|the|her|his|their|that|in)\W+){0,2}$")
+HEDGE = re.compile(r"\b(or maybe|maybe|could be|might be|possibly|perhaps|not sure|either)\b")
+HEDGE_NAMES = re.compile(r"\b[A-Z][a-z]+ or [A-Z][a-z]+\b")         # "Mira or Kofi" (a bare "or" elsewhere is fine)
 
 
 # ============================================================================ model calls
@@ -230,13 +234,14 @@ def candidates(ix, chunk, recent):
     for pid, p in ix.people.items():
         for nm in p["names"]:
             toks = nm.split()
-            if nm.startswith("my ") and nm in text:
+            if nm.startswith("my ") and (nm in text or ("my old " + nm[3:]) in text):
                 score[pid] += 3
             elif len(toks) > 1 and nm in text:
                 score[pid] += 3
             elif len(toks) == 1 and toks[0] in words:
                 score[pid] += 1
     named = set(score)                                   # matched by a name: their links come along ("Kofi's flatmate")
+    poss = {pid for pid, p in ix.people.items() for nm in p["names"] if (nm + "'s ") in text}
     for k, pid in enumerate(reversed(recent[-12:])):
         score[pid] += 0.5
     num = lambda x: int(x[1:])
@@ -248,14 +253,40 @@ def candidates(ix, chunk, recent):
                 partner[r["link"]] += 1
             if r["link"] in named:
                 partner[r["pid"]] += 1
-    extra = sorted((x for x in partner if x not in top), key=lambda x: (-partner[x], num(x)))
+    nouns = defaultdict(set)                             # "Kofi's flatmate": the word after the possessive
+    for pid, p in ix.people.items():
+        for nm in p["names"]:
+            for m in re.finditer(re.escape(nm) + r"'s (\w+(?: \w+)?)", text):
+                nouns[pid].update(norm(m.group(1)))
+    first = Counter()
+    for r in ix.rows:
+        if r["link"] and (r["pid"] in poss or r["link"] in poss):
+            anchor = r["pid"] if r["pid"] in poss else r["link"]
+            other = r["link"] if r["pid"] in poss else r["pid"]
+            fits = any(w[:5] in r["kind"] for w in nouns.get(anchor, ()) if len(w) > 3)
+            first[other] += 10 if fits else 1
+    extra = sorted((x for x in first if x not in top), key=lambda x: (-first[x], num(x)))
+    extra += sorted((x for x in partner if x not in top and x not in first), key=lambda x: (-partner[x], num(x)))
     return top + extra[:LINKED]
 
 
 ROW = re.compile(r"#\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(.+)")
 
 
-def parse_rows(text, chunk_ids, ix, recent):
+def fix_citation(nid, kind, value, texts):
+    """If the cited message does not contain the row's value but exactly one other message of the chunk does, the row
+    belongs to that one (a deleted message must take its rows with it)."""
+    words = [w for w in norm(value) if len(w) > 2 and w not in ("none", "the", "and")]
+    if not words or kind.lower() in ("mentioned", "event") or re.fullmatch(r"P\d+.*", value) or nid not in texts:
+        return nid
+    has = lambda t: all(w in norm(t) for w in words)
+    if has(texts[nid]):
+        return nid
+    others = [i for i, t in texts.items() if i != nid and has(t)]
+    return others[0] if len(others) == 1 else nid
+
+
+def parse_rows(text, chunk_ids, ix, recent, texts=None):
     """Apply the writer's lines to the index. Returns (rows added, lines that could not be used)."""
     added, bad, new_here = 0, 0, {}
     for line in text.splitlines():
@@ -266,6 +297,8 @@ def parse_rows(text, chunk_ids, ix, recent):
         if nid not in chunk_ids:
             bad += 1
             continue
+        if texts:
+            nid = fix_citation(nid, kind, value, texts)
         pid = resolve(who, ix, new_here)
         if pid is None:
             bad += 1
@@ -335,7 +368,7 @@ def build_index(llm, W, path, log, think=False):
                  "completion_tokens": r["completion_tokens"], "sec": r["sec"], "candidates": len(cands)}
             f.write(json.dumps(r, ensure_ascii=True) + "\n")
             f.flush()
-        a, b = parse_rows(r["text"], ids, ix, recent)
+        a, b = parse_rows(r["text"], ids, ix, recent, {n["id"]: n["text"] for n in chunk})
         stats["rows"] += a
         stats["bad_lines"] += b
         stats["cut"] += r["cut"]
@@ -659,11 +692,18 @@ def pages(W, q):
 
 
 # ============================================================================ scoring
+def has_key(text, key):
+    """A value key in a text: keys of up to 4 letters must be whole words ("bee" not in "been", "cat" not in "category",
+    plural allowed); longer keys are stems matched at a word start ("translat" in "translates")."""
+    k = key.strip().lower()
+    tail = r"(s|es)?(?![a-z])" if len(k) <= 4 else ""
+    return re.search(r"(?<![a-z])" + re.escape(k) + tail, text.lower()) is not None
+
+
 def named_values(slot, text):
-    t = " " + text.lower() + " "
     out = []
     for c, alt, keys in MW.SLOTS[slot]["vals"]:
-        if any(re.search(r"(?<![a-z])" + re.escape(k.strip()), t) for k in keys):
+        if any(has_key(text, k) for k in keys):
             out.append(c)
     return out
 
@@ -705,8 +745,8 @@ def history_ok(ans, gold, named, hist):
             continue
         if v not in hist:
             return False
-        pos = min((m.start() for k in MW.value_keys_any(v) for m in re.finditer(r"(?<![a-z])" + re.escape(k), t)),
-                  default=None)
+        pos = min((m.start() for k in MW.value_keys_any(v) for m in re.finditer(r"(?<![a-z])" + re.escape(k.strip()),
+                                                                                    t)), default=None)
         if pos is None or not OLD_MARK.search(t[max(0, pos - 40):pos]):
             return False
     return True
@@ -751,7 +791,8 @@ def score(W, q, ans):
               (role and re.search(rf"\b(my|your) {re.escape(role)}\b", t)) or
               (p["nick"] and re.search(rf"\b{re.escape(p['nick'].lower())}\b", t)) or
               (p["first"].lower() in norm(ans) and sum(x["first"] == p["first"] for x in W.people) == 1))
-        res["correct"] = bool(ok) and not (got - {q["person"]}) and not HEDGE.search(t) and not abstain
+        res["correct"] = (bool(ok) and not (got - {q["person"]}) and not HEDGE.search(t) and
+                          not HEDGE_NAMES.search(re.sub(r"\([^)]*\)", "", ans)) and not abstain)
     elif k == "event_last":
         y, m, d = map(int, q["gold"].split("-"))
         ds = {(yy or y, mm, dd) for yy, mm, dd in dates_in(ans)}
@@ -778,6 +819,8 @@ def write_quality(W, ix):
                       that person was mentioned;
       link precision, lure intrusion (a row carrying a lure's value), people split into several ids, facts filed."""
     truth_people = {n["id"]: {m[1] for m in n["mentions"]} for n in W.notes}
+    owners = {n["id"]: {x for pid, kind, value in n["facts"] for x in ((pid, value) if kind in MW.RELS else (pid,))}
+              for n in W.notes}                     # a fact row belongs to the person the fact is about
     me = {pid for pid, p in ix.people.items() if p["full"].lower().strip(" .") in ME_NAMES}
     rows = [r for r in ix.rows if r["pid"] not in me]
     votes = defaultdict(Counter)
@@ -789,10 +832,10 @@ def write_quality(W, ix):
     fact_notes = {n["id"] for n in W.notes if n["facts"]}
     fact_rows = [r for r in rows if r["pid"] in who and not r["link"] and r["kind"] != "mentioned" and
                  r["note"] in fact_notes]
-    wrong = [r for r in fact_rows if who[r["pid"]] not in truth_people.get(r["note"], set())]
-    conf = {n["id"] for n in W.notes if n.get("confusable")}
+    wrong = [r for r in fact_rows if who[r["pid"]] not in owners.get(r["note"], set())]
+    conf = {n["id"] for n in W.notes if n.get("confusable") or any(m[2] in ("via", "source") for m in n["mentions"])}
     hard = [r for r in fact_rows if r["note"] in conf]
-    hard_wrong = [r for r in hard if who[r["pid"]] not in truth_people.get(r["note"], set())]
+    hard_wrong = [r for r in hard if who[r["pid"]] not in owners.get(r["note"], set())]
     rows_by_note = defaultdict(list)
     for r in rows:
         rows_by_note[r["note"]].append(r)
@@ -804,8 +847,7 @@ def write_quality(W, ix):
                 continue
             facts += 1
             keys = MW.value_keys(s, v)
-            match = [r for r in rows_by_note[n["id"]] if any(re.search(r"(?<![a-z])" + re.escape(k.strip()),
-                                                                       r["value"].lower()) for k in keys)]
+            match = [r for r in rows_by_note[n["id"]] if any(has_key(r["value"], k) for k in keys)]
             if match:
                 st = style.get(pid, "?")
                 ok = any(who.get(r["pid"]) == pid for r in match)
@@ -813,11 +855,11 @@ def write_quality(W, ix):
                 by_style[st][1] += 1
                 got += ok
     links = [r for r in rows if r["pid"] in who and r["link"] and r["link"] in who]
-    pairs = {n["id"]: {frozenset((a, b)) for a, rel, b in n["facts"] if rel in MW.RELS} for n in W.notes}
-    link_ok = sum(frozenset((who[r["pid"]], who[r["link"]])) in pairs.get(r["note"], set()) for r in links)
+    pairs = {frozenset((p["id"], b)) for p in W.people for rel, b, way in p["links"]}
+    link_ok = sum(frozenset((who[r["pid"]], who[r["link"]])) in pairs for r in links)
     lures = [n for n in W.notes if n.get("lure")]
     intr = sum(any(r["value"].lower() != "none" and r["kind"] != "mentioned" and
-                   any(k.strip() in r["value"].lower() for k in MW.value_keys(n["lure"][0], n["lure"][1]))
+                   any(has_key(r["value"], k) for k in MW.value_keys(n["lure"][0], n["lure"][1]))
                    for r in rows_by_note[n["id"]]) for n in lures)
     ids_per_person = Counter(who.values())
     return {"index_people": len(ix.people), "true_people": len(W.people), "rows": len(ix.rows),
@@ -841,7 +883,13 @@ def forget_test(W, ix, reader):
     rec, coll, tot = [], 0, 0
     for p in targets:
         ids = [pid for pid, sc in reader.name_match(p["full"]).items() if sc >= 3]
+        names = {p["full"].lower()} | {nm for pid in ids for nm in ix.people[pid]["names"]
+                                       if len(nm.split()) > 1 and not nm.startswith("my ")}
+        nick = [nm for pid in ids for nm in ix.people[pid]["names"] if len(nm.split()) == 1 and
+                sum(nm in q["names"] for q in ix.people.values()) == 1 and nm != p["first"].lower()]
         removed = {r["note"] for r in ix.rows if r["pid"] in ids}
+        removed |= {n["id"] for n in W.notes if any(x in n["text"].lower() for x in names) or
+                    any(re.search(r"(?<![a-z])" + re.escape(x) + r"(?![a-z])", n["text"].lower()) for x in nick)}
         truth = {n["id"] for n in W.notes if any(m[1] == p["id"] for m in n["mentions"]) and n["id"] not in
                  W.deleted_ids}
         rec.append(len(removed & truth) / max(1, len(truth)))
@@ -852,11 +900,15 @@ def forget_test(W, ix, reader):
 
 
 def deletion_audit(W, ix, who):
-    """After deleting the 100 messages: rows left anywhere else that still carry a deleted value for that person."""
+    """After deleting the 100 messages: rows still carrying a deleted value for that person whose own (cited) message
+    does not contain the value, i.e. rows that came from the deleted message under a wrong message number. A row whose
+    own message does contain the value is a misfiled fact of someone else, counted as a merge, not as a leak."""
+    text = {n["id"]: n["text"].lower() for n in W.notes}
     left = 0
-    for pid, s, nid, val in W.deleted:
-        keys = MW.value_keys(s, val)
-        left += any(who.get(r["pid"]) == pid and any(k.strip() in r["value"].lower() for k in keys) for r in ix.rows)
+    for pid, s_, nid, val in W.deleted:
+        keys = MW.value_keys(s_, val)
+        left += any(who.get(r["pid"]) == pid and any(has_key(r["value"], k) for k in keys) and
+                    not any(has_key(text.get(r["note"], ""), k) for k in keys) for r in ix.rows)
     return left
 
 
@@ -900,8 +952,8 @@ class Stub:
 
             def who_for(pid):
                 full = self.W.people[pid]["full"]
-                if full in visible or full in n["text"] or full in self.seen_new:
-                    return full if (full in visible or full in self.seen_new) else f"NEW: {full}"
+                if full in visible or full in n["text"]:
+                    return full if full in visible else f"NEW: {full}"
                 if style.get(pid) == "via" and anchor is not None and self.W.people[anchor]["full"] in visible:
                     return self.W.people[anchor]["full"]                       # files the flatmate's fact under Kofi
                 first = self.W.people[pid]["first"]
@@ -1010,12 +1062,29 @@ class Stub:
 ARMS = [("pages", True), ("B", True), ("oracle", True), ("nolinks", True), ("C", True), ("Ccues", True),
         ("pages", False), ("B", False), ("C", False), ("Ccues", False)]
 WRITER_THINK_ARMS = [("Bw", True), ("Bw", False)]
-HELDOUT_SHA256 = None        # set by amendment 1 when the sealed wordings are committed by hash (test world only)
+# The sealed held-out wordings (amendment 1, 14.4/14.6): written by a separate agent, committed only in encoded form
+# (research_notes/Messy chat test review 2026/sealed/), not to be decoded before the FREEZE commit.
+HELDOUT_SHA256 = "7a5d7cd7d643d641df8706da71a07d32c80541a63adeff2add704a9ae4a7bdea"
+HELDOUT_SEALED = os.path.join(ROOT, "research_notes", "Messy chat test review 2026", "sealed", "messy_heldout.json.gz.b64")
+
+
+def beacon_seed(commit, rnd):
+    """Amendment 1 (14.4): seed = int(sha256("<FREEZE commit>:<drand randomness of round R>")[:8], 16). The round is
+    named in the FREEZE commit and lies in the future when it is pushed, so the seed cannot be chosen."""
+    import hashlib
+    import urllib.request
+    with urllib.request.urlopen(f"https://api.drand.sh/public/{rnd}", timeout=60) as r:
+        rand = json.loads(r.read().decode())["randomness"]
+    return int(hashlib.sha256(f"{commit}:{rand}".encode()).hexdigest()[:8], 16)
 
 
 def load_heldout(path):
+    import base64
+    import gzip
     import hashlib
     raw = open(path, "rb").read()
+    if path.endswith(".gz.b64"):
+        raw = gzip.decompress(base64.b64decode(raw))
     h = hashlib.sha256(raw).hexdigest()
     if HELDOUT_SHA256 and h != HELDOUT_SHA256:
         raise SystemExit(f"held-out wordings {path}: sha256 {h} does not match the committed {HELDOUT_SHA256}")
@@ -1035,10 +1104,20 @@ def main():
     ap.add_argument("--dev-limit", type=int, default=None, help="dev only: use the first N messages")
     ap.add_argument("--arms", default=None, help="comma list, e.g. pages:think,B:think")
     ap.add_argument("--rescore", action="store_true", help="recompute every saved answer's score; no model calls")
+    ap.add_argument("--freeze-commit", default=None, help="the scored run: the FREEZE commit's full hash")
+    ap.add_argument("--beacon-round", type=int, default=None, help="the scored run: the drand round named in the FREEZE")
     a = ap.parse_args()
-    if a.split == "test" and not a.stub and (a.test_seed is None or a.heldout is None):
-        raise SystemExit("the scored test run needs --test-seed and --heldout (amendment 1)")
+    if a.split == "test" and not a.stub:
+        if not (a.freeze_commit and a.beacon_round and a.heldout and HELDOUT_SHA256):
+            raise SystemExit("the scored test run needs --freeze-commit, --beacon-round and --heldout (amendment 1)")
+        seed = beacon_seed(a.freeze_commit, a.beacon_round)
+        if a.test_seed is not None and a.test_seed != seed:
+            raise SystemExit(f"--test-seed {a.test_seed} is not the beacon seed {seed}")
+        a.test_seed = seed
     W = MW.World(a.split, seed=a.test_seed, heldout=load_heldout(a.heldout) if a.heldout else None)
+    problems = MW.check(W)
+    if problems:
+        raise SystemExit("the world fails its self-check:\n" + "\n".join(problems[:20]))
     if a.dev_limit:
         assert a.split == "dev"
         keep = {n["id"] for n in W.notes[:a.dev_limit]}
@@ -1104,56 +1183,76 @@ def main():
     if a.arms:
         arms = [(x.split(":")[0], x.split(":")[1] == "think") for x in a.arms.split(",")]
     by_id = {n["id"]: n for n in W.notes}
-    for arm, think in arms:
+
+    def cues_for(q):
+        if q["qid"] not in cue_cache:
+            c = ask(llm, CUES.format(q=q["q"]), CUE_KW, False, zlib.crc32(q["qid"].encode()) % 2**31)
+            cue_cache[q["qid"]] = (parse_cues(c["text"]), c["text"])
+        return cue_cache[q["qid"]]
+
+    def run_one(q, arm, think, key0):
+        """One question in one arm; the record is appended to answers.jsonl (resumable)."""
+        seed = zlib.crc32(f"{key0}|{q['qid']}".encode()) % 2**31
+        rec = {"key": f"{key0}|{q['qid']}", "arm": arm, "mode": "think" if think else "nothink", "qid": q["qid"],
+               "kind": q["kind"], "held_out": q["held_out"], "person": q["person"]}
+        if arm == "C":
+            r, found, steps = run_agent(llm, S, W, q, think, seed)
+            rec.update(notes=sorted(found), steps=steps)
+        elif arm == "Ccues":
+            cues, raw = cues_for(q)
+            r, found = run_ccues(llm, S, W, q, raw, think, seed)
+            rec.update(notes=sorted(found), cues=raw)
+        else:
+            if arm == "pages":
+                ids = pages(W, q)
+            else:
+                cues, raw = cues_for(q)
+                ids, targets = readers[arm].retrieve(cues, q["q"])
+                rec.update(cues=raw, targets=targets)
+            rec["notes"] = ids
+            r = ask(llm, answer_prompt(W, ids, q), THINK if think else NOTHINK, think, seed)
+        rec.update(answer=r["text"], thinking=r["thinking"][-4000:], cut=r["cut"],
+                   prompt_tokens=r["prompt_tokens"], completion_tokens=r["completion_tokens"], sec=r["sec"],
+                   gold_found=sorted(set(q["notes"]) & set(rec["notes"])), gold_total=len(q["notes"]))
+        if q["kind"] == "deleted":                       # a design leak: the deleted value reached the reader in a
+            keys = MW.value_keys(q["slot"], q["leak"])   # message about that person
+            rec["leak_shown"] = any(i in W.deleted_ids or (any(m[1] == q["person"] for m in by_id[i]["mentions"])
+                                    and any(has_key(by_id[i]["text"], k) for k in keys)) for i in rec["notes"])
+        rec.update(score(W, q, r["text"]))
+        with lock:
+            f.write(json.dumps(rec, ensure_ascii=True) + "\n")
+            f.flush()
+            done[rec["key"]] = rec
+        return rec
+
+    def run_arm(arm, think):
         key0 = f"{arm}|{'think' if think else 'nothink'}"
         todo = [q for q in W.questions if f"{key0}|{q['qid']}" not in done]
         t0 = time.time()
-
-        def cues_for(q, seed):
-            if q["qid"] not in cue_cache:
-                c = ask(llm, CUES.format(q=q["q"]), CUE_KW, False, seed)
-                cue_cache[q["qid"]] = (parse_cues(c["text"]), c["text"])
-            return cue_cache[q["qid"]]
-
-        def one(q, arm=arm, think=think, key0=key0):
-            seed = zlib.crc32(f"{key0}|{q['qid']}".encode()) % 2**31
-            rec = {"key": f"{key0}|{q['qid']}", "arm": arm, "mode": "think" if think else "nothink", "qid": q["qid"],
-                   "kind": q["kind"], "held_out": q["held_out"], "person": q["person"]}
-            if arm == "C":
-                r, found, steps = run_agent(llm, S, W, q, think, seed)
-                rec.update(notes=sorted(found), steps=steps)
-            elif arm == "Ccues":
-                cues, raw = cues_for(q, zlib.crc32(q["qid"].encode()) % 2**31)
-                r, found = run_ccues(llm, S, W, q, raw, think, seed)
-                rec.update(notes=sorted(found), cues=raw)
-            else:
-                if arm == "pages":
-                    ids = pages(W, q)
-                else:
-                    cues, raw = cues_for(q, zlib.crc32(q["qid"].encode()) % 2**31)
-                    ids, targets = readers[arm].retrieve(cues, q["q"])
-                    rec.update(cues=raw, targets=targets)
-                rec["notes"] = ids
-                r = ask(llm, answer_prompt(W, ids, q), THINK if think else NOTHINK, think, seed)
-            rec.update(answer=r["text"], thinking=r["thinking"][-4000:], cut=r["cut"],
-                       prompt_tokens=r["prompt_tokens"], completion_tokens=r["completion_tokens"], sec=r["sec"],
-                       gold_found=sorted(set(q["notes"]) & set(rec["notes"])), gold_total=len(q["notes"]))
-            if q["kind"] == "deleted":                   # a design leak: the deleted value reached the reader in a
-                keys = MW.value_keys(q["slot"], q["leak"])   # message about that person
-                rec["leak_shown"] = any(i in W.deleted_ids or (any(m[1] == q["person"] for m in by_id[i]["mentions"])
-                                        and any(k in by_id[i]["text"].lower() for k in keys)) for i in rec["notes"])
-            rec.update(score(W, q, r["text"]))
-            with lock:
-                f.write(json.dumps(rec, ensure_ascii=True) + "\n")
-                f.flush()
-                done[rec["key"]] = rec
-            return rec
         with ThreadPoolExecutor(a.workers) as ex:
-            list(ex.map(one, todo))
+            list(ex.map(lambda q: run_one(q, arm, think, key0), todo))
         allr = [r for r in done.values() if r["key"].startswith(key0 + "|")]
         log(f"{key0}: {len(allr)} answers, {100 * np.mean([r['correct'] for r in allr]):.1f}% right, "
             f"{(time.time() - t0) / 60:.1f} min")
-    summary = write_summary(W, done, wstats, wq, fg, left, out, arms, extra)
+
+    for arm, think in arms:
+        run_arm(arm, think)
+    summary, v0 = write_summary(W, done, wstats, wq, fg, left, out, arms, extra)
+    if "writer_think" not in extra and v0.split(":")[0] in ("WRITER-LIMITED", "BETWEEN") and not a.arms:
+        log("verdict points to the thinking writer (amendment 1): running it on the same world")
+        if a.stub:
+            llm.seen_new = set()
+        ixw, wsw = build_index(llm, W, os.path.join(out, "write_think.jsonl"), log, think=True)
+        wqw = write_quality(W, ixw)
+        whow = wqw.pop("who")
+        ixw.delete(W.deleted_ids)
+        readers["Bw"] = Reader(ixw, W, emb)
+        extra["writer_think"] = {"write": wsw, "filing": wqw, "rows_left": deletion_audit(W, ixw, whow),
+                                 "forget": forget_test(W, ixw, readers["Bw"])}
+        for arm, think in WRITER_THINK_ARMS:
+            run_arm(arm, think)
+        arms = arms + WRITER_THINK_ARMS
+        summary, v0 = write_summary(W, done, wstats, wq, fg, left, out, arms, extra)
     log("\n".join(summary))
 
 
@@ -1213,6 +1312,7 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
     searches = {}
     for sa in ("C", "Ccues"):
         searches[sa] = {"hard": acc(sa, "think", MW.HARD), "assoc": acc(sa, "think", MW.ASSOC),
+                        "hard_off": acc(sa, "nothink", MW.HARD),
                         "each": {k: acc(sa, "think", [k]) for k in MW.ASSOC},
                         "margin": clustered_diff(done, "B", sa, "think", MW.ASSOC)}
     strong = max(searches, key=lambda x: (searches[x]["assoc"] if searches[x]["assoc"] == searches[x]["assoc"] else -1))
@@ -1230,15 +1330,13 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
             "margin": mg[1] > 0 and mg[0] >= PASS_MARGIN,
             "merges": wq["wrong_merge_pct"] <= MERGE_PASS, "hard_merges": wq["hard_merge_pct"] <= HARD_MERGE_PASS,
             "fast_path": bf >= FAST_PASS, "write_cost": wtok <= WRITE_COMPLETION and ptok <= WRITE_PROMPT,
-            "forget": fg["forget_recall_pct"] >= FORGET_PASS}
+            "forget": fg["forget_worst_pct"] >= FORGET_PASS}
     cond = {k: bool(x) for k, x in cond.items()}
-    search_wins = [sa for sa, v in searches.items() if v["hard"] >= PASS_HARD and
+    search_wins = [sa for sa, v in searches.items() if v["hard"] >= PASS_HARD and v["hard_off"] >= FAST_PASS and
                    all(x >= PASS_ASSOC_EACH for x in v["each"].values()) and
                    acc("B", "think", MW.ASSOC) - v["assoc"] < PASS_MARGIN]
-    if design_leaks or shown or left:
-        v = ("STOP: a deleted value survived (in an index row elsewhere, or in a message shown to the reader). "
-             "Nothing ships until the design is fixed.")
-    elif all(cond.values()):
+    stop = bool(design_leaks or shown or left)
+    if all(cond.values()):
         v = "PASS: build B, the index the phone writes as messages arrive"
     elif search_wins:
         v = f"SEARCH: build search ({' and '.join(search_wins)} reaches the bar and the index adds less than 5 points)"
@@ -1249,6 +1347,30 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
              "writer (pre-registered), a bigger writer only if that fails too")
     else:
         v = "BETWEEN: neither line met"
+    v_wo_stop = v
+    if stop:
+        v = ("STOP: a deleted value survived (in an index row elsewhere, or in a message shown to the reader); nothing "
+             f"ships until the design is fixed. Without the deletion clause the verdict would be: {v_wo_stop}")
+    wline = None
+    if extra.get("writer_think"):                         # the thinking writer, judged by the same PASS conditions
+        x = extra["writer_think"]
+        bw, bwf = acc("Bw", "think", MW.HARD), acc("Bw", "nothink", MW.HARD)
+        perw = {k: acc("Bw", "think", [k]) for k in MW.ASSOC}
+        mgw = clustered_diff(done, "Bw", strong, "think", MW.ASSOC)
+        wt = x["write"]["completion_tokens"] / max(1, x["write"]["notes"])
+        wp = x["write"]["prompt_tokens"] / max(1, x["write"]["notes"])
+        condw = {"B_hard": bw >= PASS_HARD, "oracle_ratio": o > 0 and bw / o >= PASS_ORACLE_RATIO,
+                 "assoc_each": all(q_ >= PASS_ASSOC_EACH for q_ in perw.values()),
+                 "margin": mgw[1] > 0 and mgw[0] >= PASS_MARGIN,
+                 "merges": x["filing"]["wrong_merge_pct"] <= MERGE_PASS,
+                 "hard_merges": x["filing"]["hard_merge_pct"] <= HARD_MERGE_PASS, "fast_path": bwf >= FAST_PASS,
+                 "write_cost": wt <= WRITE_COMPLETION_THINK and wp <= WRITE_PROMPT,
+                 "forget": x["forget"]["forget_worst_pct"] >= FORGET_PASS, "no_rows_left": x["rows_left"] == 0}
+        condw = {k: bool(q_) for k, q_ in condw.items()}
+        wline = ("PASS with an overnight thinking writer" if all(condw.values()) else "the thinking writer does not "
+                 "pass either") + f" (conditions {json.dumps(condw)})"
+        if all(condw.values()) and not stop and v_wo_stop.split(":")[0] in ("WRITER-LIMITED", "BETWEEN"):
+            v = "PASS with an overnight thinking writer: build B, with the index written overnight with thinking on"
     ev = acc("B", "think", MW.EVENT_KINDS)
     L += ["", "## Verdict", "", f"- **{v}**",
           f"- B hard {b:.1f}% (>= {PASS_HARD}); oracle {o:.1f}% (read-limited below {READ_LIMIT}); B/oracle "
@@ -1267,13 +1389,15 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
           f"{wq['link_precision_pct']:.1f}% of {wq['link_rows']}; lure intrusion {wq['lure_intrusion_pct']:.1f}%; "
           f"{wq['index_people']} index people for {wq['true_people']}, {wq['people_split_into_several_ids']} split; "
           f"{wq['me_rows']} rows about me",
-          f"- Forgetting a whole person: {fg['forget_recall_pct']:.1f}% of their messages removed (>= {FORGET_PASS}); "
-          f"worst person {fg['forget_worst_pct']:.1f}%; collateral {fg['forget_collateral_pct']:.1f}% of removed",
+          f"- Forgetting a whole person: {fg['forget_recall_pct']:.1f}% of their messages removed on average; worst "
+          f"person {fg['forget_worst_pct']:.1f}% (every person >= {FORGET_PASS}); collateral "
+          f"{fg['forget_collateral_pct']:.1f}% of removed",
           f"- Deletion: rows elsewhere still carrying a deleted value {left}; deleted values shown to a reader {shown}; "
           f"answers naming a deleted value (thinking on) " + ", ".join(f"{k} {x:.1f}%" for k, x in leaks.items()) +
           "; guessing rate on never-stated facts " + ", ".join(f"{k} {x:.1f}%" for k, x in guesses.items()),
           f"- Writing cost: {wtok:.0f} completion and {ptok:.0f} prompt tokens per message (<= {WRITE_COMPLETION} and "
-          f"<= {WRITE_PROMPT})",
+          f"<= {WRITE_PROMPT}); about {100 * (wtok / PHONE_DECODE + ptok / PHONE_PREFILL) / 60:.1f} phone-minutes per "
+          f"100 messages at {PHONE_DECODE} tokens/s writing and {PHONE_PREFILL} tokens/s reading (assumed)",
           f"- Events (reported line): B {ev:.1f}% (>= {EVENTS_LINE})",
           f"- Conditions for PASS: {json.dumps(cond)}"]
     for arm in ("B", "oracle", "nolinks", "C", "Ccues"):
@@ -1282,6 +1406,8 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
             L.append(f"- {arm}: found every needed message for {100 * np.mean([len(r['gold_found']) == r['gold_total'] for r in rs]):.1f}% "
                      f"of questions; median completion {np.median([r['completion_tokens'] for r in rs]):.0f} tokens; "
                      f"cut off {100 * np.mean([r['cut'] for r in rs]):.1f}%")
+    if wline:
+        L.append(f"- Thinking writer verdict: {wline}")
     if extra.get("writer_think"):
         x = extra["writer_think"]
         L.append(f"- Thinking writer: B-w hard {acc('Bw', 'think', MW.HARD):.1f}% (off {acc('Bw', 'nothink', MW.HARD):.1f}%); "
@@ -1291,10 +1417,10 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
     with open(os.path.join(out, "summary.md"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(L) + "\n")
     with open(os.path.join(out, "result.json"), "w", encoding="utf-8") as fh:
-        json.dump({"verdict": v, "conditions": cond, "B_hard": b, "oracle_hard": o, "B_off_hard": bf, "assoc": per,
+        json.dump({"verdict": v, "verdict_without_stop": v_wo_stop, "conditions": cond, "B_hard": b, "oracle_hard": o, "B_off_hard": bf, "assoc": per,
                    "searches": searches, "filing": wq, "forget": fg, "write": wstats, "rows_left": left,
                    "deleted_shown": shown, "extra": extra}, fh, indent=1, default=str)
-    return L
+    return L, v_wo_stop
 
 
 if __name__ == "__main__":
