@@ -533,3 +533,62 @@ python brain/messy_index.py --base-url URL/v1 --split test \
     --freeze-commit <FREEZE hash> --beacon-round <R> \
     --heldout "research_notes/Messy chat test review 2026/sealed/messy_heldout.json.gz.b64"   # the scored run
 ```
+
+## 16. Development phase log (dev world only; section 8 allows prompts, parsing, retrieval, chunk size, candidates)
+
+The first model call on this test was at 21:59 on 14 November 2026, after amendment 2 (commit e683b85, 21:55). The test
+world has not been built with a real seed and the sealed wordings have not been decoded.
+
+### 16.1 Smoke run (first 200 dev messages, every arm)
+
+Every code path ran against the live 4B: writing, deletion, the filing measures, every answering arm, the search agent,
+the summary, and the automatic start of the thinking writer. That last stage was stopped by hand: it was still on the
+old prompt. 45 questions fall in the first 200 messages, mostly easy kinds:
+
+| Arm | Right |
+|---|---|
+| pages | 93.3% |
+| B | 88.9% |
+| oracle | 91.1% |
+| nolinks | 88.9% |
+| C, thinking on | 88.9% |
+| C, thinking off | 68.9% |
+| Ccues, thinking off | 64.4% |
+
+Too few questions to read anything into.
+
+### 16.2 What the 4B's writer did wrong, and the changes (all to the prompt or the parsing)
+
+| Seen in the writer's replies | Change |
+|---|---|
+| Exactly one line per message, so a message never got both a fact and a link, or two people | Prompt: "A message often needs several lines…", plus a worked example with made-up people and topics outside the generator's lists (studying law, supporting a football club, collecting clocks) |
+| The fact put in the label: "P4 \| plays the trumpet \| -" | Prompt: a wrong and a right line |
+| "NEW: He", "NEW: She": a pronoun made into a person | Prompt: pronouns are never a new person. Parsing: a NEW pronoun is rejected |
+| How I know someone written as "boss of \| me", "relative \| grandma", "brother \| -" instead of "relation to me", so "my mum" never became her name and later "My mum drives a Tesla" created a person called Mum (forgetting her then missed half her messages) | Prompt: the example shows "relation to me \| niece". Parsing: "X of \| me", "relative \| X" and "X \| -" when the message says "my X" are read as "relation to me \| X"; "NEW: my brother" is the known "my brother" if there is exactly one; no "my X" name for the writer themself |
+| "mentioned" written for messages that state a fact ("Bodhi Sithole has a pet hedgehog") | Prompt: anything lasting about someone gets a fact line, never "mentioned" |
+| A date in a fact's value ("drives a Citroen \| 2025-02-01") | Prompt: only an event has a date |
+| Rentals, test drives and one-off tries filed as facts | Prompt: one-off or temporary things are not facts |
+| 3-part lines ("#267 \| P16 \| switched to the trumpet") were dropped | Parsing: kept, with the label "note" |
+
+**One measurement fix.** With `--dev-limit`, people not yet mentioned in the slice counted as "0% forgotten". They are
+now skipped. On full worlds this changes nothing: every forgetting target has messages in the dev world and in test
+worlds with seeds 7 and 20261115 (checked).
+
+### 16.3 What the small runs showed, and their limit
+
+Writing only, first 400 dev messages, after each change:
+
+| | People split | Facts filed | Wrong merges | Forgetting (average; worst) |
+|---|---|---|---|---|
+| v2 (several lines, label, pronouns) | 8 | 78.8% | 5.5% | 49% (bug); 0% (bug) |
+| v3 (+ relation example and parsing) | 1 | 73.2% | 4.1% | 61% (bug); 0% (bug) |
+| v4 (+ "mentioned" rule, dates, 3-part lines, forgetting fix) | 3 | 77.7% | 3.1% | 92.7%; 51.6% |
+| v5 (+ "my brother" parsing) | 4 | 67.6% | 6.1% | 89.4%; 47.6% |
+
+The writer is deterministic: the same prompt gives the same reply. But each batch's prompt depends on everything filed
+before it, so one parsing change alters every later prompt, and two runs on 400 messages can differ by 10 points for
+that reason alone. Saved replies cannot be re-parsed with new parsing either: person numbers shift, and the old replies
+then point at the wrong people. So changes are judged on the 1,500-message dev run, not on these small runs.
+
+Lure rows are often honest notes ("rented \| Volvo", "grew up in \| Dresden"). The lure-intrusion measure counts them
+anyway. Whether they mislead is measured by the answers.

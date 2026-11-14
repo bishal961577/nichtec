@@ -87,12 +87,42 @@ name only for someone who is not in the list yet.
 (YYYY-MM-DD; work it out from the message's date), then what we did.
 - If a message says a fact is no longer true, write that fact with the value "none". If it corrects a fact, write the \
 corrected value.
-- Only what the message says is true of the person now. Wishes, plans, guesses, the past, and facts about someone \
-else (an unnamed relative, the person telling me) are not facts about them: skip them.
+- Only what the message says is true of the person now. Wishes, plans, guesses, the past, one-off or temporary things \
+(borrowed, rented, tried once), and facts about someone else (an unnamed relative, the person telling me) are not \
+facts about them: skip them.
 - Facts about me, the writer, are not about anyone in the list: skip them.
-- If a message mentions a person but says nothing new about them, write one line for them with the fact "mentioned" \
-and the value "-".
-- Write nothing for a message that mentions no one."""
+- If a message mentions a person but says nothing lasting about them, write one line for them with the fact \
+"mentioned" and the value "-". A message that says anything lasting about someone (what they do, have, like or \
+cannot have, where they live) gets a fact line, never "mentioned".
+- Only an event has a date in its value.
+- Write nothing for a message that mentions no one.
+- A message often needs several lines: one for each fact and each person it names. Write them all.
+- The third part is a short label; the fourth is the fact itself. Wrong: "P4 | is studying law | -". Right: \
+"P4 | studying | law".
+- He, she, they and other pronouns are never a new person: they mean someone just mentioned, so use that person's id. \
+Someone you wrote as NEW earlier in this reply: write their full name again, without NEW:.
+
+Example (made-up people, not from this notebook). Index: "P3: Dev Shah; also dev, my driving instructor; relation \
+to me: driving instructor". Messages:
+#7 [2026-03-02 Mon] Ruth Okafor is studying law in the evenings.
+#8 [2026-03-03 Tue] She supports Arsenal, sadly.
+#9 [2026-03-04 Wed] Ruth's husband Tomasz Nowak collects old clocks.
+#10 [2026-03-05 Thu] My niece Lena Park loves dinosaurs.
+#11 [2026-03-06 Fri] Long day, my train was late.
+#12 [2026-03-07 Sat] My driving instructor says Tomasz gave the clocks away and collects stamps now.
+#13 [2026-03-08 Sun] Lena borrowed my bike for the afternoon.
+Lines:
+#7 | NEW: Ruth Okafor | studying | law
+#8 | Ruth Okafor | supports | Arsenal
+#9 | NEW: Tomasz Nowak | collects | old clocks
+#9 | Tomasz Nowak | husband of | Ruth Okafor
+#10 | NEW: Lena Park | relation to me | niece
+#10 | Lena Park | loves | dinosaurs
+#12 | Tomasz Nowak | collects | stamps
+#12 | P3 | mentioned | -
+#13 | Lena Park | mentioned | -
+(#11 is about me only: no line. #13 is a one-off, not a lasting fact: "mentioned" only. Later messages that say "my \
+niece" mean Lena Park.)"""
 
 CUES = """Someone asks their notebook assistant a question. Write the clues needed to look it up, one per line, using \
 only these labels:
@@ -199,7 +229,8 @@ class Index:
         p = self.people[pid]
         if kind == "nickname" and value:
             p["names"].add(value.strip('"').lower())
-        if ("relation" in kind or "role" in kind) and value and not link:
+        if ("relation" in kind or "role" in kind) and value and not link and \
+                p["full"].lower().strip(" .") not in ("me", "i", "myself", "user", "the user", "the writer", "writer"):
             p["names"].add(f"my {value.lower().replace('my ', '')}")
 
     def delete(self, note_ids):
@@ -271,6 +302,7 @@ def candidates(ix, chunk, recent):
 
 
 ROW = re.compile(r"#\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(.+)")
+ROW3 = re.compile(r"#\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*$")   # dev phase (parsing): "#267 | P16 | plays trumpet"
 
 
 def fix_citation(nid, kind, value, texts):
@@ -291,14 +323,22 @@ def parse_rows(text, chunk_ids, ix, recent, texts=None):
     added, bad, new_here = 0, 0, {}
     for line in text.splitlines():
         m = ROW.search(line)
-        if not m:
-            continue
-        nid, who, kind, value = int(m.group(1)), m.group(2).strip(), m.group(3).strip(), m.group(4).strip()
+        if m:
+            nid, who, kind, value = int(m.group(1)), m.group(2).strip(), m.group(3).strip(), m.group(4).strip()
+        else:
+            m = ROW3.search(line)
+            if not m:
+                continue
+            nid, who, kind, value = int(m.group(1)), m.group(2).strip(), "note", m.group(3).strip()
         if nid not in chunk_ids:
             bad += 1
             continue
         if texts:
             nid = fix_citation(nid, kind, value, texts)
+        kind, value = to_me(kind, value)
+        if texts and nid in texts and value.strip() in ("", "-") and kind.lower() != "mentioned" and \
+                re.search(r"\bmy " + re.escape(kind.lower()) + r"\b", texts[nid].lower()):
+            kind, value = "relation to me", kind          # "#6 | NEW: Gaia Okafor | brother | -" (dev phase: parsing)
         pid = resolve(who, ix, new_here)
         if pid is None:
             bad += 1
@@ -317,6 +357,25 @@ def parse_rows(text, chunk_ids, ix, recent, texts=None):
     return added, bad
 
 
+ME_WORDS = {"me", "myself", "i", "the writer", "the user", "user", "writer"}
+REL_KINDS = {"relative", "relation", "relationship", "relation to user", "relation to writer", "relationship to me",
+             "is my", "my"}
+
+
+def to_me(kind, value):
+    """Dev phase (parsing, allowed): the 4B writes "boss of | me" or "relative | grandma" for "relation to me"."""
+    k, v = kind.strip().lower(), value.strip()
+    m = re.fullmatch(r"(?:my |is my )?(.+?) (?:of|to)", k)
+    if m and v.lower().strip(" .") in ME_WORDS:
+        return "relation to me", m.group(1)
+    if k in REL_KINDS and v and v != "-":
+        return "relation to me", re.sub(r"^(my|is my)\s+", "", v, flags=re.I)
+    return kind, value
+
+
+PRONOUNS = {"he", "she", "they", "him", "her", "them", "it", "his", "hers", "their"}
+
+
 def resolve(who, ix, new_here):
     w = who.strip()
     m = re.match(r"(P\d+)\b", w)
@@ -324,7 +383,7 @@ def resolve(who, ix, new_here):
         return m.group(1) if m.group(1) in ix.people else None
     m = re.match(r"NEW\s*:?\s*(.+)", w, re.I)
     name = (m.group(1) if m else w).strip().strip('"')
-    if not name:
+    if not name or name.lower() in PRONOUNS:      # "NEW: He" is not a person (dev phase: parsing, allowed)
         return None
     key = name.lower()
     if key in new_here:
@@ -332,6 +391,10 @@ def resolve(who, ix, new_here):
     hit = ix.find_full(name)
     if hit:
         return hit
+    if key.startswith("my "):    # "NEW: my brother" when someone is already "my brother" (dev phase: parsing)
+        same = [pid for pid, p in ix.people.items() if key in p["names"]]
+        if len(same) == 1:
+            return same[0]
     if not m:                    # a bare name, nickname or "my sister": a known person if exactly one matches; else unusable
         same = [pid for pid, p in ix.people.items() if key in p["names"]]
         return same[0] if len(same) == 1 else None
@@ -892,11 +955,13 @@ def forget_test(W, ix, reader):
                     any(re.search(r"(?<![a-z])" + re.escape(x) + r"(?![a-z])", n["text"].lower()) for x in nick)}
         truth = {n["id"] for n in W.notes if any(m[1] == p["id"] for m in n["mentions"]) and n["id"] not in
                  W.deleted_ids}
+        if not truth:                                    # only with --dev-limit: not mentioned yet (no-op on a full world)
+            continue
         rec.append(len(removed & truth) / max(1, len(truth)))
         coll += len(removed - truth)
         tot += len(removed)
     return {"forget_recall_pct": 100 * float(np.mean(rec)), "forget_worst_pct": 100 * float(np.min(rec)),
-            "forget_collateral_pct": 100 * coll / max(1, tot), "forget_people": len(targets)}
+            "forget_collateral_pct": 100 * coll / max(1, tot), "forget_people": len(rec)}
 
 
 def deletion_audit(W, ix, who):
