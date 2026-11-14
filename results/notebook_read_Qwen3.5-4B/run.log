@@ -16,3 +16,4 @@ endpoint https://volansaquilae-com--nichtec-qwen4b-serve.us-east.modal.run/v1, s
 ('personal', 'nothink', 10): 965 answers, 96.4% right, 0.5 min (total 13.5 min)
 ('personal', 'nothink', 'search2'): 995 answers, 55.9% right, 1.0 min (total 14.4 min)
 ('personal', 'nothink', 100): 635 answers, 77.0% right, 0.3 min (total 14.8 min)
+('world', 'think', 10): 270 answers, 94.1% right, 4.7 min (total 19.5 min)
