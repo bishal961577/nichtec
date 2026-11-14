@@ -25,3 +25,8 @@ endpoint POST /chat/completions: HTTP 303:
 === 16:31:14 amendment 5: brain/whole_sample.py (256-token arms in full, then the 220-question sample of the 5,000-note arm) ===
 ('personal', 'nothink256', 10): 965 answers, 96.4% right, 0.3 min (total 0.3 min)
 ('personal', 'nothink256', 5000): 995 answers, 42.2% right, 1.3 min (total 1.6 min)
+('personal', 'think', 5000): 220 answers, 20.9% right, 79.3 min (total 79.3 min)
+Amendment 5 sample: 220 questions (20 per kind, seed 20261114); answered 220, missing 0.
+Line (amendment 4) on the sample: FAIL. Hard set, weighted to the full set's kind counts: 20.4% [13.0, 28.0] (pass >= 90, fail <= 75); described 0%, who 0%, two-hop 30% (each >= 75 to pass; n = 20 each); median completion 16384 tokens vs 1418 allowed, 90th percentile 16384; cut off at 16K 72.9% (<= 2 allowed).
+By kind (sample): amb 0% (n=20), close 30% (n=20), desc 0% (n=20), fname 15% (n=20), prev 55% (n=20), retract 40% (n=20), reword 15% (n=20), same 20% (n=20), two 30% (n=20), upd 25% (n=20), who 0% (n=20)
+Answers outside the sample (saved before amendment 5, reported only): 24, 58.3% right, kinds ['reword', 'same'].
