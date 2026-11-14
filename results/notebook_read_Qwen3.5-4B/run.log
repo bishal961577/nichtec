@@ -24,3 +24,4 @@ endpoint POST /chat/completions: HTTP 303:
 === 16:28:17 stopped: the owner had closed the Modal app ===
 === 16:31:14 amendment 5: brain/whole_sample.py (256-token arms in full, then the 220-question sample of the 5,000-note arm) ===
 ('personal', 'nothink256', 10): 965 answers, 96.4% right, 0.3 min (total 0.3 min)
+('personal', 'nothink256', 5000): 995 answers, 42.2% right, 1.3 min (total 1.6 min)
