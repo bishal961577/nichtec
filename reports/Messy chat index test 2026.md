@@ -592,3 +592,63 @@ then point at the wrong people. So changes are judged on the 1,500-message dev r
 
 Lure rows are often honest notes ("rented \| Volvo", "grew up in \| Dresden"). The lure-intrusion measure counts them
 anyway. Whether they mislead is measured by the answers.
+
+### 16.4 The reading side on 1,500 dev messages, and what it exposed
+
+With the right messages handed over (the pages arm, thinking on), the 4B scored 86.4% on the 368 questions of the
+first 1,500 dev messages. Test 1's notebook gave 99.9%. Reading the failures showed three causes:
+
+1. **The answer prompt was too literal for messy notes.**
+   - "His Skoda is in the shop again" got "not in my notes" for "what car does he drive now?". So did "gave up his old
+     hobby and took up watercolour painting".
+   - "Dropped her hobby" got "not in my notes" where "she no longer has one" was asked.
+
+   Changed (prompt, applied to every arm):
+   - answer from what the notes say or clearly imply, not from loosely related facts;
+   - a later note can change or cancel an earlier one, and the answer should say when something stopped;
+   - one person can be named in several ways;
+   - a description in a question may be loose.
+
+   The examples use topics outside the generator's lists (a phone, a gym).
+2. **The perfect pages lacked who the person is.** "Pixie works as a teacher" cannot answer "what does my uncle do?"
+   without the message that says Pixie is my uncle's nickname. The pages now include the person's introduction and
+   nickname messages (retrieval code, allowed).
+3. **The scorer missed plain verb forms:** "They fish." for fishing, "Climbs…" for climbing, "rows", "bakes", "teaches"
+   and a few others. Added to the answer keys for scoring only (`SCORE_EXTRA`).
+   - The generator also uses its keys, to choose which facts to delete. Adding them there changed the world (checked:
+     its hash moved), so they were not added there.
+   - The world is byte-identical to the reviewed one (hash b424cd579d89fec5 over the dev world and a seed-7 test world's
+     messages and questions).
+
+After changes 1 and 2, the pages arm went from 86.4% to 90.2%:
+
+| Kind | Before | After |
+|---|---|---|
+| who | 78.1% | 100% |
+| retract | 46.7% | 100% |
+| upd | 67.6% | 82.4% |
+| named | 94.6% | 86.5% |
+| never | 95.0% | 90.0% |
+| deleted | 92.7% | 87.8% |
+
+The losses come from inferring too freely: "he is a landlord" because someone rents from him, and an instrument given
+for "what do they do in their free time?". The "not from loosely related facts" clause was added after this; its
+effect is in 16.5.
+
+**Three weaknesses of the world itself, found on dev.** The generator and the questions stay as reviewed (section 8).
+These criteria are pre-registered for the hand check of 15.2 (perfect pages below 95% on a test-world kind). Under them,
+a question counts as **the world at fault** when:
+
+- **(a) Free time vs instrument.** A "free time" question (the hobby slot) is answered with an instrument the person
+  truly plays. Playing an instrument is a free-time activity; the question is ambiguous.
+- **(b) Unmarked updates.** A new value was stated without saying the old one stopped ("Bram is really into rowing"
+  after "Bram plays chess in the park"), and the answer gives both values with the newer one included. Both readings
+  are fair.
+- **(c) Unstated details in a description.** A described-person question asserts a detail that no message about that
+  person states ("plays chess *in the park*" when the notes say "loves chess"), and the answer is "not in my notes".
+
+The hand check applies these to every arm alike, and both versions are reported.
+
+**Correction to 16.3.** "The writer is deterministic" holds only for identical server load. vLLM is not
+batch-invariant, so the same prompt can give a different reply when other requests share the batch. The v6 writer's
+wrong merges were 5.5% in one run and 6.3% in another on identical code. That is the noise in a single run.
