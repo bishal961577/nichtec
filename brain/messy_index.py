@@ -135,12 +135,22 @@ niece" mean Lena Park.)"""
 
 CUES = """Someone asks their notebook assistant a question. Write the clues needed to look it up, one per line, using \
 only these labels:
-name: a name or nickname in the question
+name: a person's name or nickname in the question (never a thing, pet, place or activity)
 me: a relation to the person asking, for example sister, boss
-fact: something the question says about a person, for example plays the cello
+fact: something the question says about a person, for example plays the cello (one line per fact)
 link: a relation between two people the question goes through, for example neighbour
 ask: what is asked, in one to three words
 time: a month, date or "last" in the question
+
+Examples (made-up):
+Question: Who studies law and supports Arsenal?
+fact: studies law
+fact: supports Arsenal
+ask: who
+Question: What does Dev Shah's brother collect?
+name: Dev Shah
+link: brother
+ask: collects
 
 Question: {q}"""
 
@@ -668,8 +678,13 @@ class Reader:
         return out
 
     def retrieve(self, cues, question):
-        names = cues.get("name", []) + [f"my {m.replace('my ', '')}" for m in cues.get("me", [])]
-        facts, link = cues.get("fact", []), (cues.get("link") or [None])[0]
+        # a "name" clue that is nobody's name ("name: axolotl") is a described fact (dev phase: retrieval, allowed)
+        given = [nm for nm in cues.get("name", []) if self.name_match(nm)]
+        moved = [nm for nm in cues.get("name", []) if nm not in given]
+        names = given + [f"my {m.replace('my ', '')}" for m in cues.get("me", [])]
+        facts, link = cues.get("fact", []) + moved, (cues.get("link") or [None])[0]
+        if not names and link:                    # "link: archery club" with no one to go through: also a fact
+            facts, link = facts + cues.get("link", []), None
         ask_cue = " ".join(cues.get("ask", [])) or question
         time_cue = " ".join(cues.get("time", [])) or (question if month_of(question) else "")
         score = Counter()
