@@ -342,8 +342,9 @@ class Endpoint:
 
     def propose_batch(self, prompts, n, seeds):
         def one(ps):
+            extra = {"presence_penalty": SAMPLING["presence_penalty"]} if "presence_penalty" in SAMPLING else {}
             r = self.chat(ps[0], thinking=THINKING, n=n, seed=ps[1], max_tokens=SAMPLING["max_new_tokens"],
-                          temperature=SAMPLING["temperature"], top_p=SAMPLING["top_p"], top_k=SAMPLING["top_k"])
+                          temperature=SAMPLING["temperature"], top_p=SAMPLING["top_p"], top_k=SAMPLING["top_k"], **extra)
             if not THINKING:
                 return [c["message"].get("content") or "" for c in r["choices"]]
             # thinking on: the rule is what follows </think>; a reply cut off at the token cap has none

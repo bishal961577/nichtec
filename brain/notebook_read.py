@@ -58,7 +58,9 @@ A_KINDS = ["reword", "same", "two", "upd", "prev", "retract"]
 A3_KINDS = ["desc", "who", "fname", "amb", "close"]
 HARD = ["desc", "who", "fname", "close", "two", "upd", "retract"]       # the set the decision is read on
 N_W1, N_W2 = 150, 120
-THINK = {"max_tokens": 16384, "temperature": 0.6, "top_p": 0.95, "top_k": 20}
+THINK = {"max_tokens": 16384, "temperature": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 1.5}
+# amendment 3: Qwen's model-card settings for thinking mode on general tasks (the presence penalty guards small Qwen3.5
+# models against looping); amendment 1 had 0.6 / 0.95 / 20. The Claude run (amendment 2) sent no sampling settings.
 NOTHINK = {"max_tokens": 64, "temperature": 0}
 MQUAKE = "MQuAKE-CF-3k-v2.json"
 MQUAKE_URL = "https://raw.githubusercontent.com/princeton-nlp/MQuAKE/main/datasets/" + MQUAKE
@@ -77,7 +79,8 @@ def plan(tag):
     if "4B" in tag:
         return ([("personal", "think", n) for n in (10, "search2", "bm25", 100)] +
                 [("personal", "nothink", n) for n in (10, "search2", 100)] +
-                [("world", "think", n) for n in (10, 100)] + [("own", "think", 0)])
+                [("world", "think", n) for n in (10, 100)] + [("own", "think", 0)] +
+                [("personal", "think", 5000)])            # amendment 3: reported only (does size limit reading?)
     return ([("personal", "think", n) for n in (5000, 10, "search2", "bm25", 1000, 100)] +
             [("personal", "nothink", n) for n in (5000, 10, "search2")] +
             [("world", "think", n) for n in ("all", 10)] + [("own", "think", 0), ("world_noinst", "think", "all")] +
@@ -678,7 +681,11 @@ def score(q, ans, P=None):
         return {"correct": any(m in t for m in AMBIG) or len(set(named) & set(q["values"])) >= 2, "old": False,
                 "named": named}
     if k == "retract":
-        return {"correct": not named and any(m in t for m in ABSTAIN), "old": q["old"] in named, "named": named}
+        # amendment 3 (the section 9.2 audit rule, made automatic): right if the answer says the fact no longer holds
+        # and names no other value; mentioning the old value as past ("she sold her Subaru") is not stale
+        says_none = any(m in t for m in ABSTAIN)
+        return {"correct": says_none and not set(named) - {q["old"]}, "old": q["old"] in named and not says_none,
+                "named": named}
     if k == "prev":
         return {"correct": q["gold"] in named and not set(named) - {q["gold"], q["new"]}, "old": False, "named": named}
     hist = P[q["person"]]["hist"].get(q["rel"], [])

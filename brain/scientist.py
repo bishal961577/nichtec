@@ -236,7 +236,8 @@ def write(out, R, test, done, total):
     return L
 
 
-THINK_SAMPLING = {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 16384}
+THINK_SAMPLING = {"temperature": 1.0, "top_p": 0.95, "top_k": 20, "presence_penalty": 1.5, "max_new_tokens": 16384}
+# amendment 3: Qwen's thinking-mode settings for general tasks (was 0.6 / 0.95 / 20 without a presence penalty)
 WITHDRAW, STANDS, READABLE = 0.10, 0.30, 0.50   # Part B lines: contradiction rate, and readable share of proposals
 
 

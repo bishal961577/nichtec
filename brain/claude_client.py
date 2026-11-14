@@ -130,7 +130,8 @@ class ClaudeEndpoint:
             for _ in range(n):
                 r = self.chat(p, thinking=G.THINKING, max_tokens=G.SAMPLING["max_new_tokens"])
                 ch = r["choices"][0]
-                replies.append("" if ch["finish_reason"] != "stop" else ch["message"]["content"])
+                cut = ch["finish_reason"] != "stop"          # a cut-off reply with thinking on has no rule yet; with
+                replies.append("" if cut and G.THINKING else ch["message"]["content"])   # thinking off, keep it
             out.append(replies)
         return out
 

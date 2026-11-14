@@ -4,7 +4,8 @@ Test 1 of the expert panel's plan (`reports/Expert panel 2026.md`, section 5). T
 before any model call. Sections 1–5 are the first design. Section 6 is the panel's review of it, and section 7 is
 amendment 1, also committed before any model call; section 7.5 holds the deciding lines. Section 8 is amendment 2
 (serving on the Claude API), also committed before any model call. The result goes in section 9, and nothing above it
-changes after the run.
+changes after the run. Section 10 is amendment 3 (the phone-sized model on a Modal GPU), committed before any
+Qwen3.5-4B call; its result goes in section 11.
 
 ---
 
@@ -736,3 +737,70 @@ LongMemEval-S (cleaned), thinking on, judged by Claude Haiku 5.5 with thinking o
 - composition without thinking;
 - notebooks well beyond 100K–180K tokens (years of use);
 - the two weaknesses found here: plain restatement updates and similar names.
+
+## 10. Amendment 3: the phone-sized model on a Modal GPU (before any Qwen3.5-4B call)
+
+**Why.** The Claude result (section 9) answered the cloud question. The phone question is still open: can a model
+small enough for a phone read its notebook? Modal's endpoint page starts every endpoint on an H100, which the owner's
+free credit no longer allows. Deploying our own Modal app (`brain/modal_qwen4b.py`, run with `modal deploy` from the
+owner's computer) lets us choose the GPU.
+
+**Serving:**
+- `Qwen/Qwen3.5-4B` (Apache-2.0) on vLLM 0.33.0, on one L40S.
+- If the plan doesn't allow an L40S, an A100-40GB, A10G or L4 can be used instead (context 81,920 on 24 GB cards).
+- Context 131,072 tokens. The 5,000-note notebook is 60,122 Qwen tokens, plus up to 16,384 of thinking.
+- `--reasoning-parser qwen3` and `--language-model-only`.
+
+**Sampling with thinking on: Qwen's model-card settings for thinking mode on general tasks** (amendment 1 had 0.6 /
+0.95 / 20 with no presence penalty):
+
+| Setting | Value |
+|---|---|
+| temperature | 1.0 |
+| top_p | 0.95 |
+| top_k | 20 |
+| min_p | 0 |
+| presence_penalty | 1.5 |
+
+The reason: small Qwen3.5 models loop when thinking. In MIT CSAIL's weight-space programming report, Qwen3.5-0.8B ran
+to its 32,768-token limit on 85 of its first 96 practice answers. A loop would score as "can't read the notebook".
+Thinking off is unchanged: greedy, 64 tokens.
+
+**Plan:**
+- Section 7.4's 4B plan.
+- Plus one condition reported without a line, run last: **thinking on, 5,000 notes**. A phone could not afford a
+  60K-token prompt per answer, so this asks only whether reading a large notebook depends on model size. It is
+  compared with Claude Haiku 5.5's 94.0% (98.3% audited).
+
+**Part B.** `brain/scientist.py --thinking` on Qwen3.5-4B, with the sampling above. It is compared with the original
+Qwen3.5-4B run (thinking off, temperature 0.8: 96.5% of random1 guesses contradicted the cases shown). Section 7.6's
+lines apply.
+
+**Part C** is postponed for the 4B: no judge is available. No OpenAI key is set, the Claude key is retired, and a 4B
+judging its own answers would be weak.
+
+**Scoring, decided before any 4B answer exists:**
+- A retraction answer counts as right if it says the fact no longer holds and names no other value of that
+  attribute. This is section 9.2's audit rule, made automatic, plus a guard against naming a different value.
+- Nothing else in the scoring changes.
+
+**Lines.** Section 7.5's phone line: two-round search must reach at least 0.8 × perfect page selection on the hard set,
+thinking on. Everything else is reported without lines.
+
+**Also fixed:** `brain/claude_client.py` now keeps cut-off replies when thinking is off, as the Qwen path does
+(section 9.4's bug). This doesn't affect any Qwen run.
+
+**Cost:** GPU time only, on the owner's Modal credit. Expected under an hour.
+
+**Commands:**
+```
+modal deploy brain/modal_qwen4b.py                      # on the owner's computer; prints the URL
+python brain/notebook_read.py --base-url URL/v1 --model Qwen/Qwen3.5-4B --preflight
+python brain/notebook_read.py --base-url URL/v1 --model Qwen/Qwen3.5-4B --workers 48
+python brain/scientist.py     --base-url URL/v1 --model Qwen/Qwen3.5-4B --thinking --workers 12
+modal app stop nichtec-qwen4b                           # when done
+```
+
+## 11. Result: Qwen3.5-4B
+
+(Not yet run.)
