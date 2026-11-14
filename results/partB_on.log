@@ -1,0 +1,2 @@
+Claude API, claude-haiku-5-5; spent so far $12.70 of $25.00
+check: {"model": "claude-haiku-5-5", "replies": ["color != 'red' and size > 4", "`color != 'red' and size > 4`"], "parsed_rules": ["color != 'red' and size > 4", "color != 'red' and size > 4"], "writes_rules": true}

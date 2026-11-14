@@ -1,0 +1,2313 @@
+{
+ "model": "claude-haiku-5-5",
+ "sampling": {
+  "temperature": 0.8,
+  "top_p": 0.95,
+  "top_k": 50,
+  "max_new_tokens": 64
+ },
+ "new": {
+  "proposals": 384,
+  "readable": 18,
+  "guesses": 18,
+  "contradict": 0,
+  "contradict_rate": 0.0,
+  "readable_rate": 0.046875,
+  "pool_good_rate": 0.0,
+  "D_acc": 55.0,
+  "D_rule_good": 0.0
+ },
+ "streams": [
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 50.0,
+    "late_online_acc": 30.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "material == 'wood' and color == 'blue'",
+       "rule": "material == 'wood' and color == 'blue'"
+      },
+      {
+       "reply": "material == 'wood' and color == 'blue'",
+       "rule": "material == 'wood' and color == 'blue'"
+      },
+      {
+       "reply": "material == 'wood' and color == 'blue'",
+       "rule": "material == 'wood' and color == 'blue'"
+      },
+      {
+       "reply": "material == 'wood' and color == 'blue'",
+       "rule": "material == 'wood' and color == 'blue'"
+      }
+     ]
+    },
+    "10": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": "material == 'wood' and color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 1,
+   "pool_has_good_rule": false,
+   "guesses": 4,
+   "contradict_shown": 0,
+   "conditions": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "material == 'wood' and color == 'blue'",
+    "test_acc": 52.5,
+    "rule_good": false,
+    "online_acc": 50.0,
+    "late_online_acc": 55.0
+   },
+   "Dcount": {
+    "rule": "material == 'wood' and color == 'blue'",
+    "test_acc": 52.5,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "material == 'metal'",
+       "rule": "material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal'",
+       "rule": "material == 'metal'"
+      },
+      {
+       "reply": "Looking at the data: all accepted items are metal; rejected items are glass. Every \"yes\" has material metal, and every \"no\" has material glass.\n\nmaterial == 'metal'",
+       "rule": "material == 'metal'"
+      },
+      {
+       "reply": "Looking at the data: all accepted items are metal; all rejected items are glass. Every \"yes\" has material metal, and every \"no\" has material glass.\n\nmaterial == 'metal'",
+       "rule": "material == 'metal'"
+      }
+     ]
+    },
+    "10": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 1,
+   "pool_has_good_rule": false,
+   "guesses": 4,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "D": {
+    "rule": "material == 'metal'",
+    "test_acc": 72.5,
+    "rule_good": false,
+    "online_acc": 72.5,
+    "late_online_acc": 95.0
+   },
+   "Dcount": {
+    "rule": "material == 'metal'",
+    "test_acc": 72.5,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 42.5,
+    "late_online_acc": 40.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "shape == 'circle' and size < 3",
+       "rule": "shape == 'circle' and size < 3"
+      },
+      {
+       "reply": "shape == 'circle' and size < 3",
+       "rule": "shape == 'circle' and size < 3"
+      },
+      {
+       "reply": "shape == 'circle' and size < 3",
+       "rule": "shape == 'circle' and size < 3"
+      }
+     ]
+    },
+    "10": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": "shape == 'circle' and size < 3",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 1,
+   "pool_has_good_rule": false,
+   "guesses": 3,
+   "contradict_shown": 0,
+   "conditions": [
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "shape == 'circle' and size < 3",
+    "test_acc": 55.0,
+    "rule_good": false,
+    "online_acc": 45.0,
+    "late_online_acc": 45.0
+   },
+   "Dcount": {
+    "rule": "shape == 'circle' and size < 3",
+    "test_acc": 55.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      }
+     ]
+    },
+    "10": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 1,
+   "pool_has_good_rule": false,
+   "guesses": 4,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1
+   ],
+   "D": {
+    "rule": "color == 'blue'",
+    "test_acc": 70.0,
+    "rule_good": false,
+    "online_acc": 65.0,
+    "late_online_acc": 70.0
+   },
+   "Dcount": {
+    "rule": "color == 'blue'",
+    "test_acc": 70.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 42.5,
+    "late_online_acc": 30.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 37.5,
+    "late_online_acc": 40.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      }
+     ]
+    },
+    "10": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 1,
+   "pool_has_good_rule": false,
+   "guesses": 3,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1
+   ],
+   "D": {
+    "rule": "shape == 'square'",
+    "test_acc": 60.0,
+    "rule_good": false,
+    "online_acc": 65.0,
+    "late_online_acc": 85.0
+   },
+   "Dcount": {
+    "rule": "shape == 'square'",
+    "test_acc": 60.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 35.0,
+    "late_online_acc": 30.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 40.0,
+    "late_online_acc": 30.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "10": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "15": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "20": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "25": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "30": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "35": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    },
+    "40": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      },
+      {
+       "reply": "",
+       "rule": null
+      }
+     ]
+    }
+   },
+   "pool_size": 0,
+   "pool_has_good_rule": false,
+   "guesses": 0,
+   "contradict_shown": 0,
+   "conditions": [],
+   "D": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false,
+    "online_acc": 45.0,
+    "late_online_acc": 45.0
+   },
+   "Dcount": {
+    "rule": null,
+    "test_acc": 50.0,
+    "rule_good": false
+   }
+  }
+ ]
+}
