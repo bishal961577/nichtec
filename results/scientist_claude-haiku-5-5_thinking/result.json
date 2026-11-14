@@ -1,0 +1,2699 @@
+{
+ "model": "claude-haiku-5-5",
+ "sampling": {
+  "temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 20,
+  "max_new_tokens": 16384
+ },
+ "new": {
+  "proposals": 384,
+  "readable": 384,
+  "guesses": 384,
+  "contradict": 0,
+  "contradict_rate": 0.0,
+  "readable_rate": 1.0,
+  "pool_good_rate": 1.0,
+  "D_acc": 99.375,
+  "D_rule_good": 0.9166666666666666
+ },
+ "original_random1": {
+  "proposals": 384,
+  "readable": 18,
+  "guesses": 18,
+  "contradict": 0,
+  "contradict_rate": 0.0,
+  "readable_rate": 0.046875,
+  "pool_good_rate": 0.0,
+  "D_acc": 55.0,
+  "D_rule_good": 0.0,
+  "contradict_rate_all_orders": 0.0
+ },
+ "verdict": "WITHDRAWN: with thinking on, 0.0% of guesses contradict the cases shown (<= 10%). Conclusion (b) does not hold for this model in thinking mode.",
+ "streams": [
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      }
+     ]
+    },
+    "10": {
+     "current": "size > 5",
+     "proposals": [
+      {
+       "reply": "4 < size < 9 and shape != 'triangle'",
+       "rule": "4 < size < 9 and shape != 'triangle'"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "shape != 'triangle' and 4 < size < 9",
+       "rule": "shape != 'triangle' and 4 < size < 9"
+      }
+     ]
+    },
+    "15": {
+     "current": "color != 'red' and size > 4",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "`color != 'red' and size > 4`",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      }
+     ]
+    },
+    "20": {
+     "current": "color != 'red' and size > 4",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "`color != 'red' and size > 4`",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      }
+     ]
+    },
+    "25": {
+     "current": "color != 'red' and size > 4",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      }
+     ]
+    },
+    "30": {
+     "current": "color != 'red' and size > 4",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "`color != 'red' and size > 4`",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      }
+     ]
+    },
+    "35": {
+     "current": "color != 'red' and size > 4",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      }
+     ]
+    },
+    "40": {
+     "current": "color != 'red' and size > 4",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 4",
+       "rule": "color != 'red' and size > 4"
+      }
+     ]
+    }
+   },
+   "pool_size": 4,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    3,
+    2,
+    2,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "color != 'red' and size > 4",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 92.5,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "color != 'red' and size > 4",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "```python\ncolor == 'blue'\n```",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      }
+     ]
+    },
+    "10": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 6",
+       "rule": "size > 6"
+      },
+      {
+       "reply": "size > 6",
+       "rule": "size > 6"
+      }
+     ]
+    },
+    "15": {
+     "current": "size > 5",
+     "proposals": [
+      {
+       "reply": "`color != 'red' and size > 4`",
+       "rule": "color != 'red' and size > 4"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "`color != 'red' and size > 3`",
+       "rule": "color != 'red' and size > 3"
+      }
+     ]
+    },
+    "20": {
+     "current": "color != 'red' and size > 3",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      }
+     ]
+    },
+    "25": {
+     "current": "color != 'red' and size > 3",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      }
+     ]
+    },
+    "30": {
+     "current": "color != 'red' and size > 3",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      }
+     ]
+    },
+    "35": {
+     "current": "color != 'red' and size > 3",
+     "proposals": [
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      }
+     ]
+    },
+    "40": {
+     "current": "color != 'red' and size > 3",
+     "proposals": [
+      {
+       "reply": "`color != 'red' and size > 3`",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      },
+      {
+       "reply": "color != 'red' and size > 3",
+       "rule": "color != 'red' and size > 3"
+      }
+     ]
+    }
+   },
+   "pool_size": 5,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "color != 'red' and size > 3",
+    "test_acc": 92.5,
+    "rule_good": false,
+    "online_acc": 80.0,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "color != 'red' and size > 3",
+    "test_acc": 92.5,
+    "rule_good": false
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "material == 'metal'",
+       "rule": "material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal'",
+       "rule": "material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal'",
+       "rule": "material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal'",
+       "rule": "material == 'metal'"
+      }
+     ]
+    },
+    "10": {
+     "current": "material == 'metal'",
+     "proposals": [
+      {
+       "reply": "material in ('wood', 'metal')",
+       "rule": "material in ('wood', 'metal')"
+      },
+      {
+       "reply": "material in ('wood', 'metal')",
+       "rule": "material in ('wood', 'metal')"
+      },
+      {
+       "reply": "material in ('wood', 'metal')",
+       "rule": "material in ('wood', 'metal')"
+      },
+      {
+       "reply": "material in ('wood', 'metal')",
+       "rule": "material in ('wood', 'metal')"
+      }
+     ]
+    },
+    "15": {
+     "current": "material in ('wood', 'metal')",
+     "proposals": [
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "shape == 'circle' or material in ('wood', 'metal')",
+       "rule": "shape == 'circle' or material in ('wood', 'metal')"
+      },
+      {
+       "reply": "shape == 'circle' or material in ('wood', 'metal')",
+       "rule": "shape == 'circle' or material in ('wood', 'metal')"
+      }
+     ]
+    },
+    "20": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "```\nshape == 'circle' or material == 'metal'\n```",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "25": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "30": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "```python\nshape == 'circle' or material == 'metal'\n```",
+       "rule": "shape == 'circle' or material == 'metal'"
+      }
+     ]
+    },
+    "35": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "```python\nmaterial == 'metal' or shape == 'circle'\n```",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "```\nmaterial == 'metal' or shape == 'circle'\n```",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`shape == 'circle' or material == 'metal'`",
+       "rule": "shape == 'circle' or material == 'metal'"
+      }
+     ]
+    },
+    "40": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    }
+   },
+   "pool_size": 5,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "material == 'metal' or shape == 'circle'",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 82.5,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "material == 'metal' or shape == 'circle'",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "size % 2 == 1",
+       "rule": "size % 2 == 1"
+      },
+      {
+       "reply": "size % 2 == 1",
+       "rule": "size % 2 == 1"
+      },
+      {
+       "reply": "size % 2 == 1",
+       "rule": "size % 2 == 1"
+      },
+      {
+       "reply": "shape in ('circle', 'square')",
+       "rule": "shape in ('circle', 'square')"
+      }
+     ]
+    },
+    "10": {
+     "current": "shape in ('circle', 'square')",
+     "proposals": [
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "15": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "20": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "25": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "30": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "35": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "```\nmaterial == 'metal' or shape == 'circle'\n```",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "```python\nmaterial == 'metal' or shape == 'circle'\n```",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    },
+    "40": {
+     "current": "material == 'metal' or shape == 'circle'",
+     "proposals": [
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "`material == 'metal' or shape == 'circle'`",
+       "rule": "material == 'metal' or shape == 'circle'"
+      },
+      {
+       "reply": "shape == 'circle' or material == 'metal'",
+       "rule": "shape == 'circle' or material == 'metal'"
+      },
+      {
+       "reply": "material == 'metal' or shape == 'circle'",
+       "rule": "material == 'metal' or shape == 'circle'"
+      }
+     ]
+    }
+   },
+   "pool_size": 4,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "material == 'metal' or shape == 'circle'",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 85.0,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "material == 'metal' or shape == 'circle'",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "shape == 'circle' and size < 3",
+       "rule": "shape == 'circle' and size < 3"
+      },
+      {
+       "reply": "color in ('blue', 'green')",
+       "rule": "color in ('blue', 'green')"
+      },
+      {
+       "reply": "shape == 'circle' and size < 3",
+       "rule": "shape == 'circle' and size < 3"
+      },
+      {
+       "reply": "shape == 'circle' and size < 3",
+       "rule": "shape == 'circle' and size < 3"
+      }
+     ]
+    },
+    "10": {
+     "current": "color in ('blue', 'green')",
+     "proposals": [
+      {
+       "reply": "color in ('blue', 'green')",
+       "rule": "color in ('blue', 'green')"
+      },
+      {
+       "reply": "color in ('blue', 'green')",
+       "rule": "color in ('blue', 'green')"
+      },
+      {
+       "reply": "color in ('blue', 'green')",
+       "rule": "color in ('blue', 'green')"
+      },
+      {
+       "reply": "color in ('blue', 'green')",
+       "rule": "color in ('blue', 'green')"
+      }
+     ]
+    },
+    "15": {
+     "current": "color in ('blue', 'green')",
+     "proposals": [
+      {
+       "reply": "color in ('blue', 'green') and size < 9",
+       "rule": "color in ('blue', 'green') and size < 9"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 9",
+       "rule": "color in ('blue', 'green') and size < 9"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 9",
+       "rule": "color in ('blue', 'green') and size < 9"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 9",
+       "rule": "color in ('blue', 'green') and size < 9"
+      }
+     ]
+    },
+    "20": {
+     "current": "color in ('blue', 'green') and size < 9",
+     "proposals": [
+      {
+       "reply": "color < 'red' and size < 9",
+       "rule": "color < 'red' and size < 9"
+      },
+      {
+       "reply": "`color < 'r' and size < 9`",
+       "rule": "color < 'r' and size < 9"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 9",
+       "rule": "color in ('blue', 'green') and size < 9"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 9",
+       "rule": "color in ('blue', 'green') and size < 9"
+      }
+     ]
+    },
+    "25": {
+     "current": "color < 'r' and size < 9",
+     "proposals": [
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      },
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      },
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      },
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      }
+     ]
+    },
+    "30": {
+     "current": "color < 'r' and size < 9",
+     "proposals": [
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      },
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      },
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      },
+      {
+       "reply": "color < 'r' and size < 9",
+       "rule": "color < 'r' and size < 9"
+      }
+     ]
+    },
+    "35": {
+     "current": "color < 'r' and size < 7",
+     "proposals": [
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      },
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      },
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      },
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      }
+     ]
+    },
+    "40": {
+     "current": "color < 'r' and size < 7",
+     "proposals": [
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      },
+      {
+       "reply": "`color < 'r' and size < 8`",
+       "rule": "color < 'r' and size < 8"
+      },
+      {
+       "reply": "color < 'r' and size < 7",
+       "rule": "color < 'r' and size < 7"
+      },
+      {
+       "reply": "color < 'r' and size < 8",
+       "rule": "color < 'r' and size < 8"
+      }
+     ]
+    }
+   },
+   "pool_size": 7,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    2,
+    1,
+    2,
+    2,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "color < 'r' and size < 7",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 90.0,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "color < 'r' and size < 7",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      },
+      {
+       "reply": "color == 'blue'",
+       "rule": "color == 'blue'"
+      }
+     ]
+    },
+    "10": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "color == 'blue' and size < 8",
+       "rule": "color == 'blue' and size < 8"
+      },
+      {
+       "reply": "color == 'blue' and size < 8",
+       "rule": "color == 'blue' and size < 8"
+      },
+      {
+       "reply": "color == 'blue' and size < 8",
+       "rule": "color == 'blue' and size < 8"
+      },
+      {
+       "reply": "color == 'blue' and size < 8",
+       "rule": "color == 'blue' and size < 8"
+      }
+     ]
+    },
+    "15": {
+     "current": "color == 'blue'",
+     "proposals": [
+      {
+       "reply": "color in ('blue', 'green') and size < 7",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 7",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "`color in ('blue', 'green') and size < 7`",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 7",
+       "rule": "color in ('blue', 'green') and size < 7"
+      }
+     ]
+    },
+    "20": {
+     "current": "color in ('blue', 'green') and size < 7",
+     "proposals": [
+      {
+       "reply": "`color in ('blue', 'green') and size < 7`",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 7",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "`color in ('blue', 'green') and size < 7`",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 7",
+       "rule": "color in ('blue', 'green') and size < 7"
+      }
+     ]
+    },
+    "25": {
+     "current": "color in ('blue', 'green') and size < 7",
+     "proposals": [
+      {
+       "reply": "`color < 'red' and size < 7`",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "`color in ('blue', 'green') and size < 7`",
+       "rule": "color in ('blue', 'green') and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color in ('blue', 'green') and size < 7",
+       "rule": "color in ('blue', 'green') and size < 7"
+      }
+     ]
+    },
+    "30": {
+     "current": "color < 'red' and size < 7",
+     "proposals": [
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      }
+     ]
+    },
+    "35": {
+     "current": "color < 'red' and size < 7",
+     "proposals": [
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      }
+     ]
+    },
+    "40": {
+     "current": "color < 'red' and size < 7",
+     "proposals": [
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      },
+      {
+       "reply": "color < 'red' and size < 7",
+       "rule": "color < 'red' and size < 7"
+      }
+     ]
+    }
+   },
+   "pool_size": 4,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "color < 'red' and size < 7",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 85.0,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "color < 'red' and size < 7",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      }
+     ]
+    },
+    "10": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "shape != 'star'",
+       "rule": "shape != 'star'"
+      },
+      {
+       "reply": "shape != 'star'",
+       "rule": "shape != 'star'"
+      },
+      {
+       "reply": "shape != 'star'",
+       "rule": "shape != 'star'"
+      },
+      {
+       "reply": "shape != 'star'",
+       "rule": "shape != 'star'"
+      }
+     ]
+    },
+    "15": {
+     "current": "shape != 'star'",
+     "proposals": [
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and size < 9",
+       "rule": "shape != 'star' and size < 9"
+      },
+      {
+       "reply": "shape != 'star' and size < 9",
+       "rule": "shape != 'star' and size < 9"
+      },
+      {
+       "reply": "shape != 'star' and size < 8",
+       "rule": "shape != 'star' and size < 8"
+      }
+     ]
+    },
+    "20": {
+     "current": "shape != 'star' and material != 'wood'",
+     "proposals": [
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      }
+     ]
+    },
+    "25": {
+     "current": "shape != 'star' and material != 'wood'",
+     "proposals": [
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      }
+     ]
+    },
+    "30": {
+     "current": "shape != 'star' and material != 'wood'",
+     "proposals": [
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      }
+     ]
+    },
+    "35": {
+     "current": "shape != 'star' and material != 'wood'",
+     "proposals": [
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      }
+     ]
+    },
+    "40": {
+     "current": "shape != 'star' and material != 'wood'",
+     "proposals": [
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      }
+     ]
+    }
+   },
+   "pool_size": 5,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "shape != 'star' and material != 'wood'",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 82.5,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "shape != 'star' and material != 'wood'",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "4 < size < 8",
+       "rule": "4 < size < 8"
+      },
+      {
+       "reply": "5 <= size <= 7",
+       "rule": "5 <= size <= 7"
+      },
+      {
+       "reply": "4 < size < 8",
+       "rule": "4 < size < 8"
+      }
+     ]
+    },
+    "10": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "`material != 'wood' and shape != 'star'`",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "shape != 'star' and material != 'wood'",
+       "rule": "shape != 'star' and material != 'wood'"
+      }
+     ]
+    },
+    "15": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "```python\nmaterial != 'wood' and shape != 'star'\n```",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      }
+     ]
+    },
+    "20": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "`material != 'wood' and shape != 'star'`",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      }
+     ]
+    },
+    "25": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "`material != 'wood' and shape != 'star'`",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "```\nmaterial != 'wood' and shape != 'star'\n```",
+       "rule": "material != 'wood' and shape != 'star'"
+      }
+     ]
+    },
+    "30": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "`material != 'wood' and shape != 'star'`",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      }
+     ]
+    },
+    "35": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      }
+     ]
+    },
+    "40": {
+     "current": "material != 'wood' and shape != 'star'",
+     "proposals": [
+      {
+       "reply": "`material != 'wood' and shape != 'star'`",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "`material != 'wood' and shape != 'star'`",
+       "rule": "material != 'wood' and shape != 'star'"
+      },
+      {
+       "reply": "material != 'wood' and shape != 'star'",
+       "rule": "material != 'wood' and shape != 'star'"
+      }
+     ]
+    }
+   },
+   "pool_size": 4,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "material != 'wood' and shape != 'star'",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 90.0,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "material != 'wood' and shape != 'star'",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      },
+      {
+       "reply": "shape == 'square'",
+       "rule": "shape == 'square'"
+      }
+     ]
+    },
+    "10": {
+     "current": "shape == 'square'",
+     "proposals": [
+      {
+       "reply": "material != 'metal' and size > 1",
+       "rule": "material != 'metal' and size > 1"
+      },
+      {
+       "reply": "`shape != 'circle' and material != 'metal'`",
+       "rule": "shape != 'circle' and material != 'metal'"
+      },
+      {
+       "reply": "`material != 'metal' and size > 3`",
+       "rule": "material != 'metal' and size > 3"
+      },
+      {
+       "reply": "**Expression:** `material != 'metal' and size > 1`",
+       "rule": "material != 'metal' and size > 1"
+      }
+     ]
+    },
+    "15": {
+     "current": "shape != 'circle' and material != 'metal'",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "```python\nsize > 1 and shape in ('square', 'triangle')\n```",
+       "rule": "size > 1 and shape in ('square', 'triangle')"
+      },
+      {
+       "reply": "`shape in ('square', 'triangle') and size > 1`",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "```python\nshape in ('square', 'triangle') and size > 1\n```",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      }
+     ]
+    },
+    "20": {
+     "current": "shape in ('square', 'triangle') and size > 1",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      }
+     ]
+    },
+    "25": {
+     "current": "shape in ('square', 'triangle') and size > 3",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      }
+     ]
+    },
+    "30": {
+     "current": "shape in ('square', 'triangle') and size > 3",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      }
+     ]
+    },
+    "35": {
+     "current": "shape in ('square', 'triangle') and size > 3",
+     "proposals": [
+      {
+       "reply": "`shape in ('square', 'triangle') and size > 3`",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      }
+     ]
+    },
+    "40": {
+     "current": "shape in ('square', 'triangle') and size > 3",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "```\nshape in ('square', 'triangle') and size > 3\n```",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "```python\nshape in ('square', 'triangle') and size > 3\n```",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      }
+     ]
+    }
+   },
+   "pool_size": 7,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "shape in ('square', 'triangle') and size > 3",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 77.5,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "shape in ('square', 'triangle') and size > 3",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "material != 'wood'",
+       "rule": "material != 'wood'"
+      },
+      {
+       "reply": "material != 'wood'",
+       "rule": "material != 'wood'"
+      },
+      {
+       "reply": "material != 'wood'",
+       "rule": "material != 'wood'"
+      },
+      {
+       "reply": "material != 'wood'",
+       "rule": "material != 'wood'"
+      }
+     ]
+    },
+    "10": {
+     "current": "material != 'wood'",
+     "proposals": [
+      {
+       "reply": "shape == 'square' or shape == 'triangle'",
+       "rule": "shape == 'square' or shape == 'triangle'"
+      },
+      {
+       "reply": "`shape in ('square', 'triangle')`",
+       "rule": "shape in ('square', 'triangle')"
+      },
+      {
+       "reply": "shape in ('square', 'triangle')",
+       "rule": "shape in ('square', 'triangle')"
+      },
+      {
+       "reply": "shape in ('square', 'triangle')",
+       "rule": "shape in ('square', 'triangle')"
+      }
+     ]
+    },
+    "15": {
+     "current": "shape in ('square', 'triangle')",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      }
+     ]
+    },
+    "20": {
+     "current": "shape in ('square', 'triangle') and size > 1",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 1",
+       "rule": "shape in ('square', 'triangle') and size > 1"
+      }
+     ]
+    },
+    "25": {
+     "current": "shape in ('square', 'triangle') and size > 1",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      }
+     ]
+    },
+    "30": {
+     "current": "shape in ('square', 'triangle') and size > 2",
+     "proposals": [
+      {
+       "reply": "`shape in ('square', 'triangle') and size > 2`",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      }
+     ]
+    },
+    "35": {
+     "current": "shape in ('square', 'triangle') and size > 2",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "`shape in ('square', 'triangle') and size > 2`",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 2",
+       "rule": "shape in ('square', 'triangle') and size > 2"
+      }
+     ]
+    },
+    "40": {
+     "current": "shape in ('square', 'triangle') and size > 2",
+     "proposals": [
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      },
+      {
+       "reply": "shape in ('square', 'triangle') and size > 3",
+       "rule": "shape in ('square', 'triangle') and size > 3"
+      }
+     ]
+    }
+   },
+   "pool_size": 6,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "shape in ('square', 'triangle') and size > 3",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 72.5,
+    "late_online_acc": 85.0
+   },
+   "Dcount": {
+    "rule": "shape in ('square', 'triangle') and size > 3",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "shape != 'circle'",
+       "rule": "shape != 'circle'"
+      },
+      {
+       "reply": "shape != 'circle'",
+       "rule": "shape != 'circle'"
+      },
+      {
+       "reply": "shape != 'circle'",
+       "rule": "shape != 'circle'"
+      },
+      {
+       "reply": "shape != 'circle'",
+       "rule": "shape != 'circle'"
+      }
+     ]
+    },
+    "10": {
+     "current": "shape != 'circle'",
+     "proposals": [
+      {
+       "reply": "shape == 'star' or (size > 4 and size % 2 == 1)",
+       "rule": "shape == 'star' or (size > 4 and size % 2 == 1)"
+      },
+      {
+       "reply": "`shape == 'star' or (color != 'red' and size != 6)`",
+       "rule": "shape == 'star' or (color != 'red' and size != 6)"
+      },
+      {
+       "reply": "shape == 'star' or color == 'yellow' or size >= 9",
+       "rule": "shape == 'star' or color == 'yellow' or size >= 9"
+      },
+      {
+       "reply": "color == 'yellow' or (size > 4 and shape != 'triangle')",
+       "rule": "color == 'yellow' or (size > 4 and shape != 'triangle')"
+      }
+     ]
+    },
+    "15": {
+     "current": "shape == 'star' or (color != 'red' and size != 6)",
+     "proposals": [
+      {
+       "reply": "`size != 6 and (color != 'red' or shape == 'star')`",
+       "rule": "size != 6 and (color != 'red' or shape == 'star')"
+      },
+      {
+       "reply": "`(color != 'red' or shape == 'star') and size != 6`",
+       "rule": "(color != 'red' or shape == 'star') and size != 6"
+      },
+      {
+       "reply": "shape == 'star' or (color != 'red' and size != 6)",
+       "rule": "shape == 'star' or (color != 'red' and size != 6)"
+      },
+      {
+       "reply": "shape == 'star' or color != 'red' and size != 6",
+       "rule": "shape == 'star' or color != 'red' and size != 6"
+      }
+     ]
+    },
+    "20": {
+     "current": "shape == 'star' or color == 'yellow' or size >= 9",
+     "proposals": [
+      {
+       "reply": "`shape == 'star' or color == 'yellow' or size >= 9`",
+       "rule": "shape == 'star' or color == 'yellow' or size >= 9"
+      },
+      {
+       "reply": "shape == 'star' or color == 'yellow' or size >= 9",
+       "rule": "shape == 'star' or color == 'yellow' or size >= 9"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "shape == 'star' or color == 'yellow' or size >= 9",
+       "rule": "shape == 'star' or color == 'yellow' or size >= 9"
+      }
+     ]
+    },
+    "25": {
+     "current": "color == 'yellow' or size >= 7",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "`color == 'yellow' or size >= 7`",
+       "rule": "color == 'yellow' or size >= 7"
+      }
+     ]
+    },
+    "30": {
+     "current": "color == 'yellow' or size >= 7",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "`color == 'yellow' or size >= 7`",
+       "rule": "color == 'yellow' or size >= 7"
+      }
+     ]
+    },
+    "35": {
+     "current": "color == 'yellow' or size >= 7",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      }
+     ]
+    },
+    "40": {
+     "current": "color == 'yellow' or size >= 7",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      },
+      {
+       "reply": "color == 'yellow' or size >= 7",
+       "rule": "color == 'yellow' or size >= 7"
+      }
+     ]
+    }
+   },
+   "pool_size": 9,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    2,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "color == 'yellow' or size >= 7",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 80.0,
+    "late_online_acc": 100.0
+   },
+   "Dcount": {
+    "rule": "color == 'yellow' or size >= 7",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  },
+  {
+   "rounds": {
+    "5": {
+     "current": null,
+     "proposals": [
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      },
+      {
+       "reply": "size > 6",
+       "rule": "size > 6"
+      },
+      {
+       "reply": "size > 5",
+       "rule": "size > 5"
+      }
+     ]
+    },
+    "10": {
+     "current": "size > 5",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      }
+     ]
+    },
+    "15": {
+     "current": "color == 'yellow' or size > 5",
+     "proposals": [
+      {
+       "reply": "`color == 'yellow' or size > 6`",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      },
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      },
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      }
+     ]
+    },
+    "20": {
+     "current": "color == 'yellow' or size > 5",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      },
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      },
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      },
+      {
+       "reply": "color == 'yellow' or size > 5",
+       "rule": "color == 'yellow' or size > 5"
+      }
+     ]
+    },
+    "25": {
+     "current": "color == 'yellow' or size > 6",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "`color == 'yellow' or size > 6`",
+       "rule": "color == 'yellow' or size > 6"
+      }
+     ]
+    },
+    "30": {
+     "current": "color == 'yellow' or size > 6",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "`size > 6 or color == 'yellow'`",
+       "rule": "size > 6 or color == 'yellow'"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      }
+     ]
+    },
+    "35": {
+     "current": "color == 'yellow' or size > 6",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      }
+     ]
+    },
+    "40": {
+     "current": "color == 'yellow' or size > 6",
+     "proposals": [
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color > 'red' or size > 6",
+       "rule": "color > 'red' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      },
+      {
+       "reply": "color == 'yellow' or size > 6",
+       "rule": "color == 'yellow' or size > 6"
+      }
+     ]
+    }
+   },
+   "pool_size": 6,
+   "pool_has_good_rule": true,
+   "guesses": 32,
+   "contradict_shown": 0,
+   "conditions": [
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "D": {
+    "rule": "color > 'red' or size > 6",
+    "test_acc": 100.0,
+    "rule_good": true,
+    "online_acc": 87.5,
+    "late_online_acc": 95.0
+   },
+   "Dcount": {
+    "rule": "color > 'red' or size > 6",
+    "test_acc": 100.0,
+    "rule_good": true
+   }
+  }
+ ]
+}
