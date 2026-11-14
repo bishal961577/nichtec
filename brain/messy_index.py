@@ -148,7 +148,7 @@ ANSWER = """Here are notes from my private notebook, each with the date I wrote 
 {notes}
 
 Today is {today}. Question: {q}
-Answer in a few words, from what the notes say or clearly imply. A later note can change or cancel an earlier one \
+Answer in a few words, from what the notes say or clearly imply, not from loosely related facts. A later note can change or cancel an earlier one \
 ("his new phone is a Pixel" means he uses a Pixel now; "she stopped going to the gym" means she no longer does): give \
 what is true now, and say so when something stopped. One person can be named in different ways in different notes \
 (full name, first name, nickname, "my uncle"). A description in the question may be loose: match its main facts. If \
@@ -834,10 +834,21 @@ def has_key(text, key):
     return re.search(r"(?<![a-z])" + re.escape(k) + tail, text.lower()) is not None
 
 
+# Verb forms the answer keys lacked ("They fish." for fishing), found by reading dev answers (dev phase). Used for
+# scoring answers only: the world generator also uses its keys (to choose deletions), so they stay as reviewed there.
+SCORE_EXTRA = {"climbing": ["climb"], "fishing": ["fish", "fisher"], "rowing": ["row"], "pottery": ["potter"],
+               "archery": ["archer"], "watercolour painting": ["paint"], "baker": ["bake"],
+               "primary school teacher": ["teach"]}
+
+
+def answer_keys(v, keys):
+    return list(keys) + SCORE_EXTRA.get(v, [])
+
+
 def named_values(slot, text):
     out = []
     for c, alt, keys in MW.SLOTS[slot]["vals"]:
-        if any(has_key(text, k) for k in keys):
+        if any(has_key(text, k) for k in answer_keys(c, keys)):
             out.append(c)
     return out
 
@@ -879,7 +890,7 @@ def history_ok(ans, gold, named, hist):
             continue
         if v not in hist:
             return False
-        pos = min((m.start() for k in MW.value_keys_any(v) for m in re.finditer(r"(?<![a-z])" + re.escape(k.strip()),
+        pos = min((m.start() for k in answer_keys(v, MW.value_keys_any(v)) for m in re.finditer(r"(?<![a-z])" + re.escape(k.strip()),
                                                                                     t)), default=None)
         if pos is None or not OLD_MARK.search(t[max(0, pos - 40):pos]):
             return False
