@@ -68,6 +68,9 @@ life. For every new message, list who it is about and what it says about them, s
 People already in the index (id: names; how I know them; links):
 {people}
 
+Links in the index that may say who "<name>'s <relation>" in the new messages is:
+{links}
+
 Earlier messages, for context only (already indexed):
 {context}
 
@@ -99,11 +102,15 @@ cannot have, where they live) gets a fact line, never "mentioned".
 - A message often needs several lines: one for each fact and each person it names. Write them all.
 - The third part is a short label; the fourth is the fact itself. Wrong: "P4 | is studying law | -". Right: \
 "P4 | studying | law".
+- "Kofi's flatmate" is the person linked to Kofi as flatmate (see the links above), not Kofi: file the fact under \
+that person's id. If no one is linked to Kofi that way, write NEW: Kofi's flatmate.
+- "Kofi says Mira moved" or "Kofi told me that Mira…" is a fact about Mira; Kofi is only mentioned.
 - He, she, they and other pronouns are never a new person: they mean someone just mentioned, so use that person's id. \
 Someone you wrote as NEW earlier in this reply: write their full name again, without NEW:.
 
 Example (made-up people, not from this notebook). Index: "P3: Dev Shah; also dev, my driving instructor; relation \
-to me: driving instructor". Messages:
+to me: driving instructor" and "P8: Sam Shah; brother of: P3 Dev Shah". Links: "Dev's brother": Sam Shah (P8) | \
+brother of | Dev Shah (P3). Messages:
 #7 [2026-03-02 Mon] Ruth Okafor is studying law in the evenings.
 #8 [2026-03-03 Tue] She supports Arsenal, sadly.
 #9 [2026-03-04 Wed] Ruth's husband Tomasz Nowak collects old clocks.
@@ -111,6 +118,7 @@ to me: driving instructor". Messages:
 #11 [2026-03-06 Fri] Long day, my train was late.
 #12 [2026-03-07 Sat] My driving instructor says Tomasz gave the clocks away and collects stamps now.
 #13 [2026-03-08 Sun] Lena borrowed my bike for the afternoon.
+#14 [2026-03-09 Mon] Dev's brother collects vinyl records.
 Lines:
 #7 | NEW: Ruth Okafor | studying | law
 #8 | Ruth Okafor | supports | Arsenal
@@ -121,6 +129,7 @@ Lines:
 #12 | Tomasz Nowak | collects | stamps
 #12 | P3 | mentioned | -
 #13 | Lena Park | mentioned | -
+#14 | P8 | collects | vinyl records
 (#11 is about me only: no line. #13 is a one-off, not a lasting fact: "mentioned" only. Later messages that say "my \
 niece" mean Lena Park.)"""
 
@@ -139,8 +148,11 @@ ANSWER = """Here are notes from my private notebook, each with the date I wrote 
 {notes}
 
 Today is {today}. Question: {q}
-Answer in a few words. If the notes don't say, reply "not in my notes". If the question could mean more than one \
-person, ask which one."""
+Answer in a few words, from what the notes say or clearly imply. A later note can change or cancel an earlier one \
+("his new phone is a Pixel" means he uses a Pixel now; "she stopped going to the gym" means she no longer does): give \
+what is true now, and say so when something stopped. One person can be named in different ways in different notes \
+(full name, first name, nickname, "my uncle"). A description in the question may be loose: match its main facts. If \
+the notes don't say, reply "not in my notes". If the question could mean more than one person, ask which one."""
 
 AGENT = """You answer questions from my private notebook by searching it. Notes found so far (each with the date I \
 wrote it):
@@ -301,6 +313,28 @@ def candidates(ix, chunk, recent):
     return top + extra[:LINKED]
 
 
+def via_links(ix, chunk, cap=12):
+    """For "Kofi's flatmate" in the new messages: Kofi's link rows whose kind fits "flatmate", shown to the writer as
+    rows (both directions, so it can check). The index answering who someone is through another person (dev phase:
+    candidate list, allowed)."""
+    text = " ".join(n["text"] for n in chunk).lower()
+    out = []
+    for pid, p in ix.people.items():
+        for nm in p["names"]:
+            if len(nm) < 3 or (nm + "'s ") not in text:
+                continue
+            for m in re.finditer(re.escape(nm) + r"'s (\w+(?: \w+)?)", text):
+                words = [w for w in norm(m.group(1)) if len(w) > 3]
+                for r in ix.rows:
+                    if r["link"] and pid in (r["pid"], r["link"]) and r["link"] in ix.people and \
+                            any(w[:5] in r["kind"].lower() for w in words):
+                        line = (f'"{m.group(0)}": {ix.people[r["pid"]]["full"]} ({r["pid"]}) | {r["kind"]} | '
+                                f'{ix.people[r["link"]]["full"]} ({r["link"]})')
+                        if line not in out:
+                            out.append(line)
+    return out[:cap]
+
+
 ROW = re.compile(r"#\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(.+)")
 ROW3 = re.compile(r"#\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*$")   # dev phase (parsing): "#267 | P16 | plays trumpet"
 
@@ -336,6 +370,13 @@ def parse_rows(text, chunk_ids, ix, recent, texts=None):
         if texts:
             nid = fix_citation(nid, kind, value, texts)
         kind, value = to_me(kind, value)
+        said = reported(kind, value, ix)
+        if said:                                          # "#n | Kofi | told me | Mira moved to Lyon" (dev phase: parsing)
+            src = resolve(who, ix, new_here)
+            if src:
+                ix.add(nid, src, "mentioned", "-")
+                added += 1
+            who, kind, value = said
         if texts and nid in texts and value.strip() in ("", "-") and kind.lower() != "mentioned" and \
                 re.search(r"\bmy " + re.escape(kind.lower()) + r"\b", texts[nid].lower()):
             kind, value = "relation to me", kind          # "#6 | NEW: Gaia Okafor | brother | -" (dev phase: parsing)
@@ -371,6 +412,31 @@ def to_me(kind, value):
     if k in REL_KINDS and v and v != "-":
         return "relation to me", re.sub(r"^(my|is my)\s+", "", v, flags=re.I)
     return kind, value
+
+
+SAID = re.compile(r"(told me|tells me|says|said|say|heard|mentioned that|told me that|says that|said that|news)$")
+
+
+def reported(kind, value, ix):
+    """A fact the 4B filed under the person who told me: "told me | Ivan Lopes juggles in the park". Returns
+    (the id of the person it is about, "note", the rest) when the value starts with one known person's name."""
+    if not SAID.search(kind.strip().lower()) or value.strip() in ("", "-"):
+        return None
+    v = re.sub(r"^(that|how)\s+", "", value.strip(), flags=re.I)
+    best = None
+    for pid, p in ix.people.items():
+        for nm in p["names"]:
+            if nm.startswith("my ") or len(nm) < 3:
+                continue
+            if re.match(re.escape(nm) + r"(?![a-z])", v.lower()) and (best is None or len(nm) > len(best[1])):
+                best = (pid, nm)
+    if best is None:
+        return None
+    same = [pid for pid, p in ix.people.items() if best[1] in p["names"]]
+    if len(same) != 1:
+        return None
+    rest = v[len(best[1]):].strip(" ,:") or v
+    return best[0], "note", rest
 
 
 PRONOUNS = {"he", "she", "they", "him", "her", "them", "it", "his", "hers", "their"}
@@ -424,6 +490,7 @@ def build_index(llm, W, path, log, think=False):
             ctx = notes[max(0, c0 - CONTEXT):c0]
             cands = candidates(ix, ctx + chunk, recent)
             prompt = WRITE.format(people="\n".join(ix.summary(p) for p in cands) or "(none yet)",
+                                  links="\n".join(via_links(ix, chunk)) or "(none)",
                                   context="\n".join(note_line(n) for n in ctx) or "(none)",
                                   new="\n".join(note_line(n) for n in chunk))
             r = ask(llm, prompt, WRITE_KW_THINK if think else WRITE_KW, think, c0)
@@ -751,6 +818,10 @@ def pages(W, q):
             any(m[1] in about for m in n["mentions"])]
     if q["kind"] == "upd":                         # the whole history of the asked fact belongs in the pages
         gold |= set(W.current(q["person"], q["slot"])[2])
+    core = set([q["person"]] if q["person"] is not None else []) | set(q.get("people", [])) | \
+        ({q["anchor"]} if q.get("anchor") is not None else set())
+    gold |= {n["id"] for n in W.notes if n["type"] in ("intro", "nick") and n["id"] not in W.deleted_ids and
+             any(m[1] in core for m in n["mentions"])}   # who they are: introduction, nickname (dev phase: retrieval)
     return sorted(gold | set(rng.sample(pool, min(20, len(pool)))))
 
 
