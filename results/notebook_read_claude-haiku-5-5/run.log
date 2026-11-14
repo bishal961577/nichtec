@@ -14,3 +14,5 @@ Claude API, claude-haiku-5-5; spent so far $0.14 of $25.00
 ('own', 'think', 0): 120 answers, 75.8% right, 0.2 min (total 7.9 min)
 ('world_noinst', 'think', 'all'): 270 answers, 91.5% right, 0.4 min (total 8.3 min)
 ('world', 'think', 1000): 270 answers, 93.3% right, 0.3 min (total 8.6 min)
+('world', 'think', 100): 270 answers, 93.7% right, 0.2 min (total 8.8 min)
+('world', 'nothink', 'all'): 270 answers, 75.9% right, 0.2 min (total 9.1 min)
