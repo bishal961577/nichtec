@@ -1007,9 +1007,27 @@ the 4B answers almost as well without thinking (95.1%) as with it (99.9%), in ab
 | 100 notes | 63 | 2,327 |
 | 5,000 notes | 902 | 13,278 |
 
-### 11.4 Part B on the 4B
+### 11.4 Part B on the 4B: WITHDRAWN
 
-(Running.)
+The scientist agent, order random1, 12 tasks, the original run's seeds, Qwen's thinking sampling (amendment 3).
+Results are in `results/scientist_Qwen3.5-4B_thinking/`.
+
+| | Readable rule | Guesses contradicting shown cases | Good rule among guesses | Test accuracy | Final rule good |
+|---|---|---|---|---|---|
+| Thinking on | 97% | **0.0%** of 374 | 100% | **100.0** | 100% |
+| Original, thinking off, random1 | 75% | 96.5% of 288 | 0% | 74.0 | 0% |
+
+**Line (section 7.6):** at most 10% contradiction means withdrawn. **Conclusion (b), "the model cannot check its own
+guesses against the evidence", is withdrawn for Qwen3.5-4B in thinking mode**, as it was for Claude Haiku 5.5
+(section 9.4).
+
+**What this means:**
+- The phone-sized model with thinking on learned every hidden rule exactly, from 40 cases.
+- That is above the 27B's earlier 89.3% with thinking off, and above exhaustive search's 99.4% on the same tasks.
+- The record's "LLMs can't check their own conclusions" (96% contradiction at 4B) was a thinking-off artifact, as the
+  first panel suspected.
+- **The cost:** every guess was a thinking call on a short prompt. 12 streams × 8 rounds × 4 guesses took about 1 hour
+  on one L40S, 12 at a time.
 
 ### 11.5 What this changes
 
