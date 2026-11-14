@@ -55,14 +55,14 @@
   }
  },
  "filing": {
-  "index_people": 710,
+  "index_people": 707,
   "true_people": 260,
   "rows": 6869,
   "me_rows": 49,
-  "fact_rows": 2626,
-  "wrong_merge_pct": 3.427265803503427,
-  "hard_merge_pct": 10.144927536231885,
-  "hard_rows": 483,
+  "fact_rows": 2625,
+  "wrong_merge_pct": 3.4285714285714284,
+  "hard_merge_pct": 9.95850622406639,
+  "hard_rows": 482,
   "filed_right_by_style": {
    "fname": 97.1,
    "fname_ctx": 93.6,
@@ -70,7 +70,7 @@
    "nick": 100.0,
    "old_role": 100.0,
    "pronoun": 98.3,
-   "pronoun_prev": 99.1,
+   "pronoun_prev": 98.3,
    "role": 99.1,
    "via": 77.8
   },
@@ -86,7 +86,7 @@
    "via": 108
   },
   "people_split_into_several_ids": 109,
-  "facts_filed_pct": 91.49149149149149,
+  "facts_filed_pct": 91.44144144144144,
   "link_precision_pct": 93.65781710914455,
   "link_rows": 678,
   "lure_intrusion_pct": 0.26525198938992045
@@ -101,8 +101,8 @@
   "rows": 6869,
   "bad_lines": 0,
   "cut": 0,
-  "prompt_tokens": 698259,
-  "completion_tokens": 69822,
+  "prompt_tokens": 698288,
+  "completion_tokens": 69819,
   "notes": 6292
  },
  "rows_left": 0,
@@ -113,22 +113,22 @@
     "rows": 6848,
     "bad_lines": 0,
     "cut": 0,
-    "prompt_tokens": 699205,
-    "completion_tokens": 69510,
+    "prompt_tokens": 699174,
+    "completion_tokens": 69507,
     "notes": 6292
    },
    "filing": {
-    "index_people": 674,
+    "index_people": 673,
     "true_people": 260,
     "rows": 6848,
     "me_rows": 36,
     "fact_rows": 2635,
-    "wrong_merge_pct": 3.681214421252372,
-    "hard_merge_pct": 12.704918032786885,
+    "wrong_merge_pct": 3.7191650853889944,
+    "hard_merge_pct": 12.90983606557377,
     "hard_rows": 488,
     "filed_right_by_style": {
      "fname": 97.6,
-     "fname_ctx": 94.2,
+     "fname_ctx": 93.8,
      "full": 99.5,
      "nick": 95.6,
      "old_role": 100.0,
@@ -149,9 +149,9 @@
      "via": 107
     },
     "people_split_into_several_ids": 107,
-    "facts_filed_pct": 91.69169169169169,
-    "link_precision_pct": 94.38377535101404,
-    "link_rows": 641,
+    "facts_filed_pct": 91.64164164164164,
+    "link_precision_pct": 94.39252336448598,
+    "link_rows": 642,
     "lure_intrusion_pct": 0.13262599469496023
    },
    "rows_left": 0,

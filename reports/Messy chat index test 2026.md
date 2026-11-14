@@ -363,7 +363,12 @@ tuned on the dev world as B's may (researcher, architect).
 
 ### 14.6 Commitments
 
-- Sealed held-out wordings, SHA-256: *(added when the agent delivers the file, in the commit that records it)*.
+- Sealed held-out wordings, SHA-256 `7a5d7cd7d643d641df8706da71a07d32c80541a63adeff2add704a9ae4a7bdea`. They are stored
+  encoded in `research_notes/Messy chat test review 2026/sealed/` so that a recycled machine cannot lose them, and must not
+  be decoded before the freeze. The seal rests on that rule (anyone with the repository could decode it). The hash, which
+  the code checks, proves the file was not changed after this commit. The agent's validation: `check_heldout` reported no
+  problems, and `check` on test worlds built with seven seeds reported none either. It holds 132 attribute wordings, 46
+  frames, 40 relation phrasings, 4 small-talk lines and 24 activity phrases.
 - Freeze: a later commit that says FREEZE, names drand round R and lists the code files.
 
 ### 14.7 Asked for and not done (honest list)
@@ -406,3 +411,114 @@ It misses 5% of facts and misfiles 1%.
 | C, Ccues | not meaningful (the stub's searches only repeat the question) |
 | Deletion | 0 rows left; 0 deleted values shown to a reader |
 | Writing cost | 11 completion and 98 prompt tokens per message (the stub's; a model will write more) |
+
+## 15. Amendment 2: the experts' sign-off round (before any model call)
+
+All four reviewers signed off on commit d36350b with the same verdict: **GO WITH LISTED FIXES**
+(`research_notes/Messy chat test review 2026/round2_*.md`). Every listed fix is below. All were made before any model
+call on this test. Where this section differs from sections 1–14, this section decides.
+
+### 15.1 What the sign-off round found, and the fix
+
+| Problem | Found by | Fix |
+|---|---|---|
+| **The wrong-merge count could not see the likeliest error.** After amendment 1, the anchor of "Kofi's flatmate" and the source of "Kofi says Mira moved" counted as mentioned. A writer that filed every such fact under Kofi showed 0.00% wrong merges. | all four | A fact row is wrong unless its person is a subject of a fact in that message (`owners` in `write_quality`). Messages naming someone through another person, or second-hand, join the hard subset. The researcher's adversarial writers now show 4.6% and 3.6% wrong merges (24.6% and 19.4% on hard cases) instead of 0. |
+| **The writer's list missed the person behind "Kofi's flatmate" 44% of the time.** The partners of every name-matched person were cut to 25, ranked by count. | architect, neuroscientist | Partners whose link kind matches the word after "Kofi's" come first; the caps are 40 named plus 40 linked people; "my old boss" matches "my boss". Checked with `brain/messy_coverage.py` (perfect writer, list computed exactly as in the run): the right person is on the list 95.4% of the time for "Kofi's flatmate" (dev), 95.9% (a placeholder test world), and 100% for every other way of naming someone. List size: median 66, at most 80. |
+| **The stub's writer could see people it should not.** It filed by full name anyone it had ever created, even when they were not on its list, so its "Kofi's flatmate 94.4%" said nothing about the list. | architect, neuroscientist | Removed. The stub writer now uses only the people on its list. |
+| **One mis-numbered row could stop the whole test.** The founder simulated a writer that cites the neighbouring message for some rows: 1% of rows cited wrongly hit STOP in 4 of 10 seeds. "She adopted a ferret." after "Heard from Mira today." is the likeliest case. | founder, architect | When a row's value is not in the message it cites, but is in exactly one other message of the same batch, the row moves to that message (`fix_citation`, a write-side change the development phase allows). A row left after deletion now counts only if its own message does not contain its value. A row whose own message does contain the value is someone else's fact filed under this person: a merge, not a leak (`deletion_audit`). |
+| **STOP hid everything else.** | architect, founder | The verdict the result would have had without the deletion clause is always printed beside STOP. |
+| **SEARCH could win while needing up to four thinking calls per answer.** | founder | SEARCH also needs that search arm with thinking off ≥ 80% on the hard set, the same bar as B's fast path. |
+| **"PASS with an overnight thinking writer" was written but not coded, and its writing would break the 150-token cap.** | architect, founder | Coded. The thinking writer (Bw) is judged by every PASS condition, with its own writing cap of 400 completion tokens per message (it runs overnight on the charger) and no rows left after deletion. It runs automatically on the same test world when the verdict is WRITER-LIMITED or BETWEEN. Writing cost is also printed as phone-minutes per 100 messages, at an assumed 20 tokens/s writing and 200 tokens/s reading. |
+| **Forgetting a whole person was an average over 20 people.** The stub passed at 98.0% while its worst person kept 11.5% of their messages. | founder, neuroscientist | The line is per person: **every** one of the 20 must lose ≥ 95% of their messages (was: the average ≥ 98%). "Forget Kofi" now removes the messages filed under every index person found by his full name, plus every message whose text carries one of those people's full names or a nickname unique to them. This line was changed after the stub was seen. The reason: an average can hide a person who is not forgotten, which is the failure this line exists to catch. |
+| **Value keys matched inside other words:** "bee" in "been" (scored a right answer wrong), "cat" in "category", "bass" in "ambassador" (a false STOP). | researcher | Keys of 4 letters or fewer must be whole words, with an optional plural; longer keys are stems matched at a word start (`has_key`, used by the scorer, the filing measures, the deletion audit and the leak check). "knit", "sail", "surf" and "cook" got explicit word forms. |
+| **"Earlier value" markers were too loose:** "Moved to Graz from Valencia" and "It's not Valencia, it's Graz" scored right when the old value was given as current. | researcher | Only unambiguous markers count, within two small words of the value (previously, before, used to, formerly, earlier, originally, from, instead of, rather than, no longer, old, until, replacing). "moved", "switched", "not", "had" and "was" no longer count. |
+| **A bare "or" counted as a hedge**, so "Felix Molnar (works with Kofi or Mira)" was wrong. | neuroscientist, researcher | A who-answer is hedged only by "Name or Name" outside parentheses, or by maybe, could be, might be, possibly, perhaps, not sure or either. |
+| **"The notes don't mention it" was not an abstention.** | neuroscientist | The abstain list adds n't mention, no mention, not mentioned, nothing about, not recorded and nothing recorded. |
+| **The held-out checker rejected extra placeholders but not missing ones.** A fact without its value, or a question without its person, passed. | researcher | Every kind of wording must contain its needed placeholders (`SLOT_NEEDS`, `FRAME_NEEDS`). Error messages name the place and index, never the wording. The sealed file passes, checked by script only (no wording was printed or read). |
+| **The world's self-check was never run before a scored run.** | researcher | `main()` runs `messy_world.check` and stops on any problem. |
+| **The beacon seed was a protocol, not code.** | researcher | `--freeze-commit` and `--beacon-round` fetch round R from drand and derive the seed; a given `--test-seed` must equal it. The scored run refuses to start without both, without the held-out file, or without a committed hash. |
+| **Link precision counted correct "Kofi \| flatmate" rows as wrong** (truth pairs were taken only from the row's own message). | neuroscientist | Checked against every true pair in the world. |
+
+**Also changed in this amendment.** A BETWEEN verdict now names the conditions it missed. When the only miss is B with
+thinking off (founder: "BETWEEN with no next step"), it reads "the index works, but answers need thinking; next, measure
+answer time with thinking on a phone". This is a label only; no line moved.
+
+**Not fixed, said plainly:**
+- A bare first name while a namesake is known is still rare (6 fact messages in dev). The core "which Mira?" load stays
+  light (neuroscientist).
+- If the writer records "new boss", a question about "my boss" may find only the old boss (neuroscientist). This is a
+  development-phase tuning question.
+
+### 15.2 Rules added before the freeze
+
+1. **Hand check when the perfect-pages arm is low** (researcher). On the test world, any question kind where the
+   perfect-pages arm (thinking on) scores below 95% is read by hand. A question is dropped from every arm only where the
+   hand check finds the world at fault (the gold is wrong, or the message does not state the fact), not where the reader
+   merely erred. The verdict uses the result after dropping, and both versions are reported. The pages arm sees the
+   right messages, so this check cannot favour B or search.
+2. **Hand check before STOP** (researcher, architect). Every row and every shown message that triggers STOP is read by
+   hand. A trigger counts only if that person's deleted fact really survives. Coincidences are listed and not counted.
+3. **The freeze.**
+   - The first commit whose message says FREEZE binds. It names drand round R and the code files.
+   - It is pushed before R is published, and R is at least one hour after the push.
+   - Any later FREEZE is reported as a departure, with the reason.
+4. **The seal, honestly.**
+   - The sealed wordings are in the branch history in encoded form (commit 83b2ffa), so encrypting them now with a drand
+     timelock (tlock, the researcher's suggestion) would not remove the readable copy. It was not done.
+   - The seal is the rule in 14.6, nothing more. The author of the reading code has not printed or read the file; it was
+     decoded only by `check_heldout`, whose output names no wording.
+   - A mechanical audit replaces part of what tlock would have given (pre-registered here). After the scored run:
+     - Collect every 4-word sequence added to `brain/` between commit 83b2ffa and the FREEZE commit.
+     - Check them against the held-out wordings and against the ordinary wordings.
+     - Any sequence found in the held-out file and in neither the ordinary wordings nor the prompts already at 83b2ffa
+       is listed in the report, with the line it came from.
+
+### 15.3 Offline check after this amendment (stub, dev world)
+
+The stub writer is now deliberately crude: it sees only the people on its list. Otherwise it files "Kofi's flatmate"
+under Kofi, uses a listed namesake, or writes a new person. It misses 5% of facts and misfiles 1%. It splits 109 of
+260 people into several ids. These numbers measure that crude writer, not the 4B. The check confirms that every line,
+the bookkeeping and the automatic thinking-writer run work end to end.
+
+| | Result |
+|---|---|
+| pages | 100.0% on every kind |
+| oracle | 96.6% on the hard set (desc 86.7%: the ceiling set by paraphrase matching, not by the index) |
+| B (stub writer) | 77.7%: desc 64.0, who 75.3, two 63.3. Wrong merges 3.43%, hard cases 9.96%. Filed right by style 93.6–100%, except "Kofi's flatmate" at 77.8%. Link precision 93.7%. Forgetting: average 93.0%, worst person 54.5%. |
+| Verdict | WRITER-LIMITED. The thinking writer ran automatically; the stub ignores thinking, so Bw ≈ B, as expected. |
+| Deletion | 0 rows left; 0 deleted values shown to a reader; 0 answers naming a deleted value; 0 guesses on never-stated facts |
+| Writing cost | 11 completion and 111 prompt tokens per message (the stub's; a model will write more) |
+
+The stub writer itself is not fully reproducible: under two Python hash seeds its hard-case merges were 10.17% and
+10.37%. The pipeline the real run uses is reproducible. Replaying one fixed set of writer replies under three hash
+seeds gave identical people lists, prompts and index rows, so a resumed real run rebuilds the same index from its
+saved replies.
+
+B fell from 92.2% (14.9) to 77.7% after two changes: the stub's shortcut was removed (its writer now sees only its
+list), and the scorer was tightened. How much each contributed was not separated. Neither is evidence that the
+system got worse. The perfect-writer check in 15.1 is the measure of the list itself.
+
+### 15.4 The panel's forecasts after the sign-off round (recorded before any model call)
+
+| | B hard | Wrong merges | Verdict probabilities (%) |
+|---|---|---|---|
+| Architect | 72–84% | 1–3% (as coded before fix 1; higher after) | WRITER-LIMITED 35, BETWEEN 25, STOP 22, PASS 8, READ-LIMITED 6, SEARCH 4 |
+| Neuroscientist | 78% (72–84) | 2–4% | WRITER-LIMITED 45, READ-LIMITED 25, BETWEEN 21, PASS 3, SEARCH 3, STOP 3 |
+| Founder (with fixes) | — | — | WRITER-LIMITED 60, BETWEEN 15, READ-LIMITED 8, PASS 7, SEARCH 5, STOP 5 |
+| Researcher | about 70% (62–80); oracle 85–92% | — | WRITER-LIMITED 50, READ-LIMITED 20, BETWEEN 12, STOP 8, PASS 6, SEARCH 4 |
+| Moderator | 65–80% | 2–5% | WRITER-LIMITED 50, BETWEEN 15, READ-LIMITED 12, STOP 8, PASS 8, SEARCH 7 |
+
+The architect's STOP 22% was mostly the mis-numbered-row problem, fixed in 15.1.
+
+All five expect the index to beat search on the association questions (described people, who-questions, two hops), and
+a 4B writer with thinking off to file too many facts under the wrong person. That result reads WRITER-LIMITED. The
+thinking writer then runs on the same world: if it passes, the answer is an index written overnight; if not, a bigger
+writer.
+
+### 15.5 What happens next
+
+1. **Development phase on the dev world** (Modal, the same Qwen3.5-4B server as test 1). B's writer prompt, the clue
+   prompt and C's retrieval settings may be tuned on the dev world only.
+2. **FREEZE commit**, naming drand round R (15.2).
+3. **The scored run** on the beacon-seeded test world with the sealed wordings. Then the blind hand audit (14.5), the
+   hand checks in 15.2 and the n-gram audit.

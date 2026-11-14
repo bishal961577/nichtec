@@ -1293,7 +1293,7 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
         return 100 * np.mean([r["correct"] for r in rs]) if rs else float("nan")
     kinds = sorted({q["kind"] for q in W.questions})
     L = [f"# Messy chat index test: {W.split} (seed {W.seed}{', held-out wordings' if W.heldout else ''})", "",
-         "Pre-registration: reports/Messy chat index test 2026.md (with amendment 1). Accuracy in %; hard set = " +
+         "Pre-registration: reports/Messy chat index test 2026.md (with amendments 1 and 2). Accuracy in %; hard set = " +
          ", ".join(MW.HARD), ""]
     L += ["| Kind | n | " + " | ".join(f"{a} {'think' if t else 'off'}" for a, t in arms) + " |",
           "|---|---|" + "---|" * len(arms)]
@@ -1346,7 +1346,11 @@ def write_summary(W, done, wstats, wq, fg, left, out, arms, extra):
         v = ("WRITER-LIMITED: the reading works on a perfect index, the 4B's filing does not; next is the thinking "
              "writer (pre-registered), a bigger writer only if that fails too")
     else:
-        v = "BETWEEN: neither line met"
+        miss = sorted(k for k, x in cond.items() if not x)
+        v = "BETWEEN: neither line met (missed: " + ", ".join(miss) + ")"
+        if miss == ["fast_path"]:                         # amendment 2 (founder): the one gap with an obvious next step
+            v = ("BETWEEN (only the thinking-off line missed): the index works, but answers need thinking; next, "
+                 "measure answer time with thinking on a phone")
     v_wo_stop = v
     if stop:
         v = ("STOP: a deleted value survived (in an index row elsewhere, or in a message shown to the reader); nothing "
