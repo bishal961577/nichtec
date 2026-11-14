@@ -25,15 +25,21 @@ MODEL = "Qwen/Qwen3.5-4B"
 GPU = "L40S"
 MAX_LEN = 131072                 # the 5,000-note notebook is ~60K Qwen tokens, plus up to 16K of thinking
 VLLM_VERSION = "0.33.0"
+CUDA_IMAGE = "nvidia/cuda:13.0.3-devel-ubuntu22.04"   # torch 2.14.0 (vLLM 0.33.0's pin) is built for CUDA 13.0.3
 
-image = (modal.Image.debian_slim(python_version="3.12")
+# First deploy crashed at vLLM's warm-up: its default FlashInfer sampler compiles GPU code on first use and the slim
+# image had no CUDA compiler (nvcc). Two fixes, each enough alone: NVIDIA's devel image (has nvcc), and
+# VLLM_USE_FLASHINFER_SAMPLER=0 (vLLM's plain PyTorch top-k/top-p sampler; same sampling, nothing to compile).
+image = (modal.Image.from_registry(CUDA_IMAGE, add_python="3.12")
+         .entrypoint([])
          .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub[hf_transfer]")
-         .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"}))
+         .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "VLLM_USE_FLASHINFER_SAMPLER": "0"}))
 hf_cache = modal.Volume.from_name("nichtec-hf-cache", create_if_missing=True)
+vllm_cache = modal.Volume.from_name("nichtec-vllm-cache", create_if_missing=True)   # torch.compile results: faster restarts
 app = modal.App("nichtec-qwen4b")
 
 
-@app.function(image=image, gpu=GPU, volumes={"/root/.cache/huggingface": hf_cache},
+@app.function(image=image, gpu=GPU, volumes={"/root/.cache/huggingface": hf_cache, "/root/.cache/vllm": vllm_cache},
               scaledown_window=5 * 60, timeout=6 * 60 * 60, max_containers=1)
 @modal.concurrent(max_inputs=64)
 @modal.web_server(port=8000, startup_timeout=20 * 60)
