@@ -652,3 +652,31 @@ The hand check applies these to every arm alike, and both versions are reported.
 **Correction to 16.3.** "The writer is deterministic" holds only for identical server load. vLLM is not
 batch-invariant, so the same prompt can give a different reply when other requests share the batch. The v6 writer's
 wrong merges were 5.5% in one run and 6.3% in another on identical code. That is the noise in a single run.
+
+### 16.5 The final answer prompt
+
+The pages arm (thinking on), all versions rescored with the current scorer, on the same 368 questions:
+
+| Answer prompt | Right |
+|---|---|
+| 1. As reviewed | 86.1% |
+| 2. Implied and changed facts, several names, loose descriptions (16.4) | 91.0% |
+| 3. + "not from loosely related facts" | 91.0% |
+| 4. + full names; dates as YYYY-MM-DD counted from the note's date | **94.6%** |
+
+Prompt 4 by kind:
+
+| Kind | Right |
+|---|---|
+| event_last | 88.9% (was 44.4%) |
+| event_what | 100% |
+| event_who | 95.0% |
+| who | 96.9% |
+| desc | 100% |
+| upd | 88.2% |
+| named | 89.2% |
+| deleted | 90.2% |
+| never | 95.0% |
+
+Each kind has 9 to 41 questions, so a few points either way is noise. Prompt 4 is the last change to the answer
+prompt. Every arm in the dev run (16.6) uses it.
