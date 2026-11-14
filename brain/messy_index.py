@@ -152,7 +152,9 @@ Answer in a few words, from what the notes say or clearly imply, not from loosel
 ("his new phone is a Pixel" means he uses a Pixel now; "she stopped going to the gym" means she no longer does): give \
 what is true now, and say so when something stopped. One person can be named in different ways in different notes \
 (full name, first name, nickname, "my uncle"). A description in the question may be loose: match its main facts. If \
-the notes don't say, reply "not in my notes". If the question could mean more than one person, ask which one."""
+the notes don't say, reply "not in my notes". If the question could mean more than one person, ask which one. Give \
+people's full names when the notes have them. Give a date as YYYY-MM-DD; when a note says "yesterday" or names a \
+weekday, count from that note's date."""
 
 AGENT = """You answer questions from my private notebook by searching it. Notes found so far (each with the date I \
 wrote it):
