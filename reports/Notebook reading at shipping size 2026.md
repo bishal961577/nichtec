@@ -848,6 +848,33 @@ after the registered arms. The registered 64-token arms are unchanged, so they c
 15:23 UTC, every answer also stores its thinking text. Scoring is unchanged. Answers saved before that have no thinking
 text.
 
+### Amendment 5: the 4B whole-notebook arm on a fixed random sample (cost; before any further answer of that arm)
+
+**Why.** The registered plan runs all 995 questions of the whole-notebook arm. The first 29 answers of
+("personal", "think", 5000) on the 4B changed the cost picture:
+- they used a median of 10,583 completion tokens, and some reached the 16,384 cap;
+- they took a median of 8 minutes each at 48 at a time;
+- 15 of the 29 were right, all on the easy kinds.
+
+The full arm would take about 6–7 L40S hours, against about 1 hour planned. The run also stopped once: a client
+limitation, fixed in `order_gap.Endpoint.poll`. Modal answers requests longer than 150 s with 303 redirects, and
+`urllib` follows only a few of them.
+
+**What runs instead** (`brain/whole_sample.py`, committed before it ran):
+- 20 questions per kind (all 20 of "prev"), drawn with `random.Random(20261114)` from each kind's question ids in sorted
+  order: 220 questions, 140 of them on the hard set.
+- Amendment 4's line is applied to the sample. The hard-set estimate weights each kind by its count in the full hard set,
+  and a 95% bootstrap interval is given.
+- n = 20 per kind gives about ±20 points per kind. A per-kind result near 75% therefore cannot be called either way.
+- Saved answers outside the sample (the early ones) are reported separately.
+
+**Unchanged:** the thinking-off 256-token arms (amendment 4) run in full, at perfect pages and at 5,000 notes, before the
+sample.
+
+**Already known before this amendment.** The 29 early answers already show the length condition failing: median 10,583
+tokens against 1,418 allowed. Those answers came from the first batch to finish, so the true median can only be as long
+or longer. A PASS is therefore already ruled out. The sample decides between FAIL, BETWEEN and READS BUT TOO SLOW.
+
 ## 11. Result: Qwen3.5-4B
 
 (Not yet run.)
