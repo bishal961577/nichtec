@@ -807,6 +807,47 @@ python brain/scientist.py     --base-url URL/v1 --model Qwen/Qwen3.5-4B --thinki
 modal app stop nichtec-qwen4b                           # when done
 ```
 
+### Amendment 4: the memory road panel's lines (before the 4B whole-notebook arm and before any 4B thinking-off arm)
+
+**Why.** A second four-member panel (`research_notes/Memory road panel 2026/`) reviewed the work while the 4B run was
+going. It asked for a line on the 5,000-note arm before that result exists. It also found that the registered 64-token
+cap with thinking off cuts answers short: Claude Haiku 5.5 had 514 of 995 answers cut off at 5,000 notes.
+
+**State of the run when this was committed:**
+- Done, all thinking on: perfect pages, search2 and bm25.
+- In progress: the 100-note arm, 163 of its answers saved.
+- Not started: every thinking-off arm, the world edits, the own-fact arm and the 5,000-note arm.
+
+**Line for the 4B reading the whole 5,025-note notebook** (thinking on, hard set, automatic score; coded as
+`phone_whole_line` in `brain/notebook_read.py`). The panel's four proposals were:
+- pass (X): 90 / 90 / 85 / 90;
+- fail (Y): 75 / 75 / 70 / 75;
+- each of described, who and two-hop: 80 / 75 / 75;
+- thinking length: 1,500 / 1,400 / 1,500 / 1,000 tokens.
+
+The median of each was taken:
+
+| Outcome | Condition | Meaning |
+|---|---|---|
+| PASS | hard set ≥ 90%, and described, who and two-hop each ≥ 75%, and median completion ≤ 2 × the 4B's perfect-pages median, and ≤ 2% cut off at 16K | Road A is viable as the phone's working-set reader up to about 60K tokens |
+| READS BUT TOO SLOW | the accuracy conditions hold, the length or cut-off condition fails | A only as a small recent window |
+| FAIL | hard set ≤ 75% | A is out as the phone's reader at 5,000 notes; selection is the critical path |
+| BETWEEN | anything else | A only as a small recent window; decide kind by kind |
+
+**Also reported:**
+- the 635 name-keyed questions, against Claude Haiku 5.5's 93.4% on the same questions;
+- the 90th percentile of completion length;
+- a hand-audited score next to the automatic one.
+
+**What a PASS would not show:** the run is at 16-bit on a server GPU. 4-bit weights and phone timing are untested. Mekala et al. (EMNLP 2025, arXiv 2505.20276) report large 4-bit losses on long inputs.
+
+**New arms, reported without lines:** thinking off with a 256-token cap, at perfect pages and at 5,000 notes. They run
+after the registered arms. The registered 64-token arms are unchanged, so they can be compared with Claude Haiku 5.5.
+
+**Logging fix.** vLLM 0.33 returns the thinking as `reasoning`; the script read `reasoning_content`. From the restart at
+15:23 UTC, every answer also stores its thinking text. Scoring is unchanged. Answers saved before that have no thinking
+text.
+
 ## 11. Result: Qwen3.5-4B
 
 (Not yet run.)

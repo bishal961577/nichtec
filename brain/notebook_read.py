@@ -62,6 +62,7 @@ THINK = {"max_tokens": 16384, "temperature": 1.0, "top_p": 0.95, "top_k": 20, "m
 # amendment 3: Qwen's model-card settings for thinking mode on general tasks (the presence penalty guards small Qwen3.5
 # models against looping); amendment 1 had 0.6 / 0.95 / 20. The Claude run (amendment 2) sent no sampling settings.
 NOTHINK = {"max_tokens": 64, "temperature": 0}
+NOTHINK256 = {"max_tokens": 256, "temperature": 0}     # amendment 4: thinking off without the 64-token cut-off
 MQUAKE = "MQuAKE-CF-3k-v2.json"
 MQUAKE_URL = "https://raw.githubusercontent.com/princeton-nlp/MQuAKE/main/datasets/" + MQUAKE
 MQUAKE_SHA256 = "f82091cbb668cef8f2537f79f1768af1840184450b347ff8c344336090ddc71e"
@@ -80,7 +81,8 @@ def plan(tag):
         return ([("personal", "think", n) for n in (10, "search2", "bm25", 100)] +
                 [("personal", "nothink", n) for n in (10, "search2", 100)] +
                 [("world", "think", n) for n in (10, 100)] + [("own", "think", 0)] +
-                [("personal", "think", 5000)])            # amendment 3: reported only (does size limit reading?)
+                [("personal", "think", 5000)] +           # amendment 3; amendment 4 gives it a line
+                [("personal", "nothink256", n) for n in (10, 5000)])   # amendment 4: reported only
     return ([("personal", "think", n) for n in (5000, 10, "search2", "bm25", 1000, 100)] +
             [("personal", "nothink", n) for n in (5000, 10, "search2")] +
             [("world", "think", n) for n in ("all", 10)] + [("own", "think", 0), ("world_noinst", "think", "all")] +
@@ -751,7 +753,7 @@ class Stub:
 
 
 def ask(llm, prompt, mode, seed):
-    kw = THINK if mode == "think" else NOTHINK
+    kw = THINK if mode == "think" else NOTHINK256 if mode == "nothink256" else NOTHINK
     body = {"model": llm.model, "messages": [{"role": "user", "content": prompt}],
             "chat_template_kwargs": {"enable_thinking": mode == "think"}, "seed": seed, **kw}
     t0 = time.time()
@@ -950,6 +952,35 @@ def verdict(done, tag, n_hard, pre):
     return v, {"whole": f, "bm25": r, "selected": s, "ratio_whole": rf, "ratio_bm25": rr, "latency": lat}
 
 
+def phone_whole_line(done, n_hard):
+    """Amendment 4 (memory road panel, committed before this arm ran): Qwen3.5-4B reading the whole 5,025-note notebook,
+    thinking on, hard set, automatic score. Medians are of completion tokens (thinking + answer)."""
+    full, sel = get(done, "personal", "think", 5000, HARD), get(done, "personal", "think", 10, HARD)
+    if len(full) < n_hard or not sel:
+        return "not complete"
+    acc = 100 * np.mean([r["correct"] for r in full.values()])
+    kinds = {k: 100 * np.mean([r["correct"] for r in full.values() if r["kind"] == k]) for k in ("desc", "who", "two")}
+    med = float(np.median([r["completion_tokens"] or 0 for r in full.values()]))
+    p90 = float(np.percentile([r["completion_tokens"] or 0 for r in full.values()], 90))
+    base = float(np.median([r["completion_tokens"] or 0 for r in sel.values()]))
+    cap = 100 * np.mean([r["truncated"] for r in full.values()])
+    fast = med <= 2 * base and cap <= 2.0
+    if acc >= 90 and min(kinds.values()) >= 75 and fast:
+        v = "PASS: A is viable as the phone's working-set reader up to about 60K tokens (16-bit, server GPU)"
+    elif acc >= 90 and min(kinds.values()) >= 75:
+        v = "READS BUT TOO SLOW: accurate, but thinking too long or cut off; A only as a small recent window"
+    elif acc <= 75:
+        v = "FAIL: A is out as the phone's reader at 5,000 notes; selection is the critical path"
+    else:
+        v = "BETWEEN: A only as a small recent window; decide kind by kind"
+    named = get(done, "personal", "think", 5000, ["two", "reword", "upd", "same", "retract", "prev"])
+    nk = 100 * np.mean([r["correct"] for r in named.values()]) if named else float("nan")
+    return (f"{v}. Hard set {acc:.1f}% (pass >= 90, fail <= 75); described {kinds['desc']:.1f}%, who {kinds['who']:.1f}%, "
+            f"two-hop {kinds['two']:.1f}% (each >= 75 to pass); median completion {med:.0f} tokens vs {2 * base:.0f} "
+            f"allowed (2 x perfect-pages median {base:.0f}), 90th percentile {p90:.0f}; cut off at 16K {cap:.1f}% "
+            f"(<= 2 allowed). Name-keyed 635 questions: {nk:.1f}% (Claude Haiku 5.5: 93.4%).")
+
+
 def reference_lines(done):
     rw = get(done, "personal", "think", 5000, "reword")
     t5, t1 = paired(done, "think", 5000, 10, "two")
@@ -970,7 +1001,10 @@ def write(out, tag, done, meta, D):
          "Pre-registration: reports/Notebook reading at shipping size 2026.md (amendment 1 = section 7). Accuracy in % "
          f"with 95% bootstrap intervals over questions ({BOOT:,} resamples).", "", "## Verdict", ""]
     v, R = verdict(done, tag, n_hard, pre)
-    L += [f"- {v}", f"- Easy reference: {reference_lines(done)}", "",
+    L += [f"- {v}", f"- Easy reference: {reference_lines(done)}"]
+    if "4B" in tag:
+        L += [f"- Whole 5,025-note notebook on the phone-sized model (amendment 4): {phone_whole_line(done, n_hard)}"]
+    L += ["",
           "## Personal notebook by question kind", "",
           "| Kind | Mode | 10 (pages) | 100 | 1,000 | 5,000 | BM25 top-20 | Two-round search |",
           "|---|---|---|---|---|---|---|---|"]
@@ -979,7 +1013,7 @@ def write(out, tag, done, meta, D):
               "desc": "A3: described person", "who": "A3: who is it", "fname": "A3: first name + detail",
               "amb": "A3: ambiguous first name flagged", "close": "A3: close person with lures"}
     for kind in A_KINDS + A3_KINDS:
-        for mode in ("think", "nothink"):
+        for mode in ("think", "nothink", "nothink256"):
             cells = []
             for n in LEVELS + ["bm25", "search2"]:
                 rs = get(done, "personal", mode, n, kind)
