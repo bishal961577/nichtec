@@ -62,7 +62,7 @@ class ClaudeEndpoint:
         key = os.environ.get("NICHTEC_CLAUDE_KEY")
         if not key:
             raise SystemExit("NICHTEC_CLAUDE_KEY is not set (add it in the environment settings as a variable)")
-        self.client = anthropic.Anthropic(api_key=key, max_retries=8)
+        self.client = anthropic.Anthropic(api_key=key, base_url="https://api.anthropic.com", max_retries=8)
         self.model, self.served, self.workers = model, [model], workers
         self.budget = budget or Budget()
         self.lock, self.refusals, self.cache = threading.Lock(), 0, cache
