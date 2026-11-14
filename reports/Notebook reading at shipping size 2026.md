@@ -586,6 +586,153 @@ The easy reference lines and Part B's lines are unchanged.
 
 The stub run of the whole test still completes.
 
-## 9. Result
+## 9. Result (Claude Haiku 5.5, 14 November 2026)
 
-(Not yet run.)
+**Spend and size:**
+- **Total: $25.77.** The $25 budget stopped new requests; the $0.77 over it came from requests already in flight.
+- **Parts A, A3 and A2:** 10,305 answers, 274M prompt tokens (mostly cache reads) and 0.93M completion tokens.
+- **The 5,000-note notebook is 100,530 Claude tokens,** not the ~53K estimated from its characters. Invented names cost many tokens. That put every 5,000-note prompt in Haiku 5.5's higher price tier for prompts over 100K tokens.
+
+Raw files:
+- `results/notebook_read_claude-haiku-5-5/` (`summary.md`, `answers.jsonl`, `errors.md`, `preflight.json`)
+- `results/scientist_claude-haiku-5-5_thinking/`, `results/scientist_claude-haiku-5-5_random1_off/`
+- `results/longmem_claude-haiku-5-5/`
+
+### 9.1 Decision (section 7.5): WHOLE NOTEBOOK
+
+Hard set, 695 questions, thinking on:
+
+| Way of reading | Automatic score | Audited score (9.2) | / perfect page selection | Viable (≥ 0.8)? |
+|---|---|---|---|---|
+| Whole 5,000-note notebook | **94.0%** | **98.3%** | 0.96 [0.95, 0.98] (audited 0.98) | **yes**; warm-cache answer 1.4 s, line 10 s |
+| Two-round search | 67.9% | 70.4% | 0.70 [0.66, 0.73] | **no** |
+| Perfect page selection | 97.7% | 99.9% | – | (upper bound) |
+
+**Both scores give the same verdict:** version 1 in the cloud reads the whole notebook in the prompt, and two-round search is not enough.
+
+The search failed where it has to find a person without their name:
+
+| Question kind | Two-round search | Whole notebook |
+|---|---|---|
+| desc (described person) | 15% | 100% |
+| who | 33% | 98% |
+| two-hop | 68.5% | 98.5% |
+
+**Accuracy is flat across notebook size** (all questions, thinking on): 95.9% at 100 notes, 95.7% at 1,000, 95.3% at 5,000.
+
+### 9.2 Hand audit
+
+The primary condition has 42 wrong answers.
+
+**30 are scorer errors: every retraction question.** All 30 answers say the fact no longer holds ("Signe Esposito no longer has a car. She sold her Subaru."). Because they name the old value, the scorer counted them as stale. That is 30 of 695 primary answers (4.3%), above section 7.8's 2% line, so both scores are reported above. The audited score applies the same rule to every condition: a retraction answer is right if it says the fact no longer holds.
+
+**12 are genuine errors:**
+
+| Kind of error | Count | Detail |
+|---|---|---|
+| Stale updates | 7 | 6 were plain restatements, where only note order tells which value is current; 1 was an explicit change made twice |
+| "The notes don't say" when they do | 3 | One missed the reworded relation: the question asked about a "personal trainer", the note said "coaches … at the gym" |
+| Name mix-up | 1 | Answered about Joao Caruso, asked about Joaquin Caruso: the same kind of name collision behind every error in the keyed-memory tests |
+| Who-question missed | 1 | – |
+
+### 9.3 Reported without lines
+
+**Changes and retractions:**
+- **Plain restatements are the one reading weakness found.** 13% of answers at 5,000 notes gave the old value, against 0% at 1,000 notes. The neuroscientist's recorded prediction was 10–25%.
+- Explicit changes scored 98% and corrections 100%.
+- Retractions were answered correctly in every condition, once audited.
+
+**Thinking off at 5,000 notes: 28.8%.**
+- 514 of 995 answers hit the 64-token limit: without thinking, Haiku reasons in its visible answer.
+- Of the answers not cut off, 47.4% were right. Many said "the notes don't say" when they do.
+- With only the group's own notes, thinking off scored 96.4%.
+- So the large notebook, not the lack of thinking alone, is what fails here.
+
+**Other personal-notebook results:**
+- The easy reference passes as three reviewers predicted: reworded single-hop 99.3%, two-hop ratio 0.98.
+- Ambiguous first names were flagged 90% of the time.
+- Close people surrounded by near-miss notes: 100%.
+- Plain BM25 top 20 scored 57.7% overall, with its failures where the recall check of section 7.3 put them.
+
+**Conflicting world edits (MQuAKE-CF-3k-v2), thinking on:**
+- Single-hop: 100% at every pile size, with 0% old answers.
+- Two-hop with all 2,764 edits: 81.7% (5% old), against the model's own-fact two-hop rate of 75.8%. The use ratio is **1.08 [0.95, 1.22]**; GPT-J with the keyed memory scored 0.40.
+- Without the "treat them as true" instruction: two-hop 80.8%, single-hop 100%.
+- Thinking off: two-hop 51.7%.
+
+**Recorded predictions against outcomes:**
+
+| Prediction | Outcome | Right? |
+|---|---|---|
+| Neuroscientist: described-person questions 60–80% | 100% | no |
+| Neuroscientist: close people 10–20 points worse | no difference | no |
+| Neuroscientist: same-form updates 10–25% stale | 13% | yes |
+| Architect and researcher: easy reference passes | it passed | yes |
+
+### 9.4 Part B: WITHDRAWN
+
+The scientist agent with thinking on, random1 streams, 12 tasks:
+
+| Measure | Result |
+|---|---|
+| Proposals | 384 |
+| Readable rules | 100% |
+| Guesses contradicting the cases shown | **0.0%** |
+| Streams with a good rule in the pool | 100% |
+| D's test accuracy | 99.4 (the same as exhaustive search over all simple rules) |
+| D's final rule good | 92% |
+
+Under section 7.6, conclusion (b), "LLMs can't check their own conclusions", **does not hold for this model in thinking mode**.
+
+**Limits on this result:**
+- **The earlier 37% / 96% came from Qwen3.5-27B / 4B with thinking off.** This is a different model, so the comparison is across models as well as modes.
+- **The thinking-off arm is unreadable and was not rerun.** Only 5% of its proposals gave a rule, for two reasons:
+  - the 64-token limit cut replies off before the rule;
+  - a bug in `brain/claude_client.py`'s `propose_batch` blanked every reply that did not end normally, including thinking-off replies cut at 64 tokens, which the Qwen path still parsed.
+
+  The budget was spent, so it was not rerun.
+- **One label in the summary is wrong.** The comparison row labelled "all five orders" is in fact Haiku's random1 thinking-off arm.
+
+### 9.5 Part C: LONG CONTEXT HOLDS
+
+LongMemEval-S (cleaned), thinking on, judged by Claude Haiku 5.5 with thinking off (a stated deviation). Full histories averaged **180,918 tokens**.
+
+| Type | Evidence sessions only | BM25 top 10 sessions | Full history |
+|---|---|---|---|
+| knowledge-update | 96.0 | 92.0 | 96.0 |
+| multi-session | 88.0 | 68.0 | 88.0 |
+| single-session-assistant | 92.0 | 88.0 | 88.0 |
+| single-session-preference | 76.0 | 72.0 | 78.3 (n=23) |
+| single-session-user | 92.0 | 96.0 | 100.0 (n=20) |
+| temporal-reasoning | 96.0 | 92.0 | 100.0 (n=4) |
+| all | 90.0 (n=150) | 84.7 (n=150) | 90.2 (n=122) |
+
+**Line:**
+- On the 122 questions all three arms answered, full history and evidence only both scored 90.2%: full/oracle = **1.00 [0.94, 1.07]**, above the 0.9 line.
+- BM25 sessions scored 84.4%, below full history.
+
+**Limits:**
+- **28 full-history questions were not run because the budget stopped.** They are not random: 21 temporal-reasoning, 5 single-session-user and 2 single-session-preference. Full-history timing questions are therefore barely measured (4 questions).
+- **The judge and the sample differ from published LongMemEval results,** so the numbers are not comparable with them.
+
+### 9.6 What this changes
+
+**For the companion app:**
+- Version 1 in the cloud: put the whole notebook in a long-context model's prompt, with thinking on. That held at 5,000 clean notes (~100K tokens) and on real-style chat histories (~180K tokens).
+- Cost: about half a cent per answer at 5,000 notes with caching, and 1.4 s per answer.
+- Do not put a simple search in front of the model. It lost 28 points on questions that describe a person instead of naming them.
+- Keep thinking on. Without it, the same model missed most facts in the large notebook.
+
+**For the research:**
+- **Conclusion (b) is withdrawn for this thinking model.**
+- **Conclusion (c), "stored facts are not integrated into reasoning", does not hold for facts read from the prompt by this model:**
+  - two-hop over two new personal facts: 98.5%;
+  - edits that contradict the model's beliefs: used at 1.08 times its own-fact rate.
+- The filing-cabinet failure measured earlier belonged to small models reading through a memory add-on, not to reading as such.
+
+**Still open:**
+- the phone-sized model (Qwen3.5-4B arms not run);
+- turning messy chat into notes;
+- composition without thinking;
+- notebooks well beyond 100K–180K tokens (years of use);
+- the two weaknesses found here: plain restatement updates and similar names.
