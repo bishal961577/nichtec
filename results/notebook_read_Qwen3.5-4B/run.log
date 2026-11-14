@@ -14,3 +14,4 @@ endpoint https://volansaquilae-com--nichtec-qwen4b-serve.us-east.modal.run/v1, s
 endpoint https://volansaquilae-com--nichtec-qwen4b-serve.us-east.modal.run/v1, serving ['Qwen/Qwen3.5-4B']; using Qwen/Qwen3.5-4B
 ('personal', 'think', 100): 635 answers, 99.4% right, 13.0 min (total 13.0 min)
 ('personal', 'nothink', 10): 965 answers, 96.4% right, 0.5 min (total 13.5 min)
+('personal', 'nothink', 'search2'): 995 answers, 55.9% right, 1.0 min (total 14.4 min)
