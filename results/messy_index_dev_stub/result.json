@@ -1,0 +1,46 @@
+{
+ "verdict": "BETWEEN (neither line met)",
+ "conditions": {
+  "hard": true,
+  "oracle_ratio": false,
+  "assoc_each": false,
+  "margin": true,
+  "merges": true,
+  "no_leak": true,
+  "write_cost": true
+ },
+ "B_hard": 87.52449379490528,
+ "oracle_hard": 97.38732854343566,
+ "assoc": {
+  "desc": 69.33333333333334,
+  "who": 74.66666666666667,
+  "two": 89.44444444444444
+ },
+ "margin": [
+  72.08333333333333,
+  67.70833333333334,
+  76.25
+ ],
+ "filing": {
+  "index_people": 260,
+  "true_people": 260,
+  "rows": 3325,
+  "unmapped_rows": 0,
+  "wrong_merge_pct": 0.8120300751879699,
+  "near_name_wrong_pct": 0.5243445692883895,
+  "people_split_into_several_ids": 0,
+  "facts_filed_pct": 93.69369369369369,
+  "lure_rows": 0,
+  "lure_notes": 604
+ },
+ "write": {
+  "rows": 3325,
+  "bad_lines": 0,
+  "cut": 0,
+  "prompt_tokens": 494551,
+  "completion_tokens": 36327,
+  "notes": 6019
+ },
+ "leaks": 0,
+ "rows_left": 0
+}
