@@ -680,3 +680,43 @@ Prompt 4 by kind:
 
 Each kind has 9 to 41 questions, so a few points either way is noise. Prompt 4 is the last change to the answer
 prompt. Every arm in the dev run (16.6) uses it.
+
+### 16.6 B's retrieval on 1,500 dev messages: the clue step
+
+With answer prompt 4, B scored 64.4% on the 368 questions, against the pages arm's 94.6%.
+
+**The reading was fine.** When B's retrieval found every needed message (64.1% of questions), it was right 92.4% of
+the time.
+
+**The finding was not.** On the association questions B found every needed message only rarely:
+
+| Kind | Found every needed message |
+|---|---|
+| who | 28.1% |
+| desc | 30.8% |
+| two | 17.6% |
+| event_who | 30.0% |
+
+**The cause was the clue step.** The 4B (thinking off) wrote the first described fact as a name: "name: axolotl",
+"name: Nantes", "name: Nissan". Retrieval then looked for a person called Axolotl, found none, and never ran the
+described-person search. The stub's clues were perfect, so the offline check could not show this.
+
+Changed:
+- **Prompt:** a name is a person's name, never a thing, pet, place or activity; one line per fact; two made-up examples.
+- **Retrieval:** a name clue that matches no one in the index, or a link clue when there is no one to go through, is
+  treated as a described fact.
+
+Same index, the 75 association questions, share where every needed message was found:
+
+| Kind | Before | After | Truth index, same clues |
+|---|---|---|---|
+| who | 28.1% | 50.0% | 75.0% |
+| desc | 30.8% | 42.3% | 84.6% |
+| two | 17.6% | 41.2% | 100% |
+
+**What is left:**
+- The gap between B and the truth index is mostly the writer's filing.
+- The truth index's 75% on who-questions is a retrieval ceiling: described facts are matched to rows by meaning, and
+  a loose paraphrase can miss.
+
+All arms except the pages arm (which uses no clues) were rerun after this change (16.7).
