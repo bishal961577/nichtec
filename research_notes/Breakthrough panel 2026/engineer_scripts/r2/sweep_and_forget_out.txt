@@ -1,0 +1,14 @@
+== sweep on the original world (anchor errors at the hard rate) ==
+easy 2% hard 2%                                            wrong-of-filed  0.17%  filed-right  99.8%  via right/unfiled  98.4/ 0.0  fname right/unfiled 100.0/ 0.0  forget worst 100.0%
+easy 2% hard 5%                                            wrong-of-filed  0.61%  filed-right  99.4%  via right/unfiled  93.5/ 0.0  fname right/unfiled  99.8/ 0.0  forget worst  93.3%
+easy 2% hard 10%                                           wrong-of-filed  1.41%  filed-right  98.6%  via right/unfiled  82.0/ 0.0  fname right/unfiled  99.2/ 0.0  forget worst  93.3%
+easy 2% hard 20%                                           wrong-of-filed  2.05%  filed-right  98.0%  via right/unfiled  71.3/ 0.0  fname right/unfiled  99.2/ 0.0  forget worst  93.3%
+easy 5% hard 2%                                            wrong-of-filed  0.35%  filed-right  99.5%  via right/unfiled  95.0/ 2.4  fname right/unfiled 100.0/ 0.0  forget worst 100.0%
+easy 5% hard 5%                                            wrong-of-filed  0.80%  filed-right  99.1%  via right/unfiled  90.1/ 2.4  fname right/unfiled  99.8/ 0.0  forget worst  93.3%
+easy 5% hard 10%                                           wrong-of-filed  1.52%  filed-right  98.3%  via right/unfiled  79.6/ 2.7  fname right/unfiled  99.2/ 0.0  forget worst  93.3%
+easy 5% hard 20%                                           wrong-of-filed  2.23%  filed-right  97.7%  via right/unfiled  68.2/ 0.9  fname right/unfiled  99.2/ 0.0  forget worst  93.3%
+
+== forget by candidate set, loose world (amb 0.3, early 0.5), perfect describer, strict ==
+  binding only           forget average  94.3%  worst  68.0%  messages removed that did not mention the target (all 20 targets): 0
+  binding + candidates   forget average  98.4%  worst  76.0%  messages removed that did not mention the target (all 20 targets): 9
+  unfiled bare-name mentions: 126; with >1 candidate: 122

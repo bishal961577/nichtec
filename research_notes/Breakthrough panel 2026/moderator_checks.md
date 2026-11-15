@@ -70,3 +70,12 @@ The round-1 check read only the **current** version of arXiv 2607.27539 and call
 | Block-Attention, arXiv 2409.15355**v3**, Table 1 | Llama3-block-ft HQA 68.5, 2wiki 73.3; full-attention baseline HQA 69.5, 2wiki 73.4 | **Supported** for v3. The architect notes v5 gives larger gaps (72.3 vs 74.8; 72.2 vs 73.2). |
 
 **Revised verdict:** not a false citation, but a bad one. The original lacked a version number, and its paraphrase ("12–49% of a record's contribution depended on later writes") was stronger than the text ("changes by 12–49% with the suffix"). The underlying finding is a single-author preprint on synthetic contexts. The moderator's "Treat as a false citation" in round 1 was itself too strong, because it rested on one version of the page.
+
+## Round 2 checks (continued)
+
+| Claim | By | Check | Verdict |
+|---|---|---|---|
+| One misread role definition files on average 13 extra facts under the wrong person (median 9, worst 53). At a 10% misreading rate for role definitions only, wrong filing averages 0.70% (90th percentile 2.0%, worst 4.3%). | architect | Re-ran `architect_scripts/definition_errors.py` | **Reproduced exactly.** |
+| With anchor errors included and errors concentrated on hard messages, wrong filing rises: 1.88% at 10%/10%, 2.65% at 5%/30%, 3.6–3.8% with real-chat-like references | engineer | Re-ran `engineer_scripts/r2/adversarial_sim.py` | **Reproduced exactly.** |
+| Test 1, thinking off, two-step questions: 93% right with 10 notes, 40% with 100, 5% with 5,000. Most wrong answers give the named person's own value (10 of 14, 90 of 120, 98 of 190). | engineer | Re-ran `engineer_scripts/r2/twohop_errors.py` on test 1's saved answers | **Reproduced exactly.** |
+| REALTALK: none of 14 named third parties named before being introduced; 4 of 14 role first, name later; about 200 "my <relation>" mentions, many never named | researcher | not re-run (hand count) | The researcher's count. |

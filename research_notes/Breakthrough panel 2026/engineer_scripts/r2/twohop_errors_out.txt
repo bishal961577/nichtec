@@ -1,0 +1,7 @@
+10 nothink n 200 right 186 [("the asker's own value (A)", 10), ('no value', 4)]
+10 nothink256 n 200 right 186 [("the asker's own value (A)", 10), ('no value', 4)]
+10 think n 200 right 200 []
+100 nothink n 200 right 80 [("the asker's own value (A)", 90), ("another person's value", 19), ('no value', 6), ('same first name', 3)]
+100 think n 200 right 199 [('cut off', 1)]
+5000 nothink256 n 200 right 10 [("the asker's own value (A)", 98), ("another person's value", 68), ('same first name', 14), ('same last name', 10)]
+5000 think n 20 right 6 [('cut off', 13), ("another person's value", 1)]

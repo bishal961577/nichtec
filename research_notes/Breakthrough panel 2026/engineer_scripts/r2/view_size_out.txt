@@ -1,0 +1,4 @@
+dev world: 6292 messages over 666 days, 260 people
+current fact rows 1820, relation rows 722, nickname rows 60, people rows 260
+view rows total 2862; ~18 tokens per fact row; view ~43K tokens
+scaled to a decade at the same density: ~15,685 rows (upper bound: people and facts saturate)
