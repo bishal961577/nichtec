@@ -720,3 +720,62 @@ Same index, the 75 association questions, share where every needed message was f
   a loose paraphrase can miss.
 
 All arms except the pages arm (which uses no clues) were rerun after this change (16.7).
+
+### 16.7 The clue fix, second round, and the dev run with everything final
+
+The first clue fix (16.6) made the clue writer add spurious links to plain questions ("link: live in", "link: drive",
+"link: from football"). Retrieval then followed them to the wrong person: named questions fell from 67.6% to 56.8%.
+Two more changes:
+- **Retrieval:** a link is followed only when the question goes through someone ("X's flatmate", "the flatmate of X").
+  "link: from football" goes back onto the name ("Maya from football").
+- **Prompt:** two plain clue examples with no link.
+
+Same index, share of questions where every needed message was found:
+
+| Kind | Clues as reviewed | First fix | Final | Truth index, final clues |
+|---|---|---|---|---|
+| named | 67.6% | 59.5% | 75.7% | 94.6% |
+| fname_ctx | 65.4% | 46.2% | 76.9% | 100% |
+| upd | 64.7% | 52.9% | 70.6% | 94.1% |
+| who | 28.1% | 50.0% | 56.2% | 93.8% |
+| desc | 30.8% | 42.3% | 38.5% | 92.3% |
+| two | 17.6% | 41.2% | 41.2% | 100% |
+
+Retrieval on the truth index is now 92–100%, so what is left between B and the truth index is the writer's filing.
+
+**The dev run on the first 1,500 messages, everything final** (`results/messy_index_dev_dev1500/`; the pages arm
+predates one small fix, the next-message pronoun's antecedent, which changed thinking-off pages by −0.5 points). Hard
+set, 290 questions; association kinds (desc, who, two), 75:
+
+| Arm | Hard, thinking on | Association, thinking on | Hard, thinking off |
+|---|---|---|---|
+| pages (perfect retrieval) | 95.5% | 97.3% | 66.0% |
+| oracle (truth index) | 86.1% | 77.3% | – |
+| **B (the 4B's index)** | **70.1%** | **46.7%** | **50.3%** |
+| nolinks | 67.4% | 36.0% | – |
+| C (search agent) | 62.8% | 42.7% | about 40% |
+| Ccues (equal-cost search) | 50.0% | 22.7% | about 33% |
+
+**Verdict under the registered lines: WRITER-LIMITED.**
+- B is 0.81 of the oracle (line 0.9).
+- Wrong merges are 6.27% (line 3%), and 33.3% of the 90 hard cases (line 10%).
+- Facts said through someone else ("Kofi's flatmate") are filed under the right person 11.1% of the time.
+- Forgetting a whole person: 89.0% of their messages on average, worst person 62.2%.
+- Deletion: no row left, and no deleted value shown to a reader.
+
+**B against the stronger search on the association kinds: +4.0 points, interval −9.1 to +16.2** (people resampled,
+n = 75). No real difference can be claimed on dev. The search agent beats B on two-hop questions (52.9% against 35.3%)
+because B's links are poor.
+
+**One clear difference: guessing.** On facts never stated, B, the oracle and the pages arm answered with a value 0% of
+the time. C did 37.5% of the time and Ccues 35.0%.
+
+**Two facts that matter for a phone:**
+1. **Thinking-off answers fail even with perfect pages** (66.0% on the hard set). Without thinking, the 4B does not
+   connect identities across messages: "Ana from choir" with "Ana Varga, met at choir"; "my dad" with his name;
+   "dropped her hobby" with the question. Test 1's notebook used full names throughout, which is why thinking-off
+   worked there (95.1%). The fast-path line (B thinking off ≥ 80%) cannot be met with this reader.
+2. **Thinking answers are long.** The median answer used about 4,200 tokens (B 4,172; the oracle 4,449). At the
+   assumed 20 tokens per second on a phone, that is about 3.5 minutes per answer.
+
+Writing the index cost 15 completion and 139 prompt tokens per message, about 2.4 phone-minutes per 100 messages.

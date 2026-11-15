@@ -32,3 +32,12 @@ index written: {"rows": 1536, "bad_lines": 16, "cut": 0, "prompt_tokens": 207897
 pages|think: 368 answers, 94.6% right, 0.0 min
 B|think: 368 answers, 72.3% right, 19.2 min
 oracle|think: 368 answers, 87.5% right, 21.2 min
+nolinks|think: 368 answers, 70.7% right, 20.4 min
+C|think: 368 answers, 61.4% right, 42.9 min
+Ccues|think: 368 answers, 51.6% right, 30.6 min
+pages|nothink: 368 answers, 69.0% right, 0.3 min
+B|nothink: 368 answers, 55.2% right, 0.3 min
+C|nothink: 368 answers, 39.7% right, 0.9 min
+Ccues|nothink: 368 answers, 32.6% right, 0.6 min
+verdict points to the thinking writer (amendment 1): running it on the same world
+index: 20/1500 messages, 0 people, 0 rows, 2.0 min
