@@ -854,6 +854,9 @@ def pages(W, q):
         ({q["anchor"]} if q.get("anchor") is not None else set())
     gold |= {n["id"] for n in W.notes if n["type"] in ("intro", "nick") and n["id"] not in W.deleted_ids and
              any(m[1] in core for m in n["mentions"])}   # who they are: introduction, nickname (dev phase: retrieval)
+    by_id = {n["id"]: n for n in W.notes}
+    gold |= {i - 1 for i in list(gold) if i in by_id and i - 1 in by_id and i - 1 not in W.deleted_ids and
+             any(m[1] in core and m[2] == "pronoun_prev" for m in by_id[i]["mentions"])}   # whom "She" refers to
     return sorted(gold | set(rng.sample(pool, min(20, len(pool)))))
 
 
