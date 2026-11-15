@@ -12,11 +12,11 @@
   "write_cost": true,
   "forget": false
  },
- "B_hard": 77.720207253886,
- "oracle_hard": 96.56735751295336,
- "B_off_hard": 77.720207253886,
+ "B_hard": 77.91450777202073,
+ "oracle_hard": 96.89119170984456,
+ "B_off_hard": 77.91450777202073,
  "assoc": {
-  "desc": 64.0,
+  "desc": 63.33333333333333,
   "who": 75.33333333333333,
   "two": 63.33333333333333
  },
@@ -31,9 +31,9 @@
     "two": 7.777777777777778
    },
    "margin": [
-    44.583333333333336,
-    38.38028300245982,
-    50.34760233492753,
+    44.375,
+    38.150408083948705,
+    50.198596413874185,
     480
    ]
   },
@@ -47,9 +47,9 @@
     "two": 4.444444444444445
    },
    "margin": [
-    48.541666666666664,
-    42.576163519775164,
-    54.18410041841004,
+    48.333333333333336,
+    42.26713889327528,
+    53.992208329114774,
     480
    ]
   }
@@ -60,12 +60,12 @@
   "rows": 6869,
   "me_rows": 49,
   "fact_rows": 2625,
-  "wrong_merge_pct": 3.4285714285714284,
-  "hard_merge_pct": 9.95850622406639,
+  "wrong_merge_pct": 3.466666666666667,
+  "hard_merge_pct": 10.37344398340249,
   "hard_rows": 482,
   "filed_right_by_style": {
    "fname": 97.1,
-   "fname_ctx": 93.6,
+   "fname_ctx": 93.2,
    "full": 98.8,
    "nick": 100.0,
    "old_role": 100.0,
@@ -86,9 +86,9 @@
    "via": 108
   },
   "people_split_into_several_ids": 109,
-  "facts_filed_pct": 91.44144144144144,
-  "link_precision_pct": 93.65781710914455,
-  "link_rows": 678,
+  "facts_filed_pct": 91.3913913913914,
+  "link_precision_pct": 93.50073855243723,
+  "link_rows": 677,
   "lure_intrusion_pct": 0.26525198938992045
  },
  "forget": {
@@ -101,8 +101,8 @@
   "rows": 6869,
   "bad_lines": 0,
   "cut": 0,
-  "prompt_tokens": 698288,
-  "completion_tokens": 69819,
+  "prompt_tokens": 889570,
+  "completion_tokens": 69818,
   "notes": 6292
  },
  "rows_left": 0,
@@ -113,8 +113,8 @@
     "rows": 6848,
     "bad_lines": 0,
     "cut": 0,
-    "prompt_tokens": 699174,
-    "completion_tokens": 69507,
+    "prompt_tokens": 890404,
+    "completion_tokens": 69506,
     "notes": 6292
    },
    "filing": {
@@ -150,8 +150,8 @@
     },
     "people_split_into_several_ids": 107,
     "facts_filed_pct": 91.64164164164164,
-    "link_precision_pct": 94.39252336448598,
-    "link_rows": 642,
+    "link_precision_pct": 94.375,
+    "link_rows": 640,
     "lure_intrusion_pct": 0.13262599469496023
    },
    "rows_left": 0,

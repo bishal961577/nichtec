@@ -1171,7 +1171,7 @@ class Stub:
         return "\n".join(out)
 
     def cues(self, p):
-        q = self.byq[p.split("Question: ", 1)[1].strip()]
+        q = self.byq[p.rsplit("Question: ", 1)[1].strip()]
         W, k = self.W, q["kind"]
         lines = []
         txt = q["q"]
