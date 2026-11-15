@@ -58,3 +58,15 @@ The architect's "write locally" and the neuroscientist's "re-read" are close var
 |---|---|---|---|
 | Of B's 86 wrong hard-set answers: 26 wrong person, 17 a person split into several ids, 7 a fact never written, 18 filed right but not found, 18 wrong with every needed message in hand. Write-time identity explains about half (43 of 86). | founder | Re-ran `founder_scripts/r2_gap.py` (copied into this folder) | **Reproduced exactly.** One cause per question, writing causes counted first, so the writing share is the generous figure. |
 | About 16% of true facts appear in no index row from their own message; 5.6% are filed under the wrong person | neuroscientist | Consistent with the dev summary's "facts filed right 78.2%" (100 − 78.2 = 21.8 ≈ 16 + 5.6) | **Consistent.** Not independently recomputed. |
+
+## Correction to the moderator's own round-1 check: the architect's citations
+
+The round-1 check read only the **current** version of arXiv 2607.27539 and called the citation false. After the architect's round-2 correction, a second fetch read the earlier version and the companion paper:
+
+| Citation | What the pages say | Verdict |
+|---|---|---|
+| arXiv 2607.27539**v2** (13 Aug 2026), "Subtract, Transport, or Replay? Auditable Deletion from Language-Model Memory" | Abstract: "the corpus-pooled raw recurrent contribution changes by 12-49% with the suffix". It names native Kimi Delta Attention (KDA) but gives no model size. Its v3 comments say the KDA work moved to "a separate companion paper". | **Supported** for the 12–49% sentence. |
+| Companion paper arXiv 2609.06872 (same single author, Vy Labs; v3, 25 Sep 2026) | Full text: "We evaluate the four strategies on the released 48B Kimi Linear hybrid". Replay "matched the never-stored reference … across all 80 evaluation and calibration contexts". The 12–49% (additive writes: none) and 0.7–32.9% figures are reported in sections VI-A and VI-B, per a model-extracted summary, not read verbatim. | **Mostly supported.** |
+| Block-Attention, arXiv 2409.15355**v3**, Table 1 | Llama3-block-ft HQA 68.5, 2wiki 73.3; full-attention baseline HQA 69.5, 2wiki 73.4 | **Supported** for v3. The architect notes v5 gives larger gaps (72.3 vs 74.8; 72.2 vs 73.2). |
+
+**Revised verdict:** not a false citation, but a bad one. The original lacked a version number, and its paraphrase ("12–49% of a record's contribution depended on later writes") was stronger than the text ("changes by 12–49% with the suffix"). The underlying finding is a single-author preprint on synthetic contexts. The moderator's "Treat as a false citation" in round 1 was itself too strong, because it rested on one version of the page.
