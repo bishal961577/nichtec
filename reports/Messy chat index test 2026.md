@@ -744,17 +744,17 @@ Same index, share of questions where every needed message was found:
 Retrieval on the truth index is now 92–100%, so what is left between B and the truth index is the writer's filing.
 
 **The dev run on the first 1,500 messages, everything final** (`results/messy_index_dev_dev1500/`; the pages arm
-predates one small fix, the next-message pronoun's antecedent, which changed thinking-off pages by −0.5 points). Hard
-set, 290 questions; association kinds (desc, who, two), 75:
+predates one small fix, the next-message pronoun's antecedent, which changed thinking-off pages by −0.5 points on all
+questions). Hard set, 288 questions; association kinds (desc, who, two), 75:
 
 | Arm | Hard, thinking on | Association, thinking on | Hard, thinking off |
 |---|---|---|---|
-| pages (perfect retrieval) | 95.5% | 97.3% | 66.0% |
+| pages (perfect retrieval) | 95.5% | 97.3% | 66.7% |
 | oracle (truth index) | 86.1% | 77.3% | – |
 | **B (the 4B's index)** | **70.1%** | **46.7%** | **50.3%** |
 | nolinks | 67.4% | 36.0% | – |
-| C (search agent) | 62.8% | 42.7% | about 40% |
-| Ccues (equal-cost search) | 50.0% | 22.7% | about 33% |
+| C (search agent) | 62.8% | 42.7% | 39.2% |
+| Ccues (equal-cost search) | 50.0% | 22.7% | 29.9% |
 
 **Verdict under the registered lines: WRITER-LIMITED.**
 - B is 0.81 of the oracle (line 0.9).
@@ -771,7 +771,7 @@ because B's links are poor.
 the time. C did 37.5% of the time and Ccues 35.0%.
 
 **Two facts that matter for a phone:**
-1. **Thinking-off answers fail even with perfect pages** (66.0% on the hard set). Without thinking, the 4B does not
+1. **Thinking-off answers fail even with perfect pages** (66.7% on the hard set). Without thinking, the 4B does not
    connect identities across messages: "Ana from choir" with "Ana Varga, met at choir"; "my dad" with his name;
    "dropped her hobby" with the question. Test 1's notebook used full names throughout, which is why thinking-off
    worked there (95.1%). The fast-path line (B thinking off ≥ 80%) cannot be met with this reader.
