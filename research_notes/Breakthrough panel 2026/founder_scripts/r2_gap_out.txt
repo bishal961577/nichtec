@@ -1,0 +1,53 @@
+check: wrong merge 6.27 facts filed 78.2
+
+(1) true facts: 641
+  right person: 501 (78.2%)
+  not written: 104 (16.2%)
+  written, wrong person: 33 (5.1%)
+  written, person unidentifiable: 3 (0.5%)
+  fname         n= 127 right person 87%, not written 12%, written, wrong person 1%
+  fname_ctx     n=  65 right person 74%, not written 18%, written, wrong person 8%
+  full          n= 243 right person 85%, not written 13%, written, wrong person 2%
+  nick          n=  13 right person 69%, not written 31%
+  pronoun       n=  66 right person 71%, not written 27%, written, wrong person 2%
+  pronoun_prev  n=  37 right person 57%, written, wrong person 22%, not written 22%
+  role          n=  68 right person 82%, not written 18%
+  via           n=  22 written, wrong person 59%, not written 18%, written, person unidentifiable 14%, right person 9%
+
+(2) B think hard: n=288 wrong=86; all needed messages handed over yet wrong=18; no needed messages defined=0; some needed message missing=68
+  missed needed messages, by message type and what B's index held:
+    68 ('fact', 'row under right person, still not handed over')
+    43 ('intro', 'row under right person, still not handed over')
+    18 ('fact', 'rows only under wrong/unidentified person')
+    12 ('intro', "only a 'mentioned' tag")
+    5 ('fact', "only a 'mentioned' tag")
+    5 ('rel', 'rows only under wrong/unidentified person')
+    2 ('nick', 'row under right person, still not handed over')
+    2 ('nick', "only a 'mentioned' tag")
+    2 ('rel', 'row under right person, still not handed over')
+    2 ('event', 'row under right person, still not handed over')
+    2 ('event', 'rows only under wrong/unidentified person')
+    1 ('fact', 'no row at all from that message')
+    1 ('retract', 'rows only under wrong/unidentified person')
+    1 ('event', "only a 'mentioned' tag")
+  failed questions touched by each cause: {'row under right person, still not handed over': 59, 'rows only under wrong/unidentified person': 26, "only a 'mentioned' tag": 18, 'no row at all from that message': 1}
+  by question kind: {'nick': 8, 'role': 2, 'fname_ctx': 5, 'desc': 13, 'who': 13, 'two': 9, 'upd': 9, 'retract': 1, 'event_what': 2, 'event_last': 1, 'event_who': 5}
+
+(2) oracle think hard: n=288 wrong=40; all needed messages handed over yet wrong=27; no needed messages defined=0; some needed message missing=13
+
+(3) B think hard failures with a needed message whose row sat under the right person:
+  23 target person split over several index ids: {'nick': 2, 'role': 2, 'fname_ctx': 5, 'desc': 3, 'who': 4, 'two': 1, 'upd': 6}
+  21 reader found none of the target's messages: {'nick': 2, 'who': 7, 'desc': 6, 'two': 5, 'event_who': 1}
+  15 reader found some of the target's messages, not the needed one: {'nick': 2, 'desc': 2, 'who': 2, 'two': 3, 'upd': 1, 'event_what': 1, 'event_who': 4}
+
+(4) B think hard failures, one cause each (priority order):
+   26  A write-time identity: filed under wrong/unidentified person
+   17  B write-time identity: person split over several ids
+    7  C writer coverage: fact not written from its own message
+   18  D question-time: row filed right, reader did not find it
+   18  E reading: every needed message handed over
+  total 86
+  A [('nick', 'What pet does Kit have?'), ('nick', 'Which city does Olive live in?')]
+  B [('nick', 'Which city does Bee live in?'), ('role', 'Which city does my mum live in?')]
+  C [('nick', 'What instrument does Cricket play?'), ('nick', 'What pet does Cricket have?')]
+  D [('nick', 'What is Sparky allergic to?'), ('nick', 'What does Sparky do in her free time?')]

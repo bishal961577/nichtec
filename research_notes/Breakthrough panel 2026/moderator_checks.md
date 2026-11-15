@@ -51,3 +51,10 @@ All five members, independently, put the root at the same place: **the model dec
 - the researcher: bind first.
 
 The architect's "write locally" and the neuroscientist's "re-read" are close variants. Round 2 must say whether this is real convergence or one model agreeing with itself.
+
+## Round 2 checks
+
+| Claim | By | Check | Verdict |
+|---|---|---|---|
+| Of B's 86 wrong hard-set answers: 26 wrong person, 17 a person split into several ids, 7 a fact never written, 18 filed right but not found, 18 wrong with every needed message in hand. Write-time identity explains about half (43 of 86). | founder | Re-ran `founder_scripts/r2_gap.py` (copied into this folder) | **Reproduced exactly.** One cause per question, writing causes counted first, so the writing share is the generous figure. |
+| About 16% of true facts appear in no index row from their own message; 5.6% are filed under the wrong person | neuroscientist | Consistent with the dev summary's "facts filed right 78.2%" (100 − 78.2 = 21.8 ≈ 16 + 5.6) | **Consistent.** Not independently recomputed. |
