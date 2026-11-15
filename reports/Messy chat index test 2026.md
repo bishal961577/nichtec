@@ -791,3 +791,18 @@ index. On the test world the same configuration would read "the thinking writer 
 that says nothing about whether thinking files facts better.
 
 A probe of smaller batches (5 messages, same cap; batch size is a development-phase setting) is in 16.9.
+
+### 16.9 Smaller batches do not rescue the thinking writer
+
+Probe: batches of 5 messages, same 8,192-token cap, first dev messages. Only the first batch finished (7,222 tokens,
+5 lines). The next 4 batches each hit the cap with no index line. That is over 1,600 thinking tokens per message,
+four times the registered 400-token line, and still no index. The probe was stopped after 5 batches.
+
+**Conclusion.** With the thinking settings this project uses for Qwen3.5-4B, its thinking mode is not a usable writer
+at any phone-sized cost: it thinks until it runs out. The registered fallback ("WRITER-LIMITED: the thinking writer
+next; a bigger writer only if that fails too") therefore points to a bigger or better writer, or to a different way of
+writing, not to an overnight thinking 4B.
+
+The scored run still runs the thinking writer as registered. It is the pre-registered arm, and changing it now would
+be fitting the protocol to dev results. Its result will read "does not pass" for the reason shown here, and the report
+will say so.
