@@ -1,0 +1,14 @@
+perfect descriptions: 2351 facts; right 2351, wrong 0, unfiled 0
+role definitions: 12; nouns: ['best friend', 'boss', 'brother', 'dad', 'flatmate', 'grandma', 'mum', 'partner', 'sister', 'uncle']
+
+ONE role definition misread (noun substituted), 108 cases:
+  extra facts filed under the WRONG person: mean 13.2, median 9, max 53; cases with >=1 wrong fact: 68/108
+  extra facts left UNFILED: mean 17.7, median 18, max 36
+  worst cases (true noun -> misread noun: wrong, unfiled): [('flatmate', 'partner', 53, 2), ('flatmate', 'dad', 47, 4), ('boss', 'partner', 45, 7), ('flatmate', 'uncle', 44, 3), ('boss', 'dad', 39, 10)]
+
+ONE role definition dropped, 12 cases: extra wrong mean 3.2 (max 19), extra unfiled mean 17.4 (max 34)
+
+for comparison: one misread plain fact misfiles at most 1 fact.
+role definitions misread at rate 0.05 (all else perfect): wrong among filed mean 0.31%, 90th percentile 1.21%, max 2.71%
+role definitions misread at rate 0.10 (all else perfect): wrong among filed mean 0.70%, 90th percentile 2.00%, max 4.25%
+role definitions misread at rate 0.20 (all else perfect): wrong among filed mean 1.33%, 90th percentile 2.92%, max 5.29%
