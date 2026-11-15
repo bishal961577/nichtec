@@ -779,3 +779,15 @@ the time. C did 37.5% of the time and Ccues 35.0%.
    assumed 20 tokens per second on a phone, that is about 3.5 minutes per answer.
 
 Writing the index cost 15 completion and 139 prompt tokens per message, about 2.4 phone-minutes per 100 messages.
+
+### 16.8 The thinking writer as registered cannot finish
+
+The verdict started the thinking writer automatically. As registered, it had batches of 20 messages and an
+8,192-token cap per batch (matching the 400-tokens-per-message writing line).
+
+All 4 batches it wrote hit the cap with no index line at all: 8,192 completion tokens and 107–134 s each, all of it
+thinking. It was stopped after 4 of 75 batches. At that rate it would have spent about 2.5 hours producing an empty
+index. On the test world the same configuration would read "the thinking writer does not pass either" for a reason
+that says nothing about whether thinking files facts better.
+
+A probe of smaller batches (5 messages, same cap; batch size is a development-phase setting) is in 16.9.

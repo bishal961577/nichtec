@@ -1,1 +1,4 @@
 {"chunk": 0, "text": "", "cut": true, "prompt_tokens": 1757, "completion_tokens": 8192, "sec": 118.3, "candidates": 0}
+{"chunk": 20, "text": "", "cut": true, "prompt_tokens": 1906, "completion_tokens": 8192, "sec": 107.03, "candidates": 0}
+{"chunk": 40, "text": "", "cut": true, "prompt_tokens": 1884, "completion_tokens": 8192, "sec": 107.04, "candidates": 0}
+{"chunk": 60, "text": "", "cut": true, "prompt_tokens": 1919, "completion_tokens": 8192, "sec": 134.17, "candidates": 0}
