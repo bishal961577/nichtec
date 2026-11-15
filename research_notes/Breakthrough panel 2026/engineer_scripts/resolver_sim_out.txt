@@ -1,0 +1,36 @@
+dev world: 6292 messages
+
+parser error rate 0.00: full re-solve of the whole set 0.04s (Python, 1 core)
+  facts filed right (of all facts the parser kept): 100.0%; wrong person among filed: 0.00%
+  right person among filed, by mention style: {'fname': 100.0, 'fname_ctx': 100.0, 'full': 100.0, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 100.0, 'role': 100.0, 'via': 100.0}
+  left unfiled (deferred, not guessed), by style: {'fname': 0.0, 'fname_ctx': 0.0, 'full': 0.0, 'nick': 0.0, 'old_role': 0.0, 'pronoun_prev': 0.0, 'role': 0.0, 'via': 0.0}
+  forget a person (20 targets): average 100.0%, worst 100.0% of their messages
+
+parser error rate 0.02: full re-solve of the whole set 0.04s (Python, 1 core)
+  facts filed right (of all facts the parser kept): 99.7%; wrong person among filed: 0.30%
+  right person among filed, by mention style: {'fname': 99.8, 'fname_ctx': 100.0, 'full': 99.9, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 100.0, 'role': 100.0, 'via': 96.0}
+  left unfiled (deferred, not guessed), by style: {'fname': 0.0, 'fname_ctx': 0.0, 'full': 0.0, 'nick': 0.0, 'old_role': 0.0, 'pronoun_prev': 0.0, 'role': 0.0, 'via': 0.0}
+  forget a person (20 targets): average 100.0%, worst 100.0% of their messages
+
+parser error rate 0.05: full re-solve of the whole set 0.04s (Python, 1 core)
+  facts filed right (of all facts the parser kept): 99.2%; wrong person among filed: 0.62%
+  right person among filed, by mention style: {'fname': 99.2, 'fname_ctx': 100.0, 'full': 99.8, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 100.0, 'role': 100.0, 'via': 92.9}
+  left unfiled (deferred, not guessed), by style: {'fname': 0.0, 'fname_ctx': 0.0, 'full': 0.0, 'nick': 0.0, 'old_role': 0.0, 'pronoun_prev': 0.0, 'role': 0.0, 'via': 3.4}
+  forget a person (20 targets): average 100.0%, worst 100.0% of their messages
+
+parser error rate 0.10: full re-solve of the whole set 0.04s (Python, 1 core)
+  facts filed right (of all facts the parser kept): 98.1%; wrong person among filed: 1.03%
+  right person among filed, by mention style: {'fname': 99.4, 'fname_ctx': 99.6, 'full': 99.6, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 100.0, 'role': 100.0, 'via': 85.9}
+  left unfiled (deferred, not guessed), by style: {'fname': 0.0, 'fname_ctx': 0.0, 'full': 0.0, 'nick': 1.5, 'old_role': 0.0, 'pronoun_prev': 0.0, 'role': 0.0, 'via': 15.4}
+  forget a person (20 targets): average 99.3%, worst 92.0% of their messages
+
+order invariance (same set, shuffled arrival): True
+delete all nickname-defining messages: nickname mentions bound 228 -> 0
+
+use-before-definition world (40% of nick/rel messages arrive last), ONLINE write-time binding:
+  facts filed right: 96.8%; wrong among filed 0.00%
+  unfiled by style: {'nick': 39.4, 'pronoun_prev': 1.7, 'via': 36.5}
+
+use-before-definition world (40% of nick/rel messages arrive last), SET re-solve (deferred):
+  facts filed right: 99.7%; wrong among filed 0.00%
+  unfiled by style: {'nick': 5.6, 'via': 2.4}

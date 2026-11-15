@@ -1,0 +1,11 @@
+decode ceiling from bandwidth: 24 tokens/s (weights streamed once per token)
+answer now (B, thinking on: ~2,000 prompt, 4,172 median completion): 1,312 J = 2.02% battery, 219 s
+answer proposed (resolved evidence, thinking off: ~600 prompt, ~40 completion): 30 J = 0.05% battery, 5 s
+answer proposed, engine template (query parse only: ~400 prompt, ~25 completion): 20 J = 0.03% battery, 3 s
+write now (B writer: 139 prompt + 15 completion per message, sequential): 8.7 J, 1.44 s per message; 50 messages/day = 434 J/day = 0.67% battery
+write proposed, live (70 new prompt tokens + 30 completion, cached instructions): 11.1 J, 1.85 s per message; 50 messages/day = 555 J/day = 0.86% battery
+write proposed, at night, 8 messages decoded together: 4.0 J, 0.66 s per message; 50 messages/day = 199 J/day = 0.31% battery
+
+10 years at the test-2 density: 34,320 messages; text 1.9 MB; descriptions 4.1 MB; binary 384-bit codes 1.6 MB
+one full scan of the codes moves 1.6 MB (0.03 ms); one decoded token moves 2.5 GB = 1,518 full memory scans
+full re-solve, measured 0.04 s for 6,292 messages in Python on one server core -> 10 years ~0.2 s server, assume 3-5x slower on a phone core: ~1 s

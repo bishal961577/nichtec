@@ -1,0 +1,3 @@
+e=0.05: filed right 98.6%, wrong among filed 0.76%, by style {'fname': 99.2, 'fname_ctx': 100.0, 'full': 99.5, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 100.0, 'role': 100.0, 'via': 92.9}
+e=0.10: filed right 96.3%, wrong among filed 1.38%, by style {'fname': 99.4, 'fname_ctx': 98.5, 'full': 99.1, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 100.0, 'role': 100.0, 'via': 85.1}
+e=0.20: filed right 93.3%, wrong among filed 2.02%, by style {'fname': 99.3, 'fname_ctx': 97.6, 'full': 98.5, 'nick': 100.0, 'old_role': 100.0, 'pronoun_prev': 97.9, 'role': 99.4, 'via': 80.6}

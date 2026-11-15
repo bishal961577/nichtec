@@ -33,3 +33,21 @@ Every panel member reads this before round 2.
   - The neuroscientist: a memory that re-reads itself.
 
   They are the same underlying model with different instructions. Agreement is weak evidence.
+
+## The engineer's round 1 (checked after it arrived)
+
+| Claim | Check | Verdict |
+|---|---|---|
+| CPU simulation: with a perfect describer, code resolves who is who with 0% wrong filing. At 10% simulated describer error: 1.03% wrong, "Kofi's flatmate" 85.9%, worst-person forgetting 92.0%. Order invariance holds. Deleting nickname messages unbinds all 228 nickname mentions. Use-before-definition world: write-time binding leaves 39% and 37% unfiled, re-solve leaves 6% and 2%. | Re-ran `engineer_scripts/resolver_sim.py` (copied into this folder) | **Reproduced exactly.** It is a simulation from the generator's truth with injected errors, written after reading the generator (the designer's advantage, which the engineer states). It does not show that the 4B can write the descriptions. |
+| B's link rows were right 57.1% of the time; B's writer put lure values into 51.9% of lure messages | `results/messy_index_dev_dev1500/result.json` | **Confirmed** (link precision 57.14%, lure intrusion 51.91%). |
+| Test 2's world uses "Kofi's flatmate" only after the relation was stated, nicknames only after they were introduced, and bare first names only when clear at that moment | `brain/messy_world.py` lines 598–617 (`link_known`, `nick_known`, `known_first`) | **Confirmed.** Test 2 therefore cannot measure deferred reference (use before definition). |
+| PowerInfer-2 measured 0.257 J per token on a phone | not re-checked | Treat as the engineer's citation. |
+
+## Convergence, updated
+
+All five members, independently, put the root at the same place: **the model decides identity while writing, with the memory in view, and the decision is final.** The remedy has three names:
+- the founder: remove recurrence;
+- the engineer: describe, don't decide;
+- the researcher: bind first.
+
+The architect's "write locally" and the neuroscientist's "re-read" are close variants. Round 2 must say whether this is real convergence or one model agreeing with itself.
