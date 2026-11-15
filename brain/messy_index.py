@@ -151,6 +151,12 @@ Question: What does Dev Shah's brother collect?
 name: Dev Shah
 link: brother
 ask: collects
+Question: Which team does Ruth Okafor support?
+name: Ruth Okafor
+ask: which team
+Question: What is Lena from choir studying?
+name: Lena from choir
+ask: studying
 
 Question: {q}"""
 
@@ -681,10 +687,19 @@ class Reader:
         # a "name" clue that is nobody's name ("name: axolotl") is a described fact (dev phase: retrieval, allowed)
         given = [nm for nm in cues.get("name", []) if self.name_match(nm)]
         moved = [nm for nm in cues.get("name", []) if nm not in given]
+        links = cues.get("link", [])
+        ctx = [x for x in links if x.lower().startswith("from ")]       # "link: from football" belongs to the name
+        if ctx and given:
+            given = [f"{nm} {ctx[0]}" if " from " not in nm.lower() else nm for nm in given]
+        links = [x for x in links if x not in ctx]
         names = given + [f"my {m.replace('my ', '')}" for m in cues.get("me", [])]
-        facts, link = cues.get("fact", []) + moved, (cues.get("link") or [None])[0]
-        if not names and link:                    # "link: archery club" with no one to go through: also a fact
-            facts, link = facts + cues.get("link", []), None
+        ql = question.lower()
+        # follow a link only when the question goes through someone ("Kofi's flatmate", "the flatmate of Kofi")
+        real = [x for x in links if norm(x) and (re.search(r"'s\s+(\w+\s+)?" + re.escape(norm(x)[0][:5]), ql) or
+                                                 re.search(r"\bthe\s+" + re.escape(norm(x)[0][:5]) + r"\w*\s+of\b", ql))]
+        facts, link = cues.get("fact", []) + moved, (real or [None])[0]
+        if not names and links:                   # "link: archery club" with no one to go through: also a fact
+            facts, link = facts + links, None
         ask_cue = " ".join(cues.get("ask", [])) or question
         time_cue = " ".join(cues.get("time", [])) or (question if month_of(question) else "")
         score = Counter()
