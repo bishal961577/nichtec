@@ -196,3 +196,52 @@ filed under Uma).
    - relation direction;
    - definitions.
 3. **The 27B arm, and the owner's 300 messages.**
+
+---
+
+## Step 2: the whole chain on the dev world (pre-registered before its model calls, 16 November 2026)
+
+The owner approved step 1 of the "next" list.
+- It is not CPU-only as first said: describing the other 1,200 messages and answering need about 10–20 GPU minutes
+  (well under $1).
+- It is a **development measurement on the dev world**. Prompts were developed on it, so it is not a judged run. The
+  judged run comes later on a fresh seed, with the lines committed again.
+
+**The chain** (`brain/describe_bind.py`):
+1. **Describe.** Describer v3 (above) describes all 1,500 dev messages: one message, the previous one for context, no
+   memory. The 300 already described are reused.
+2. **Bind.** The engineer's resolver from the panel (`research_notes/Breakthrough panel 2026/engineer_scripts/resolver_sim.py`)
+   reads the real descriptions instead of simulated ones. It re-solves who everyone is over the whole set, in date order,
+   repeated until nothing changes. It never guesses: an unresolved mention becomes a placeholder person ("Kofi's
+   flatmate, unknown"). It is ported to read describer JSON:
+   - a mention's kind comes from the describer;
+   - a pronoun's antecedent comes from the describer's "previous" field, or the only person in the previous message;
+   - relation words are normalised ("tenant" becomes the reverse of "landlord").
+3. **Index.** The bindings become index rows in test 2's format, so test 2's filing, forgetting and deletion measures
+   run unchanged. Deleting a message means recomputing from the journal without it.
+4. **Answer.**
+   - Test 2's reader retrieves messages from this index, using the final clue prompt and retrieval code.
+   - Pages are built as V3 above, from the resolver's view instead of the truth: names from the bindings; a header from
+     the resolved claims (latest value per label with dates; "no longer" marked); links from the resolved relations.
+   - The 4B answers with thinking off.
+
+**Lines (dev; reference values are B's dev results, §16.7 of the test 2 report):**
+
+| Measure | Line | B on dev |
+|---|---|---|
+| Wrong merges (fact rows under the wrong person) | ≤ 1.5% | 6.27% |
+| "X's flatmate"-style facts filed right | ≥ 75% | 11.1% |
+| Worst-person forgetting | ≥ 90% | 62.2% |
+| Facts filed right | ≥ 85% | 78.2% |
+| Hard set, the chain with thinking off | ≥ 77.3% (B with thinking + 5 points) | B thinking on 72.3%, thinking off 50.3% |
+| Median answer | ≤ 64 tokens | B thinking on about 4,200 |
+
+**Stop:** wrong merges > 3%, or the chain with thinking off < 70% on the hard set.
+
+**Also reported:**
+- hard-case merges (B 33.3%);
+- filing by mention style;
+- link precision;
+- share of mentions left unresolved;
+- deletion by recomputation: how many bindings change when the 35 deleted messages are removed;
+- that a shuffled input order gives the same view.
