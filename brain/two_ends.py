@@ -251,7 +251,14 @@ Return JSON:
 "tried or temporary" (tried once, rented, borrowed, test-drove); "past" (used to, grew up in); "about someone else" (their \
 unnamed relative).
   How I know someone is a claim too: label "relation to me" (value "sister"), "known from" (value "choir"), or "nickname" \
-(value the nickname). Facts about me, the writer, are not claims.
+(value the nickname). Facts about me, the writer, are not claims: a claim must be about a mention.
+- One person, one mention:
+  - an introduction is one mention, the name, with the relation in "relation": "my dad Chloe Constantin", "my brother, \
+Gaia Okafor", "Teo Rojas, a friend of a friend", "Bodhi Sithole is a colleague of mine";
+  - a first name with a group is one mention: "Rosalind from work", "Chloe from down the street";
+  - "Uma from football's kid" is someone else, named through Uma: a "through someone" mention, not Uma;
+  - a relation between two people always goes in "links", never in "claims".
+- Visiting, a trip, or something only for this week is "tried or temporary".
 - "links": a relation between two mentioned people: "from" (mention number), "relation" (one word), "to" (mention \
 number), meaning "from is the <relation> of to". "Ana rents from Kofi" means Kofi is Ana's landlord: from Kofi, relation \
 landlord, to Ana.
@@ -264,6 +271,14 @@ Message: [2026-03-03 Tue] Jonas says Tessa's flatmate quit law school and studie
 "previous": ""}}, {{"text": "Tessa", "kind": "first name", "name": "Tessa", "through": "", "relation": "", "previous": ""}}], \
 "claims": [{{"about": 1, "label": "studies", "value": "law", "status": "no longer"}}, {{"about": 1, "label": "studies", \
 "value": "music", "status": "true now"}}], "links": [{{"from": 1, "relation": "flatmate", "to": 2}}], "told_by": 0}}
+
+Second example. Previous message: [2026-04-01 Wed] Busy day.
+Message: [2026-04-02 Thu] My niece Lena Park, a friend of a friend's daughter, rents from Omar from work.
+{{"mentions": [{{"text": "My niece Lena Park", "kind": "full name", "name": "Lena Park", "through": "", "relation": "niece", \
+"previous": ""}}, {{"text": "Omar from work", "kind": "first name with group", "name": "Omar", "through": "", "relation": \
+"work", "previous": ""}}], "claims": [{{"about": 0, "label": "relation to me", "value": "niece", "status": "true now"}}, \
+{{"about": 1, "label": "known from", "value": "work", "status": "true now"}}], "links": [{{"from": 1, "relation": "landlord", \
+"to": 0}}], "told_by": -1}}
 
 Previous message: {prev}
 Message: {msg}"""
@@ -366,6 +381,87 @@ def score_description(W, n, d):
     return out
 
 
+# ---------------------------------------------------------------------------- corrected scorer (added after run 1)
+# Four scorer false negatives found by reading run 1's failures (reports/Two ends check 2026.md, results). The registered
+# scorer above is kept and reported unchanged; this one is reported beside it. Self-checks re-run for both.
+ARTICLES = re.compile(r"^(a|an|the|my|some)\s+")
+STOPW = {"a", "an", "the", "my", "of", "from", "at", "in", "on", "our", "someone", "one", "mine", "to", "with"}
+# the generator's own surface phrases for each "known from" label (messy_world.CIRCLES and the party introductions)
+DEF_WORDS = {c: {w for ph in phrases for w in norm_t(ph) if w not in STOPW} | {c}
+             for c, phrases in MW.CIRCLES.items()}
+DEF_WORDS["a party"] = {"party", "friend of a friend"}
+
+
+def match_mention_v2(text, truth):
+    """As match_mention, but a describer mention whose words all occur in one true mention also matches ("Rosalind" for
+    "Rosalind from work"); the best overlap wins, so "Uma" still matches the anchor "Uma from football", not the
+    flatmate "Uma from football's colleague"."""
+    a = set(norm_t(text))
+    best, score = None, 0.0
+    for m in truth:
+        b = set(norm_t(m[0]))
+        if not a or not b:
+            continue
+        j = len(a & b) / len(a | b)
+        if j >= 0.34 or a <= b:
+            if j > score:
+                best, score = m, j
+    return best
+
+
+def score_description_v2(W, n, d):
+    out = {"facts": [], "defs": [], "rels": [], "lure_ok": None}
+    if d is None:
+        d = {"mentions": [], "claims": [], "links": [], "told_by": -1}
+    ms = d.get("mentions", [])
+    mpid = [(match_mention_v2(m.get("text", ""), n["mentions"]) or (None, None, None))[1] for m in ms]
+    valid = lambda i: isinstance(i, int) and 0 <= i < len(mpid)
+    about = lambda c: mpid[c["about"]] if valid(c.get("about", -1)) else None
+    claims = d.get("claims", [])
+    for pid, kind, value in n["facts"]:
+        if kind in MW.SLOTS:
+            if value is None:
+                cand = [c for c in claims if c.get("status") == "no longer"]
+            else:
+                cand = [c for c in claims if val_hit(kind, value, c.get("value", "") + " " + c.get("label", ""))]
+            out["facts"].append({"pid": pid, "slot": kind, "recalled": bool(cand),
+                                 "right": any(about(c) == pid for c in cand), "hard": is_hard(n)})
+        elif kind in DEFS:
+            v = ARTICLES.sub("", str(value).lower())
+            words = DEF_WORDS.get(str(value).lower(), {v}) if kind == "known from" else {v}
+            has = lambda t: any(w in t.lower() for w in words)
+            hit = any(about(c) == pid and has(c.get("value", "") + " " + c.get("label", "")) for c in claims)
+            hit = hit or any(mpid[i] == pid and has(m.get("relation", "") + " " + m.get("text", ""))
+                             for i, m in enumerate(ms))
+            out["defs"].append({"kind": kind, "right": hit})
+        elif kind in MW.RELS and not MW.RELS[kind][0]:
+            # a relation may come as a link or as a claim whose value names another mention; its direction is read
+            # from its wording: "<x> rents from <y>" / "<x>'s mentor is <y>" make y the landlord / mentor
+            pairs = []
+            for lk in d.get("links", []):
+                if valid(lk.get("from", -1)) and valid(lk.get("to", -1)):
+                    pairs.append((mpid[lk["from"]], lk.get("relation", "").lower(), mpid[lk["to"]]))
+            for c in claims:
+                tgt = [i for i, m in enumerate(ms) if m.get("text") and m["text"].lower() in c.get("value", "").lower()]
+                if about(c) is not None and tgt:
+                    pairs.append((about(c), c.get("label", "").lower(), mpid[tgt[0]]))
+            fw = bw = False
+            for x, rel, y in pairs:
+                passive = any(w in rel for w in ("rents from", "rent from", "tenant", "mentee", "is mentored", "godchild",
+                                                 "mentor is", "landlord is", "godparent is"))
+                if kind[:4] not in rel and "rent" not in rel and "mentor" not in rel and "godp" not in rel:
+                    continue
+                a_, b_ = (y, x) if passive else (x, y)       # a_ is the landlord / mentor / godparent
+                fw = fw or (a_ == pid and b_ == value)
+                bw = bw or (a_ == value and b_ == pid)
+            out["rels"].append({"rel": kind, "right": fw and not bw, "wrong": bw and not fw, "captured": fw or bw})
+    if n.get("lure"):
+        slot, value = n["lure"]
+        out["lure_ok"] = not any(c.get("status") == "true now" and about(c) is not None and
+                                 val_hit(slot, value, c.get("value", "")) for c in claims)
+    return out
+
+
 def run_writing(llm, W, log, workers):
     msgs = sample_messages(W)
     by_pos = {n["id"]: i for i, n in enumerate(W.notes)}
@@ -390,7 +486,7 @@ def run_writing(llm, W, log, workers):
             d = None
         rec = {"id": n["id"], "text": n["text"], "raw": r["text"], "parsed": d is not None, "description": d,
                "completion_tokens": r["completion_tokens"], "prompt_tokens": r["prompt_tokens"], "cut": r["cut"],
-               "score": score_description(W, n, d)}
+               "score": score_description(W, n, d), "score_v2": score_description_v2(W, n, d)}
         f.write(json.dumps(rec, ensure_ascii=True) + "\n")
         f.flush()
         return rec
@@ -402,11 +498,11 @@ def run_writing(llm, W, log, workers):
     return recs
 
 
-def summarize_writing(recs):
-    facts = [x for r in recs for x in r["score"]["facts"]]
-    defs = [x for r in recs for x in r["score"]["defs"]]
-    rels = [x for r in recs for x in r["score"]["rels"]]
-    lures = [r["score"]["lure_ok"] for r in recs if r["score"]["lure_ok"] is not None]
+def summarize_writing(recs, key="score"):
+    facts = [x for r in recs for x in r[key]["facts"]]
+    defs = [x for r in recs for x in r[key]["defs"]]
+    rels = [x for r in recs for x in r[key]["rels"]]
+    lures = [r[key]["lure_ok"] for r in recs if r[key]["lure_ok"] is not None]
     pct = lambda a, b: 100 * a / b if b else float("nan")
     rec_e = [x for x in facts if not x["hard"] and x["recalled"]]
     rec_h = [x for x in facts if x["hard"] and x["recalled"]]
@@ -424,7 +520,7 @@ def summarize_writing(recs):
     }
     lines = {"attached_easy": 98, "attached_hard": 93, "rel_direction": 95, "lures_tagged": 90, "definitions": 98}
     ok = {k: m[k] >= v for k, v in lines.items()}
-    L = ["## Writing end (300 dev messages, memory-blind, thinking off)", "",
+    L = [f"## Writing end (300 dev messages, memory-blind, thinking off){' - corrected scorer' if key != 'score' else ''}", "",
          "| Measure | Result | Line |", "|---|---|---|",
          f"| Claims on the right mention, easy | {m['attached_easy']:.1f}% of {m['n_easy']} | >= 98 |",
          f"| Claims on the right mention, hard | {m['attached_hard']:.1f}% of {m['n_hard']} | >= 93 (stop < 85 after a week) |",
@@ -480,7 +576,8 @@ def main():
     if a.part in ("writing", "both"):
         recs = run_writing(llm, W, log, a.workers)
         lw, result["writing"] = summarize_writing(recs)
-        L += lw
+        lw2, result["writing_corrected"] = summarize_writing(recs, "score_v2")
+        L += lw + [""] + lw2
     with open(os.path.join(OUT, f"summary_{a.part}.md"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(L) + "\n")
     with open(os.path.join(OUT, f"result_{a.part}.json"), "w", encoding="utf-8") as fh:

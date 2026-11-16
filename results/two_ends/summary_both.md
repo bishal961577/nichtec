@@ -1,0 +1,29 @@
+# Two ends check: results (dev world, first 1,500 messages)
+
+Pre-registration: reports/Two ends check 2026.md
+
+## Reading end (288 dev hard questions, thinking off)
+
+| Version | Hard set | two | retract | role | event_last | nick | desc | who | median tokens | cut |
+|---|---|---|---|---|---|---|---|---|---|---|
+| V0 | 66.3 | 23.5 | 26.7 | 33.3 | 33.3 | 52.9 | 73.1 | 87.5 | 11 | 3 |
+| V1 | 72.9 | 29.4 | 60.0 | 50.0 | 33.3 | 70.6 | 84.6 | 87.5 | 12 | 4 |
+| V2 | 90.3 | 58.8 | 73.3 | 100.0 | 55.6 | 91.2 | 96.2 | 90.6 | 17 | 1 |
+| V3 | 91.7 | 94.1 | 80.0 | 100.0 | 44.4 | 85.3 | 88.5 | 90.6 | 18 | 1 |
+
+**Reading-end verdict (V3, as registered): BETWEEN** (pass: hard >= 88, each of two, retract, role, event_last, nick >= 75, median <= 64 tokens; stop: hard < 80)
+
+## Writing end (300 dev messages, memory-blind, thinking off)
+
+| Measure | Result | Line |
+|---|---|---|
+| Claims on the right mention, easy | 87.5% of 24 | >= 98 |
+| Claims on the right mention, hard | 79.4% of 97 | >= 93 (stop < 85 after a week) |
+| Relation direction (one-way, of captured) | 40.0% (captured 29.4% of 17) | >= 95 |
+| Lures tagged | 78.3% of 60 | >= 90 |
+| Definitions captured | 55.4% of 65 | >= 98 |
+| Fact recall | 93.8% of 129 | reported (>= 90 suggested) |
+| Valid JSON | 100.0% | - |
+| Tokens per message | 178 out, 924 in | - |
+
+**Writing-end lines met:** {"attached_easy": false, "attached_hard": false, "rel_direction": false, "lures_tagged": false, "definitions": false}
