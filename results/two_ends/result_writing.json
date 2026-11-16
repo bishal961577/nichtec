@@ -1,0 +1,38 @@
+{
+ "writing": {
+  "attached_easy": 96.15384615384616,
+  "n_easy": 26,
+  "attached_hard": 88.77551020408163,
+  "n_hard": 98,
+  "rel_direction": 78.57142857142857,
+  "rel_captured": 82.3529411764706,
+  "n_rel": 17,
+  "lures_tagged": 91.66666666666667,
+  "n_lures": 60,
+  "definitions": 70.76923076923077,
+  "n_defs": 65,
+  "fact_recall": 96.12403100775194,
+  "n_facts": 129,
+  "parsed": 100.0,
+  "tokens_per_message": 167.89333333333335,
+  "prompt_tokens_per_message": 1452.84
+ },
+ "writing_corrected": {
+  "attached_easy": 96.15384615384616,
+  "n_easy": 26,
+  "attached_hard": 89.79591836734694,
+  "n_hard": 98,
+  "rel_direction": 64.70588235294117,
+  "rel_captured": 100.0,
+  "n_rel": 17,
+  "lures_tagged": 93.33333333333333,
+  "n_lures": 60,
+  "definitions": 92.3076923076923,
+  "n_defs": 65,
+  "fact_recall": 96.12403100775194,
+  "n_facts": 129,
+  "parsed": 100.0,
+  "tokens_per_message": 167.89333333333335,
+  "prompt_tokens_per_message": 1452.84
+ }
+}

@@ -225,8 +225,8 @@ SCHEMA = {
             "status": {"type": "string", "enum": STATUSES}},
             "required": ["about", "label", "value", "status"], "additionalProperties": False}},
         "links": {"type": "array", "items": {"type": "object", "properties": {
-            "from": {"type": "integer"}, "relation": {"type": "string"}, "to": {"type": "integer"}},
-            "required": ["from", "relation", "to"], "additionalProperties": False}},
+            "who": {"type": "integer"}, "is_the": {"type": "string"}, "of": {"type": "integer"}},
+            "required": ["who", "is_the", "of"], "additionalProperties": False}},
         "told_by": {"type": "integer"}},
     "required": ["mentions", "claims", "links", "told_by"], "additionalProperties": False}
 
@@ -259,9 +259,13 @@ Gaia Okafor", "Teo Rojas, a friend of a friend", "Bodhi Sithole is a colleague o
   - "Uma from football's kid" is someone else, named through Uma: a "through someone" mention, not Uma;
   - a relation between two people always goes in "links", never in "claims".
 - Visiting, a trip, or something only for this week is "tried or temporary".
-- "links": a relation between two mentioned people: "from" (mention number), "relation" (one word), "to" (mention \
-number), meaning "from is the <relation> of to". "Ana rents from Kofi" means Kofi is Ana's landlord: from Kofi, relation \
-landlord, to Ana.
+- Every message that says something about a person gets at least one claim. "He adopted a cat" is a mention "He" \
+(pronoun) and a claim about it. Something said in passing counts: "Dev's new bike is red" tells you Dev has a bike.
+- Describe only the message, never the previous message: the previous message is there only to tell you who "he", \
+"she" or "they" is.
+- "links": a relation between two mentioned people, as "who" is_the "<relation>" "of" whom: "who" (mention number), \
+"is_the" (one word), "of" (mention number). "Ana rents from Kofi": Kofi is the landlord of Ana, so who = Kofi, is_the = \
+"landlord", of = Ana. "Ana's mentor is Kofi": who = Kofi, is_the = "mentor", of = Ana.
 - "told_by": the number of the mention who told me this, if the message passes on what someone said, else -1.
 
 Example (made-up people). Previous message: [2026-03-02 Mon] Had tea with Tessa Brandt.
@@ -270,15 +274,15 @@ Message: [2026-03-03 Tue] Jonas says Tessa's flatmate quit law school and studie
 {{"text": "Tessa's flatmate", "kind": "through someone", "name": "", "through": "Tessa", "relation": "flatmate", \
 "previous": ""}}, {{"text": "Tessa", "kind": "first name", "name": "Tessa", "through": "", "relation": "", "previous": ""}}], \
 "claims": [{{"about": 1, "label": "studies", "value": "law", "status": "no longer"}}, {{"about": 1, "label": "studies", \
-"value": "music", "status": "true now"}}], "links": [{{"from": 1, "relation": "flatmate", "to": 2}}], "told_by": 0}}
+"value": "music", "status": "true now"}}], "links": [{{"who": 1, "is_the": "flatmate", "of": 2}}], "told_by": 0}}
 
 Second example. Previous message: [2026-04-01 Wed] Busy day.
 Message: [2026-04-02 Thu] My niece Lena Park, a friend of a friend's daughter, rents from Omar from work.
 {{"mentions": [{{"text": "My niece Lena Park", "kind": "full name", "name": "Lena Park", "through": "", "relation": "niece", \
 "previous": ""}}, {{"text": "Omar from work", "kind": "first name with group", "name": "Omar", "through": "", "relation": \
 "work", "previous": ""}}], "claims": [{{"about": 0, "label": "relation to me", "value": "niece", "status": "true now"}}, \
-{{"about": 1, "label": "known from", "value": "work", "status": "true now"}}], "links": [{{"from": 1, "relation": "landlord", \
-"to": 0}}], "told_by": -1}}
+{{"about": 1, "label": "known from", "value": "work", "status": "true now"}}], "links": [{{"who": 1, "is_the": "landlord", \
+"of": 0}}], "told_by": -1}}
 
 Previous message: {prev}
 Message: {msg}"""
@@ -484,6 +488,9 @@ def run_writing(llm, W, log, workers):
             d = json.loads(r["text"])
         except (json.JSONDecodeError, TypeError):
             d = None
+        if d is not None:
+            d["links"] = [{"from": lk.get("who", lk.get("from", -1)), "relation": lk.get("is_the", lk.get("relation", "")),
+                           "to": lk.get("of", lk.get("to", -1))} for lk in d.get("links", [])]
         rec = {"id": n["id"], "text": n["text"], "raw": r["text"], "parsed": d is not None, "description": d,
                "completion_tokens": r["completion_tokens"], "prompt_tokens": r["prompt_tokens"], "cut": r["cut"],
                "score": score_description(W, n, d), "score_v2": score_description_v2(W, n, d)}
