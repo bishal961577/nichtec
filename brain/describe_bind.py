@@ -114,6 +114,8 @@ def desc_of(m):
     low = text.lower()
     if kind == "pronoun" or low in PRON:
         return ("pron",)
+    if low.startswith("my ") or name.lower().startswith("my "):        # (dev fix 5) "my best friend" is a role
+        return classify(text if low.startswith("my ") else name)
     if kind == "through someone" and thr:
         noun = rel or (text.rsplit("'s ", 1)[-1] if "'s " in text else "")
         return ("via", classify(thr), norm_rel(noun)[0])
@@ -130,6 +132,14 @@ def desc_of(m):
         nm = (name or text).strip().strip('"')
         return ("name", nm.lower().split()[0]) if nm else classify(text)
     return classify(text)
+
+
+def grounded(val, text):
+    """(dev fix 4) A claim's value must be supported by its own message: one of its content words (or a 4-letter
+    stem of one) occurs in the message, so a definition carried over from the previous message is dropped."""
+    words = [w for w in re.sub(r"[^a-z ]", " ", val.lower()).split() if len(w) > 2 and w not in STOP]
+    t = text.lower()
+    return not words or any(w in t or (len(w) > 4 and w[:4] in t) for w in words)
 
 
 def to_parse(W, descs_by_id, ids):
@@ -165,17 +175,36 @@ def to_parse(W, descs_by_id, ids):
             elif prev_ments:
                 ante[k] = ("prev", prev_ments[0])
         valid = lambda a: isinstance(a, int) and 0 <= a < len(ms)
+        # (dev fix 1) apposition: in "my dad Chloe Constantin" / "my sister, Ugo Mensah" the role mention and the full
+        # name are one person, whether or not the describer split them; the role is defined on the full name
+        alias = {}
+        fulls = [j for j, x in enumerate(descs) if x[0] == "full"]
+        low = n["text"].lower()
+        for j, x in enumerate(descs):
+            if x[0] == "role" and len(fulls) == 1:
+                last = descs[fulls[0]][1].split()[0]
+                if re.search(r"\bmy (old |new )?" + re.escape(ms[j].get("text", "").lower().split()[-1] if ms[j].get("text")
+                                                         else x[1]) + r"\b,?\s+" + re.escape(last), low):
+                    alias[j] = fulls[0]
+                    ante[j] = ("here", fulls[0])
         claims = []
+        for j, f_ in alias.items():
+            claims.append(("role", f_, descs[j][1], bool(re.search(r"\bnew\b", low))))
         for c in d.get("claims", []):
             a = c.get("about", -1)
             if not valid(a):
                 continue
+            a = alias.get(a, a)
             lab, val, st = (c.get("label") or "").strip().lower(), (c.get("value") or "").strip(), c.get("status")
+            if lab in ("nickname", "known from", "relation to me") and not grounded(val, n["text"]):
+                continue                                 # definitions only: facts may be paraphrased ("flies planes")
             if lab == "nickname":
                 claims.append(("nick", a, val.lower().strip('"').split()[0] if val else ""))
             elif lab == "known from":
                 claims.append(("circle", a, gwords(val)))
             elif lab == "relation to me":
+                if descs[a][0] == "role":               # (dev fix 2) "my dad" cannot define who "my dad" is
+                    continue
                 claims.append(("role", a, norm_role(val), bool(re.search(r"\bnew\b", n["text"].lower()))))
             elif st in ("true now", "correction"):
                 claims.append(("fact", a, lab, val))
@@ -185,6 +214,7 @@ def to_parse(W, descs_by_id, ids):
             a, b = lk.get("from", -1), lk.get("to", -1)
             if not (valid(a) and valid(b)) or a == b:
                 continue
+            a, b = alias.get(a, a), alias.get(b, b)
             noun, rev = norm_rel(lk.get("relation", ""))
             if rev:
                 a, b = b, a
@@ -227,6 +257,28 @@ def resolve(P, iters=5):
                         if c[4]:
                             relof[(a, c[2])].append((p["date"], b))
         recent, new = [], {}
+        # (dev fix 3) definitions by majority over the whole history, so one misread definition cannot redirect every
+        # later mention; a role changes hands only when a message says "new" (my new boss)
+        role_base, role_new = {}, defaultdict(list)
+        for r, lst in roles.items():
+            base = Counter(e for d, e in lst if d == "0000")
+            news = sorted((d, e) for d, e in lst if d != "0000")
+            if base:
+                top = max(base.values())
+                role_base[r] = sorted(e for e, c in base.items() if c == top)[0]
+            elif news:
+                role_base[r] = news[0][1]
+            role_new[r] = [(d, e) for d, e in news if e != role_base.get(r)]
+        nick_major = {}
+        for x, lst in nick.items():
+            c = Counter(e for _, e in lst)
+            top = max(c.values())
+            nick_major[x] = sorted(e for e, k in c.items() if k == top)[0]
+        rel_major = {}
+        for key, lst in relof.items():
+            c = Counter(e for _, e in lst)
+            top = max(c.values())
+            rel_major[key] = {e for e, k in c.items() if k == top}
 
         def rec_pick(cands):
             for e in reversed(recent[-30:]):
@@ -239,20 +291,16 @@ def resolve(P, iters=5):
             if t == "full":
                 return d[1]
             if t == "role":
-                hs = sorted(set(roles.get(d[1], [])))
-                if not hs:
+                if d[1] not in role_base:
                     return None
-                holders = []
-                for dd, e in hs:
-                    if not holders or holders[-1][1] != e:
-                        holders.append((dd, e))
+                holders = [("0000", role_base[d[1]])] + role_new[d[1]]
                 cur = [k for k, (dd, e) in enumerate(holders) if dd <= date]
                 k = cur[-1] if cur else 0
                 if d[2] == "old":
                     k -= 1
                 return holders[k][1] if 0 <= k < len(holders) else None
             if t == "name":
-                nk = {e for _, e in nick.get(d[1], [])}
+                nk = {nick_major[d[1]]} if d[1] in nick_major else set()
                 fn = {e for e in first_of.get(d[1], ()) if first_seen[e] <= date}
                 cands = nk or fn or set(first_of.get(d[1], ()))
                 if len(cands) == 1:
@@ -269,7 +317,7 @@ def resolve(P, iters=5):
                 a = res(d[1], date)
                 if not a:
                     return None
-                cands = {e for _, e in relof.get((a, d[2]), [])}
+                cands = rel_major.get((a, d[2]), set())
                 if len(cands) == 1:
                     return next(iter(cands))
                 return rec_pick(cands)

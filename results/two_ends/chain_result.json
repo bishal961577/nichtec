@@ -1,0 +1,73 @@
+{
+ "filing": {
+  "index_people": 202,
+  "true_people": 260,
+  "rows": 1812,
+  "me_rows": 0,
+  "fact_rows": 977,
+  "wrong_merge_pct": 9.416581371545547,
+  "hard_merge_pct": 32.846715328467155,
+  "hard_rows": 137,
+  "filed_right_by_style": {
+   "fname": 96.6,
+   "fname_ctx": 96.2,
+   "full": 98.6,
+   "nick": 91.7,
+   "pronoun": 66.7,
+   "pronoun_prev": 97.1,
+   "role": 81.6,
+   "via": 45.0
+  },
+  "filed_n_by_style": {
+   "fname": 118,
+   "fname_ctx": 52,
+   "full": 216,
+   "nick": 12,
+   "pronoun": 54,
+   "pronoun_prev": 35,
+   "role": 49,
+   "via": 20
+  },
+  "people_split_into_several_ids": 23,
+  "facts_filed_pct": 79.09516380655226,
+  "link_precision_pct": 86.07594936708861,
+  "link_rows": 79,
+  "lure_intrusion_pct": 6.106870229007634
+ },
+ "forget": {
+  "forget_recall_pct": 83.91451879599002,
+  "forget_worst_pct": 49.152542372881356,
+  "forget_collateral_pct": 10.072815533980583,
+  "forget_people": 14
+ },
+ "rows_left_after_deletion": 0,
+ "same_view_shuffled": true,
+ "bindings_changed_by_deleting_35": 3,
+ "mentions": 1799,
+ "unresolved": 166,
+ "unresolved_pct": 9.227348526959421,
+ "answers": {
+  "hard": 54.861111111111114,
+  "median_tokens": 22.0,
+  "per_kind": {
+   "deleted": 85.36585365853658,
+   "desc": 50.0,
+   "event_last": 22.22222222222222,
+   "event_what": 72.72727272727273,
+   "event_who": 25.0,
+   "fname_ctx": 69.23076923076923,
+   "nick": 61.76470588235294,
+   "retract": 40.0,
+   "role": 33.33333333333333,
+   "two": 35.294117647058826,
+   "upd": 55.88235294117647,
+   "who": 40.625
+  },
+  "found_all_pct": 75.69444444444444,
+  "chain_minus_B_think": [
+   -15.277777777777768,
+   -22.72871116225547,
+   -8.021399456521763
+  ]
+ }
+}

@@ -245,3 +245,99 @@ The owner approved step 1 of the "next" list.
 - share of mentions left unresolved;
 - deletion by recomputation: how many bindings change when the 35 deleted messages are removed;
 - that a shuffled input order gives the same view.
+
+### Step 2 results (16 November 2026): STOP on dev
+
+**Run 1, the chain as registered** (`results/two_ends/chain_summary_v1.md`, `chain_answers_v1.jsonl`):
+
+| Measure | Result | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 12.90% | ≤ 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | ≥ 75% | 11.1% |
+| Worst-person forgetting | 41.3% (average 58.8%) | ≥ 90% | 62.2% |
+| Facts filed right | 77.2% | ≥ 85% | 78.2% |
+| Hard set, thinking off | 52.1% | ≥ 77.3% | B thinking on 72.3% |
+| Median answer | 22 tokens | ≤ 64 | about 4,200 |
+
+**Verdict: STOP** (wrong merges above 3%, hard set below 70%).
+
+**Self-check, run before the model calls** (`brain/describe_bind_selfcheck.py`). With descriptions built from the truth,
+the same code gives:
+- 0% wrong merges;
+- "X's flatmate" filed right 100%;
+- worst-person forgetting 96.6%;
+- no unresolved mentions.
+
+So the losses come from how the describer's real errors pass through the resolver.
+
+**Diagnosis.** A few wrong *definitions* fan out, as the architect warned in the panel.
+- **Split introductions.** "My dad Chloe Constantin called today" was often described as two unconnected mentions, so
+  "my dad" was never defined.
+- **Invented definitions.** "Forgot to reply to Ugo Mensah" was given "relation to me: dad", and "Sarai Quinn forwarded
+  me a recipe" was given "relation to me: partner". These look like definitions carried over from the previous message.
+  - In the votes for "sister", the real sister had 2 and two other people had 6 each.
+- **Unrecovered "X's colleague" mentions.** The describer split "Uma from football's colleague" into pieces, and the
+  facts went to Uma.
+
+**Five resolver fixes, all development changes on dev.** Each was re-checked against the truth-built descriptions, which
+still give 0% wrong merges.
+1. A role and a full name in apposition ("my sister, Ugo Mensah") are one person.
+2. A "my dad" mention cannot define "my dad".
+3. Definitions (roles, nicknames, links) go by majority over the whole history, and a role changes hands only on "new".
+4. A definition must be grounded: its value occurs in its own message. This applies to definitions only, because facts
+   may be paraphrased.
+5. A name beginning "my" is a role.
+
+**After the fixes** (`results/two_ends/chain_summary.md`, `chain_answers.jsonl`):
+
+| Measure | Result | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 9.42% | ≤ 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | ≥ 75% | 11.1% |
+| Worst-person forgetting | 49.2% (average 83.9%) | ≥ 90% | 62.2% |
+| Facts filed right | 79.1% | ≥ 85% | 78.2% |
+| Link precision | 86.1% | reported | 57.1% |
+| Hard set, thinking off | 54.9% | ≥ 77.3% | B thinking on 72.3% |
+| Chain minus B thinking on | −15.3 points [−22.7, −8.0] | interval above 0 | – |
+| Median answer | 22 tokens | ≤ 64 | about 4,200 |
+
+**Verdict: STOP.**
+
+Filed right by how the person was mentioned:
+
+| Mention | Filed right |
+|---|---|
+| full name | 98.6% |
+| first name | 96.6% |
+| first name with a group | 96.2% |
+| previous-message pronoun | 97.1% |
+| nickname | 91.7% |
+| role | 81.6% |
+| same-message pronoun | 66.7% |
+| "X's flatmate" | 45.0% |
+
+By construction:
+- a shuffled input order gives the same view;
+- removing the 35 deleted messages changes 3 bindings;
+- no row carries a deleted value.
+
+### What step 2 means
+
+1. **With a 4B describer, "describe, don't decide" loses to B on dev.** It loses on wrong merges (9.4% against 6.3%)
+   and on answers (54.9% thinking off against B's 72.3% thinking on). It wins on links (86% against 57%), on "X's
+   flatmate" (45% against 11%) and on answer cost (22 tokens against about 4,200). By its pre-registered lines this
+   route **stops** with the 4B describer.
+2. **The panel's simulation was too kind** (the engineer predicted about 1–2% wrong merges at 5–10% describer error).
+   The real describer's errors are a different kind: invented and split definitions, and pronouns attached to the wrong
+   mention. A code resolver amplifies these, because one definition decides many later facts.
+3. **The gap between the reading-end ceiling and the chain is all in the view.** Pages bound from the truth gave 91.7%
+   with thinking off (step 1). Pages bound from this view gave 54.9%. The 4B can read; the view built from its own
+   descriptions is too noisy.
+4. **What would reopen the route** (the engineer's stop branch):
+   - a better describer on the same resolver: the 27B at night, the cheapest test (one server, about 1,500 short calls);
+   - or a 4B describer trained on generated lives.
+
+   If the 27B gives wrong merges ≤ 1.5% through the same code, the design is right and the clerk is the problem. If
+   not, the design itself fails on messy chat.
+5. **Not tried, and possibly cheaper:** B's own index, which writes with memory in view, feeding the same kind of bound
+   header. Step 1 showed the header does most of the reading work.

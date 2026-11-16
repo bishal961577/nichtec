@@ -1,0 +1,113 @@
+=== 2026-11-16 20:31:41 step 2: the whole chain on dev
+described: 1500 messages (1200 new, 2.1 min)
+filing: {"wrong_merge_pct": 12.903225806451612, "hard_merge_pct": 40.97222222222222, "facts_filed_pct": 77.22308892355694, "filed_right_by_style": {"fname": 95.8, "fname_ctx": 94.2, "full": 98.1, "nick": 75.0, "pronoun": 61.1, "pronoun_prev": 97.1, "role": 73.5, "via": 45.0}, "link_precision_pct": 79.74683544303798, "index_people": 199, "people_split_into_several_ids": 22}
+forgetting: {"forget_recall_pct": 58.754295554689584, "forget_worst_pct": 41.269841269841265, "forget_collateral_pct": 19.6513470681458, "forget_people": 14}; rows left after deletion: 0; shuffled order same view: True; bindings changed by deleting the 35 messages: 3; unresolved mentions 156 of 1799
+answers: 288, 52.1% right, median 22 tokens, 1.0 min
+# Step 2: the whole chain on the dev world (first 1,500 messages)
+
+Pre-registration: reports/Two ends check 2026.md, step 2.
+
+| Measure | Chain | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 12.90% | <= 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | >= 75% | 11.1% |
+| Worst-person forgetting | 41.3% (average 58.8%) | >= 90% | 62.2% |
+| Facts filed right | 77.2% | >= 85% | 78.2% |
+| Hard-case merges | 41.0% | reported | 33.3% |
+| Link precision | 79.7% | reported | 57.1% |
+| Mentions left unresolved | 8.7% | reported | - |
+| Filed right by mention style | {"fname": 95.8, "fname_ctx": 94.2, "full": 98.1, "nick": 75.0, "pronoun": 61.1, "pronoun_prev": 97.1, "role": 73.5, "via": 45.0} | reported | - |
+| Hard set, chain, thinking off | 52.1% | >= 77.3% | B thinking on 72.3%, off 50.3% |
+| Chain minus B thinking on (people-resampled 95% interval) | -18.1 [-26.1, -10.2] | interval above 0 | - |
+| Median answer | 22 tokens | <= 64 | about 4,200 |
+| Found every needed message | 70.5% | reported | 71.7% |
+| By kind | {"deleted": 80.5, "desc": 42.3, "event_last": 22.2, "event_what": 50.0, "event_who": 30.0, "fname_ctx": 65.4, "nick": 64.7, "retract": 26.7, "role": 16.7, "two": 35.3, "upd": 61.8, "who": 46.9} | reported | - |
+
+**Verdict (dev, as registered): STOP**
+
+Checks by construction: shuffled input order gives the same view: True; bindings that change when the 35 deleted messages are removed: 3; rows left carrying a deleted value: 0.
+=== 2026-11-16 20:39:46 step 2: the whole chain on dev
+filing: {"wrong_merge_pct": 10.954773869346734, "hard_merge_pct": 37.956204379562045, "facts_filed_pct": 77.84711388455538, "filed_right_by_style": {"fname": 95.8, "fname_ctx": 94.2, "full": 98.1, "nick": 75.0, "pronoun": 59.3, "pronoun_prev": 97.1, "role": 83.7, "via": 45.0}, "link_precision_pct": 79.74683544303798, "index_people": 195, "people_split_into_several_ids": 23}
+forgetting: {"forget_recall_pct": 67.19788321702724, "forget_worst_pct": 41.269841269841265, "forget_collateral_pct": 13.970588235294118, "forget_people": 14}; rows left after deletion: 0; shuffled order same view: True; bindings changed by deleting the 35 messages: 3; unresolved mentions 100 of 1799
+# Step 2: the whole chain on the dev world (first 1,500 messages)
+
+Pre-registration: reports/Two ends check 2026.md, step 2.
+
+| Measure | Chain | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 10.95% | <= 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | >= 75% | 11.1% |
+| Worst-person forgetting | 41.3% (average 67.2%) | >= 90% | 62.2% |
+| Facts filed right | 77.8% | >= 85% | 78.2% |
+| Hard-case merges | 38.0% | reported | 33.3% |
+| Link precision | 79.7% | reported | 57.1% |
+| Mentions left unresolved | 5.6% | reported | - |
+| Filed right by mention style | {"fname": 95.8, "fname_ctx": 94.2, "full": 98.1, "nick": 75.0, "pronoun": 59.3, "pronoun_prev": 97.1, "role": 83.7, "via": 45.0} | reported | - |
+
+Checks by construction: shuffled input order gives the same view: True; bindings that change when the 35 deleted messages are removed: 3; rows left carrying a deleted value: 0.
+=== 2026-11-16 20:40:41 step 2: the whole chain on dev
+filing: {"wrong_merge_pct": 9.64824120603015, "hard_merge_pct": 34.306569343065696, "facts_filed_pct": 78.93915756630265, "filed_right_by_style": {"fname": 95.8, "fname_ctx": 94.2, "full": 98.6, "nick": 91.7, "pronoun": 64.8, "pronoun_prev": 97.1, "role": 85.7, "via": 45.0}, "link_precision_pct": 87.34177215189874, "index_people": 194, "people_split_into_several_ids": 23}
+forgetting: {"forget_recall_pct": 82.586983798907, "forget_worst_pct": 49.152542372881356, "forget_collateral_pct": 13.238770685579196, "forget_people": 14}; rows left after deletion: 0; shuffled order same view: True; bindings changed by deleting the 35 messages: 3; unresolved mentions 96 of 1799
+# Step 2: the whole chain on the dev world (first 1,500 messages)
+
+Pre-registration: reports/Two ends check 2026.md, step 2.
+
+| Measure | Chain | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 9.65% | <= 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | >= 75% | 11.1% |
+| Worst-person forgetting | 49.2% (average 82.6%) | >= 90% | 62.2% |
+| Facts filed right | 78.9% | >= 85% | 78.2% |
+| Hard-case merges | 34.3% | reported | 33.3% |
+| Link precision | 87.3% | reported | 57.1% |
+| Mentions left unresolved | 5.3% | reported | - |
+| Filed right by mention style | {"fname": 95.8, "fname_ctx": 94.2, "full": 98.6, "nick": 91.7, "pronoun": 64.8, "pronoun_prev": 97.1, "role": 85.7, "via": 45.0} | reported | - |
+
+Checks by construction: shuffled input order gives the same view: True; bindings that change when the 35 deleted messages are removed: 3; rows left carrying a deleted value: 0.
+=== 2026-11-16 20:41:35 step 2: the whole chain on dev
+filing: {"wrong_merge_pct": 8.969072164948454, "hard_merge_pct": 32.846715328467155, "facts_filed_pct": 79.09516380655226, "filed_right_by_style": {"fname": 96.6, "fname_ctx": 96.2, "full": 98.6, "nick": 91.7, "pronoun": 66.7, "pronoun_prev": 97.1, "role": 81.6, "via": 45.0}, "link_precision_pct": 86.07594936708861, "index_people": 202, "people_split_into_several_ids": 23}
+forgetting: {"forget_recall_pct": 83.91451879599002, "forget_worst_pct": 49.152542372881356, "forget_collateral_pct": 10.072815533980583, "forget_people": 14}; rows left after deletion: 0; shuffled order same view: True; bindings changed by deleting the 35 messages: 3; unresolved mentions 166 of 1799
+# Step 2: the whole chain on the dev world (first 1,500 messages)
+
+Pre-registration: reports/Two ends check 2026.md, step 2.
+
+| Measure | Chain | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 8.97% | <= 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | >= 75% | 11.1% |
+| Worst-person forgetting | 49.2% (average 83.9%) | >= 90% | 62.2% |
+| Facts filed right | 79.1% | >= 85% | 78.2% |
+| Hard-case merges | 32.8% | reported | 33.3% |
+| Link precision | 86.1% | reported | 57.1% |
+| Mentions left unresolved | 9.2% | reported | - |
+| Filed right by mention style | {"fname": 96.6, "fname_ctx": 96.2, "full": 98.6, "nick": 91.7, "pronoun": 66.7, "pronoun_prev": 97.1, "role": 81.6, "via": 45.0} | reported | - |
+
+Checks by construction: shuffled input order gives the same view: True; bindings that change when the 35 deleted messages are removed: 3; rows left carrying a deleted value: 0.
+=== 2026-11-16 20:42:09 step 2: the whole chain on dev
+described: 1500 messages (0 new, 0.0 min)
+filing: {"wrong_merge_pct": 9.416581371545547, "hard_merge_pct": 32.846715328467155, "facts_filed_pct": 79.09516380655226, "filed_right_by_style": {"fname": 96.6, "fname_ctx": 96.2, "full": 98.6, "nick": 91.7, "pronoun": 66.7, "pronoun_prev": 97.1, "role": 81.6, "via": 45.0}, "link_precision_pct": 86.07594936708861, "index_people": 202, "people_split_into_several_ids": 23}
+forgetting: {"forget_recall_pct": 83.91451879599002, "forget_worst_pct": 49.152542372881356, "forget_collateral_pct": 10.072815533980583, "forget_people": 14}; rows left after deletion: 0; shuffled order same view: True; bindings changed by deleting the 35 messages: 3; unresolved mentions 166 of 1799
+answers: 288, 54.9% right, median 22 tokens, 1.1 min
+# Step 2: the whole chain on the dev world (first 1,500 messages)
+
+Pre-registration: reports/Two ends check 2026.md, step 2.
+
+| Measure | Chain | Line | B on dev |
+|---|---|---|---|
+| Wrong merges | 9.42% | <= 1.5% | 6.27% |
+| "X's flatmate" filed right | 45.0% | >= 75% | 11.1% |
+| Worst-person forgetting | 49.2% (average 83.9%) | >= 90% | 62.2% |
+| Facts filed right | 79.1% | >= 85% | 78.2% |
+| Hard-case merges | 32.8% | reported | 33.3% |
+| Link precision | 86.1% | reported | 57.1% |
+| Mentions left unresolved | 9.2% | reported | - |
+| Filed right by mention style | {"fname": 96.6, "fname_ctx": 96.2, "full": 98.6, "nick": 91.7, "pronoun": 66.7, "pronoun_prev": 97.1, "role": 81.6, "via": 45.0} | reported | - |
+| Hard set, chain, thinking off | 54.9% | >= 77.3% | B thinking on 72.3%, off 50.3% |
+| Chain minus B thinking on (people-resampled 95% interval) | -15.3 [-22.7, -8.0] | interval above 0 | - |
+| Median answer | 22 tokens | <= 64 | about 4,200 |
+| Found every needed message | 75.7% | reported | 71.7% |
+| By kind | {"deleted": 85.4, "desc": 50.0, "event_last": 22.2, "event_what": 72.7, "event_who": 25.0, "fname_ctx": 69.2, "nick": 61.8, "retract": 40.0, "role": 33.3, "two": 35.3, "upd": 55.9, "who": 40.6} | reported | - |
+
+**Verdict (dev, as registered): STOP**
+
+Checks by construction: shuffled input order gives the same view: True; bindings that change when the 35 deleted messages are removed: 3; rows left carrying a deleted value: 0.
