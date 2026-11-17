@@ -142,7 +142,10 @@ def grounded(val, text):
     return not words or any(w in t or (len(w) > 4 and w[:4] in t) for w in words)
 
 
-def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None):
+REPORTING = re.compile(r"^(told|tells|says|said|heard|hears|reported|reports|mentioned|mentions|according)\b")
+
+
+def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None, drop_reporting=False):
     """Describer JSON -> the engineer's parse format: {note id: {date, order, descs, ante, claims, styles, texts}}.
 
     Step 3 (owner confirms definitions): keep_defs=False drops every definition the describer or the apposition rule
@@ -204,6 +207,8 @@ def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None):
             lab, val, st = (c.get("label") or "").strip().lower(), (c.get("value") or "").strip(), c.get("status")
             if lab in ("nickname", "known from", "relation to me") and not keep_defs:
                 continue
+            if drop_reporting and REPORTING.match(lab):        # (step 4 dev change, registered before its run) a
+                continue                                       # reporting verb is not a fact about the teller
             if lab in ("nickname", "known from", "relation to me") and not grounded(val, n["text"]):
                 continue                                 # definitions only: facts may be paraphrased ("flies planes")
             if lab == "nickname":
@@ -498,9 +503,11 @@ class View:
 
 
 # ============================================================================ describe all messages
-def describe_all(llm, W, log, workers):
+def describe_all(llm, W, log, workers, out=DESC, reuse_sample=True):
+    """Describe every dev message (resumable). reuse_sample: take the 300 already described by the 4B in
+    writing.jsonl (step 2); step 4's 27B describes all 1,500 itself, into its own file."""
     cache = {}
-    for path in (os.path.join(OUT, "writing.jsonl"), DESC):         # writing.jsonl = describer v3 on the 300 sample
+    for path in ((os.path.join(OUT, "writing.jsonl"),) if reuse_sample else ()) + (out,):
         if os.path.exists(path):
             for line in open(path, encoding="utf-8"):
                 r = json.loads(line)
@@ -508,7 +515,7 @@ def describe_all(llm, W, log, workers):
                     cache[r["id"]] = r
     by_pos = {n["id"]: k for k, n in enumerate(W.notes)}
     todo = [n for n in W.notes if n["id"] not in cache]
-    f = open(DESC, "a", encoding="utf-8")
+    f = open(out, "a", encoding="utf-8")
 
     def one(n):
         prev = W.notes[by_pos[n["id"]] - 1] if by_pos[n["id"]] > 0 else None
@@ -522,7 +529,7 @@ def describe_all(llm, W, log, workers):
         except (json.JSONDecodeError, TypeError, AttributeError):
             d = None
         return {"id": n["id"], "description": d, "completion_tokens": r["completion_tokens"],
-                "prompt_tokens": r["prompt_tokens"]}
+                "prompt_tokens": r["prompt_tokens"], "cut": r.get("cut", False)}
     t0 = time.time()
     if todo:
         with ThreadPoolExecutor(workers) as ex:

@@ -34,22 +34,24 @@ def is_def(kind):
     return k in DEF_KINDS or k.startswith("relation") or k.startswith("nick") or k.startswith("known from")
 
 
-def load_descs():
+def load_descs(paths=None):
+    """The 4B's descriptions (step 2's files) by default; step 4 passes the 27B's file."""
     descs = {}
-    for path in (os.path.join(OUT, "writing.jsonl"), DB.DESC):
+    for path in paths or (os.path.join(OUT, "writing.jsonl"), DB.DESC):
         for line in open(path, encoding="utf-8"):
             r = json.loads(line)
             descs[r["id"]] = r.get("description")
     return descs
 
 
-def everyday_merges(W, ix, who):
+def everyday_merges(W, ix, who, exclude=()):
     """test 2's wrong-merge count (MI.write_quality) with definition rows left out: of the everyday-fact rows (job,
-    city, pet, ...) on messages that state a fact, the share filed under someone the fact is not about."""
+    city, pet, ...) on messages that state a fact, the share filed under someone the fact is not about. exclude: message
+    ids left out (step 4's split without the practice world's pronoun quirk)."""
     owners = {n["id"]: {x for pid, kind, value in n["facts"] for x in ((pid, value) if kind in MW.RELS else (pid,))}
               for n in W.notes}
     me = {pid for pid, p in ix.people.items() if p["full"].lower().strip(" .") in MI.ME_NAMES}
-    fact_notes = {n["id"] for n in W.notes if n["facts"]}
+    fact_notes = {n["id"] for n in W.notes if n["facts"] and n["id"] not in exclude}
     rows = [r for r in ix.rows if r["pid"] not in me and r["pid"] in who and not r["link"] and
             r["kind"] != "mentioned" and r["note"] in fact_notes and not is_def(r["kind"])]
     wrong = [r for r in rows if who[r["pid"]] not in owners.get(r["note"], set())]
@@ -111,11 +113,11 @@ def owner_answer(W, n, m, d):
     return e, defs
 
 
-def policy_B(W, descs, ids, log):
+def policy_B(W, descs, ids, log, drop_reporting=False):
     by = {n["id"]: n for n in W.notes}
     order = sorted(ids, key=lambda i: (by[i]["date"], i))
     # (1) confirm what the 4B proposed
-    P_own = DB.to_parse(W, descs, ids)
+    P_own = DB.to_parse(W, descs, ids, drop_reporting=drop_reporting)
     asked0 = [i for i in order if any(c[0] in ("nick", "circle", "role", "rel") for c in P_own[i]["claims"])]
     confirmed = {i: truth_defs(W, by[i]) for i in asked0}
     q = Counter({"confirm a proposed definition": len(asked0)})
@@ -126,7 +128,7 @@ def policy_B(W, descs, ids, log):
     rounds = 0
     while True:
         rounds += 1
-        P = DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confirmed, binds=binds)
+        P = DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confirmed, binds=binds, drop_reporting=drop_reporting)
         bind = DB.resolve(P)
         new, seen = [], set()
         for i in order:
@@ -157,7 +159,7 @@ def policy_B(W, descs, ids, log):
     return confirmed, binds, q, total, q_none, rounds
 
 
-def measure(W, P, emb, label, log):
+def measure(W, P, emb, label, log, exclude=None):
     t0 = time.time()
     bind = DB.resolve(P)
     V = DB.View(W, P, bind)
@@ -175,6 +177,9 @@ def measure(W, P, emb, label, log):
          "unresolved_pct": 100 * V.unresolved / max(1, V.mentions), "filed_right_by_style": wq["filed_right_by_style"],
          "filed_n_by_style": wq["filed_n_by_style"], "rows_left_after_deletion": left,
          "people_split_into_several_ids": wq["people_split_into_several_ids"]}
+    if exclude is not None:                   # step 4: the same count without the practice world's pronoun quirk
+        evs, wrong_s, n_s = everyday_merges(W, V.ix, who, exclude)
+        r.update(everyday_wrong_split_pct=evs, everyday_rows_split=n_s, everyday_wrong_rows_split=len(wrong_s))
     log(f"{label}: everyday wrong {ev:.2f}% ({len(wrong)}/{n_ev}); registered {wq['wrong_merge_pct']:.2f}%; via "
         f"{r['via_pct']}; forgetting worst {fg['forget_worst_pct']:.1f} avg {fg['forget_recall_pct']:.1f}; filed "
         f"{wq['facts_filed_pct']:.1f}; links {wq['link_precision_pct']:.1f}; unresolved {r['unresolved_pct']:.1f}% "
@@ -186,6 +191,29 @@ def verdict(r, questions=None, days=None):
     ok = (r["everyday_wrong_pct"] <= 1.5 and r["via_pct"] >= 75 and r["forget_worst_pct"] >= 90 and
           r["facts_filed_pct"] >= 85 and (questions is None or questions / days <= 2))
     return "PASS" if ok else ("STOP" if r["everyday_wrong_pct"] > 3 else "BETWEEN")
+
+
+def run_conditions(W, descs, ids, emb, log, days, drop_reporting=False, exclude=None, tag=""):
+    """Step 2 as is (none), A (every definition confirmed) and B (asking policy) on one set of descriptions."""
+    res = {}
+    res["none"], _ = measure(W, DB.to_parse(W, descs, ids, drop_reporting=drop_reporting), emb,
+                             f"{tag}none (own definitions)", log, exclude)
+    by = {n["id"]: n for n in W.notes}
+    confA = {i: truth_defs(W, by[i]) for i in ids if truth_defs(W, by[i])}
+    rA, _ = measure(W, DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confA, drop_reporting=drop_reporting),
+                    emb, f"{tag}A (every definition)", log, exclude)
+    rA["questions"] = len(confA)
+    res["A"] = rA
+    confB, bindsB, qB, totB, q_none, rounds = policy_B(W, descs, ids, log, drop_reporting)
+    rB, _ = measure(W, DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confB, binds=bindsB,
+                                   drop_reporting=drop_reporting), emb, f"{tag}B (asking policy)", log, exclude)
+    rB.update(questions=totB, questions_by_type=dict(qB), confirmations_with_nothing_true=q_none, rounds=rounds,
+              true_definitions_recovered=sum(1 for i in confB for c in confB[i] if c in confA.get(i, [])),
+              true_definitions_total=sum(len(v) for v in confA.values()))
+    res["B"] = rB
+    for k in ("none", "A", "B"):
+        res[k]["verdict"] = verdict(res[k], res[k].get("questions"), days) if k != "none" else verdict(res[k])
+    return res
 
 
 def main():
@@ -216,27 +244,9 @@ def main():
     log(f"B's dev index: registered wrong {bwq['wrong_merge_pct']:.2f}% (step 2 reference 6.27%); everyday wrong "
         f"{bev:.2f}% ({len(bwrong)}/{bn})")
 
-    # step 2 as is (regression: must give 9.42% registered)
-    r0, _ = measure(W, DB.to_parse(W, descs, ids), emb, "none (step 2 as is)", log)
-    res["none"] = r0
-
-    # A: every definition confirmed
-    by = {n["id"]: n for n in W.notes}
-    confA = {i: truth_defs(W, by[i]) for i in ids if truth_defs(W, by[i])}
-    rA, _ = measure(W, DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confA), emb, "A (every definition)", log)
-    rA["questions"] = len(confA)
-    res["A"] = rA
-
-    # B: realistic asking policy
-    confB, bindsB, qB, totB, q_none, rounds = policy_B(W, descs, ids, log)
-    rB, _ = measure(W, DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confB, binds=bindsB), emb,
-                    "B (asking policy)", log)
-    rB.update(questions=totB, questions_by_type=dict(qB), confirmations_with_nothing_true=q_none, rounds=rounds,
-              true_definitions_recovered=sum(1 for i in confB for c in confB[i] if c in confA.get(i, [])),
-              true_definitions_total=sum(len(v) for v in confA.values()))
-    res["B"] = rB
-    for k in ("none", "A", "B"):
-        res[k]["verdict"] = verdict(res[k], res[k].get("questions"), days) if k != "none" else verdict(res[k])
+    res.update(run_conditions(W, descs, ids, emb, log, days))
+    r0, rA, rB = res["none"], res["A"], res["B"]
+    qB, rounds, q_none = rB["questions_by_type"], rB["rounds"], rB["confirmations_with_nothing_true"]
 
     def row(name, key, fmt, line, ref=""):
         return f"| {name} | " + " | ".join(fmt(res[c][key]) if key in res[c] else "–" for c in ("none", "A", "B")) + \

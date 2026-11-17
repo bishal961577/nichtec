@@ -523,3 +523,81 @@ the same defect, so the comparison with B is fair as it stands.
 4. **Not tried, by design.** The describer's format could be changed so that each fact names its person directly, as
    B's rows do, instead of pointing at a pronoun mention. That would be prompt tuning on the practice world, which this
    project said it would stop doing.
+
+## Step 4: the bigger describer (pre-registered before its model calls, 17 November 2026)
+
+The owner approved the pre-registered branch after step 3's STOP: the bigger describer on the same resolver.
+
+**The question.** Is reading one sentence (which person a fact belongs to) a capacity problem that a bigger model
+solves? Or does the describe-then-bind format itself fail at it?
+
+**Setup** (`brain/bigger_describer.py`; server `brain/modal_qwen27b.py`):
+- **Model.** Qwen3.5-27B-FP8: the 4B's family, about 7 times larger. vLLM 0.33.0 on one H100.
+- **Settings, unchanged from the 4B:**
+  - describer v3, word for word;
+  - thinking off;
+  - temperature 0, at most 700 tokens, structured JSON output, seed = message id;
+  - one message plus the previous one, no memory.
+- **Scope.** The 27B describes all 1,500 dev messages itself; none of the 4B's descriptions are reused.
+- **Binding.** The same resolver, and the three step-3 conditions:
+  - its own definitions;
+  - A, every definition confirmed;
+  - B, the asking policy.
+- **Caveat.** vLLM is not batch-invariant, so a rerun can differ slightly.
+
+**Dev change, registered now and applied to both models:** the reporting-verb filter.
+- A fact claim whose label begins with told, tells, says, said, heard, hears, reported, reports, mentioned, mentions or
+  according is dropped ("told me: that Shirin drives a Subaru" is not a fact about the teller).
+- On the 4B, measured before this registration, it moves A from 8.52% to 6.57%.
+
+**Split measure, registered now for interpretation only.**
+- What it is: the primary wrong-merge count, leaving out the 66 of 1,465 messages touched by the practice world's
+  pronoun quirk.
+- How those messages are chosen, from the truth alone:
+  - a person with an everyday fact is referred to by a pronoun that clashes with the usual gender of their first name
+    (the labels in `brain/confirm_defs_diag.py`);
+  - or the message uses the frame "In her free time, &lt;name&gt; loves …".
+
+**The 4B under exactly this code** (reference, computed before any 27B call; `results/two_ends/bigger_reference_4b.json`):
+
+| Measure | 4B own | 4B A | 4B B |
+|---|---|---|---|
+| Wrong merges, everyday facts | 8.17% | 6.57% | 6.83% |
+| Same, without the pronoun quirk | 5.11% | 3.23% | 3.51% |
+| "X's flatmate" filed right | 45.0% | 65.0% | 65.0% |
+| Worst-person forgetting | 49.2% | 92.1% | 92.1% |
+| Facts filed right | 78.8% | 80.8% | 80.7% |
+
+**Lines (the 27B, condition A, filter on):** the same as step 3.
+
+| Measure | Pass | Stop |
+|---|---|---|
+| Wrong merges, everyday facts | ≤ 1.5% | > 3% |
+| "X's flatmate" filed right | ≥ 75% | – |
+| Worst-person forgetting | ≥ 90% | – |
+| Facts filed right | ≥ 85% | – |
+
+**What the results would mean (decided now):**
+- **The 27B passes.** The design works with a good enough clerk, and the 4B is the problem. Next: train the 4B on the
+  27B's descriptions of freshly generated worlds (teacher and student), judged on a fresh seed.
+- **The 27B fails, but its split measure is ≤ 1.5%.** The 27B reads sentences well except where the practice world's
+  pronouns mislead it. Next: fix the world's pronouns (the owner's decision, before test 2's FREEZE), then judge.
+- **The 27B's split measure is above 1.5%.** Even a model 7 times larger cannot attach facts within one sentence in
+  this format. The format becomes the suspect: claims that point at mentions, and pronouns as mentions. Next is a
+  format change, not a bigger model.
+
+**Also reported:**
+- the 27B's own and B conditions;
+- its numbers without the filter;
+- wrong rows by mention style;
+- the writing-end scores on the 300 sample with the corrected scorer (the 4B: easy 96.2, hard 89.8, relation direction
+  64.7, lures 93.3, definitions 92.3, recall 96.1);
+- valid JSON, and tokens per message.
+
+**Not in this step:** answers. The reader stays the 4B. An answer run happens only if filing passes, and needs its own
+approval.
+
+**Cost and access:**
+- One H100, about 20–40 minutes with start-up: about $1.50–3.
+- The endpoint is protected by a vLLM API key, held as the cloud environment's network secret.
+- The URL is never written into the repository.
