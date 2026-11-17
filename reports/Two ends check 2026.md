@@ -341,3 +341,88 @@ By construction:
    not, the design itself fails on messy chat.
 5. **Not tried, and possibly cheaper:** B's own index, which writes with memory in view, feeding the same kind of bound
    header. Step 1 showed the header does most of the reading work.
+
+## Step 3: the owner confirms definitions (pre-registered before the run, 17 November 2026)
+
+The owner approved the next step after step 2's STOP. It is a **free CPU simulation**: no model calls. It reuses the 4B's
+cached descriptions of all 1,500 dev messages (`results/two_ends/describe_all.jsonl` and `writing.jsonl`) and the same
+resolver.
+
+**The question.** Step 2's diagnosis blamed a few wrong *definitions* that fan out to many later facts. Definitions are:
+- "relation to me" (my dad);
+- "known from" (from work);
+- nicknames;
+- links between people (Shirin rents from Tobias).
+
+If the phone AI asks the owner to confirm new people and relations, the definitions become right. Does the rest of the
+4B's output then file facts well enough? Or do its other errors (split mentions, facts attached to the wrong mention,
+pronouns) also sink it?
+
+**A correction to what was said before this step.** Definitions are not "about 4% of messages".
+- 204 of the 1,500 dev messages that remain after deletion carry a definition (13.6%).
+- 92 of the 204 are "known from" introductions.
+- The dev world spans 176 days, so this is about 1.2 a day.
+- No role changes hands inside the dev window (the two changes fall in October 2025 and February 2026), so "my new boss"
+  is not tested here.
+
+**Conditions** (`brain/confirm_defs.py`; the resolver in `brain/describe_bind.py` gains a path for confirmed
+definitions, with the default path unchanged):
+- **Step 2 as is** (reproduced): the 4B's own definitions.
+- **A, every definition confirmed** (upper bound). The describer's definitional claims are dropped, including the
+  apposition rule's role claims (the apposition *binding* stays). The truth's definitions in each message are added,
+  dated by that message and naming people by full name, as the owner would. Everything else is the 4B's: mentions,
+  facts, pronoun antecedents, who told what. One owner question per message that carries a definition.
+- **B, a realistic asking policy.**
+  1. The AI asks about each message where the 4B proposed a definition that survives the resolver's filters ("I noted:
+     Sarai Quinn is your partner. Right?"). The owner corrects it to that message's true definitions, or none.
+  2. When a mention cannot be resolved (a role, a nickname, "X's flatmate", an unknown first name), the AI asks "who is
+     this?" at its first unresolved occurrence. The owner's answer binds that mention. For a role, nickname, group or
+     "X's flatmate", it also defines the form for later messages. Pronouns are never asked about.
+
+     Rounds repeat until no new question arises. A mention that is not a person costs a question and adds nothing. The
+     owner is always right.
+
+**Measures.** Test 2's filing, forgetting and deletion measures are unchanged, plus one added measure:
+- **Wrong merges on everyday-fact rows: primary for this step.** This is the registered wrong-merge count with
+  definition rows left out (relation to me, known from, nickname).
+- **Why it is primary.** The registered count includes definition rows. Confirmed definitions are right by
+  construction, so they would pad the denominator and flatter A and B.
+- It is computed the same way for step 2's chain and for B's dev index, so all comparisons use one yardstick.
+
+**Lines (each condition, dev):**
+
+| Measure | Pass | Stop |
+|---|---|---|
+| Wrong merges on everyday-fact rows | ≤ 1.5% | > 3% |
+| "X's flatmate" filed right | ≥ 75% | – |
+| Worst-person forgetting | ≥ 90% | – |
+| Facts filed right | ≥ 85% | – |
+| Owner questions (B; A reported) | ≤ 2 per world-day (≤ 352 on dev) | – |
+
+The question line is a judgement: an assistant that asks more than twice a day about who is who becomes a chore. It
+depends on this world's pace of 8.5 messages a day, so questions per 100 messages are reported as well.
+
+**Also reported:**
+- the registered wrong-merge count;
+- hard-case merges;
+- filing by mention style;
+- link precision;
+- unresolved mentions;
+- deletion by recomputation;
+- for B, questions by type.
+
+**What the results would mean (decided now):**
+- **A fails the filing lines.** Confirming definitions is not enough: the 4B's other errors matter too. Next is the
+  bigger describer (27B) diagnostic.
+- **A passes, B fails.** Confirmation works only if the AI knows when to ask; the asking policy is the next problem.
+- **A and B pass.** This is the first phone-size memory design that files well on dev. Next:
+  - the answer run (GPU, under $1) against step 2's reading lines;
+  - then the owner's 300 labelled messages and the sealed exam.
+
+**Rules:**
+- This is a development measurement on the world the resolver was tuned on, not a judged run.
+- The resolver is not changed after seeing these results. Any change is logged as a dev change, with the numbers before
+  it.
+- **Regression checks before the run.**
+  - The default path must reproduce step 2's numbers (wrong merges 9.42%).
+  - Truth-built descriptions must still give 0% wrong merges.
