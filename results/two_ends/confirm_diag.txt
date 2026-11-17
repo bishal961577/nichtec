@@ -1,0 +1,22 @@
+== step 2 as is: true pronoun facts written down, share filed under the right person
+   pronoun       no name cue (they, or a name not labelled)  88.9% of 18
+   pronoun       pronoun clashes with the name               40.0% of 25
+   pronoun       pronoun matches the name                    90.9% of 11
+   pronoun_prev  no name cue (they, or a name not labelled) 100.0% of 7
+   pronoun_prev  pronoun clashes with the name              100.0% of 12
+   pronoun_prev  pronoun matches the name                    93.8% of 16
+== A: true pronoun facts written down, share filed under the right person
+   pronoun       no name cue (they, or a name not labelled)  88.9% of 18
+   pronoun       pronoun clashes with the name               40.0% of 25
+   pronoun       pronoun matches the name                    81.8% of 11
+   pronoun_prev  no name cue (they, or a name not labelled) 100.0% of 7
+   pronoun_prev  pronoun clashes with the name              100.0% of 12
+   pronoun_prev  pronoun matches the name                   100.0% of 16
+== A: 69 wrong everyday rows of 810, by cause
+    20  pronoun: pronoun clashes with the name
+    17  a 'told me / says' claim filed on the teller
+    15  pronoun: no name cue (they, or a name not labelled)
+     7  fact put on the anchor of X's relation
+     6  pronoun: pronoun matches the name
+     4  other
+   of the pronoun rows, in the frame 'In her free time, <name> loves ...': 10

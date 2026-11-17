@@ -426,3 +426,100 @@ depends on this world's pace of 8.5 messages a day, so questions per 100 message
 - **Regression checks before the run.**
   - The default path must reproduce step 2's numbers (wrong merges 9.42%).
   - Truth-built descriptions must still give 0% wrong merges.
+
+### Step 3 results (17 November 2026): STOP on dev, for A and for B
+
+`brain/confirm_defs.py` (`results/two_ends/confirm_summary.md`, `confirm_result.json`, `confirm.log`). It runs in about
+10 seconds on a CPU.
+
+**Regression checks passed:**
+- the default path reproduces step 2 (registered wrong merges 9.42%);
+- truth-built descriptions still give 0% wrong merges (worst forgetting 98.3%);
+- B's dev index rebuilt from its cached replies reproduces 6.27%.
+
+| Measure | Step 2 as is | A: every definition confirmed | B: asking policy | Line | B's index (test 2) |
+|---|---|---|---|---|---|
+| **Wrong merges, everyday facts (primary)** | 10.10% | **8.52%** | **8.77%** | ≤ 1.5% (stop > 3%) | 6.53% |
+| Wrong merges, registered count | 9.42% | 7.36% | 7.73% | reported | 6.27% |
+| "X's flatmate" filed right (of 20) | 45.0% | 65.0% | 65.0% | ≥ 75% | 11.1% |
+| Worst-person forgetting | 49.2% | **92.1%** | **92.1%** | ≥ 90% | 62.2% |
+| Average forgetting | 83.9% | 97.1% | 97.4% | reported | – |
+| Facts filed right | 79.1% | 81.1% | 81.0% | ≥ 85% | 78.2% |
+| Hard-case merges | 32.8% | 26.3% | 27.0% | reported | 33.3% |
+| Link precision | 86.1% | 100% | 100% | reported | 57.1% |
+| Mentions left unresolved | 9.2% | 4.3% | 3.2% | reported | – |
+| Owner questions | – | 204 (1.16 a day) | 281 (1.60 a day; 19.2 per 100 messages) | B ≤ 2 a day | – |
+| Verdict | STOP | **STOP** | **STOP** | | |
+
+**What confirming definitions fixed:**
+- **Forgetting.** "Forget Kofi" now finds 92% or more of the worst person's messages, against 49%. This passes its line.
+- **Roles.** Facts about "my dad" are filed right 98.0% of the time, against 81.6%.
+- **Links.** Link precision is 100%.
+- **Cost.** The realistic asking policy (B) does as well as confirming everything (A), at 1.6 questions a day in this
+  world.
+  - 60 of B's 225 confirmations were the 4B's invented definitions, which the owner turns down.
+  - 30 "who is this?" questions were about things that are not people.
+  - B recovers 165 of the 204 true definitions.
+
+**What it did not fix:** wrong merges. Everyday-fact wrong merges fell only from 10.1% to 8.5%, against a line of
+1.5%. "X's flatmate" reached 65% (line 75%) and facts filed right 81% (line 85%). On the same yardstick the chain still
+files worse than B's index (6.5%).
+
+**Correction to step 2's diagnosis.**
+- Step 2 said a few wrong definitions fan out. That is true for forgetting and roles. It is **not** what drives wrong
+  merges: definitions account for 12 of step 2's 81 wrong everyday rows.
+- This step had been proposed to the owner on that diagnosis.
+
+**Post-hoc diagnosis** (`brain/confirm_defs_diag.py`, output in `results/two_ends/confirm_diag.txt`; written after
+seeing the results; no measure or verdict changes). A's 69 wrong everyday rows (of 810) are about *which person in the
+sentence* a fact belongs to, not who is who across messages:
+
+| Cause | Rows |
+|---|---|
+| A pronoun that clashes with the usual gender of the person's first name ("Heard from Hana today. He trains for marathons.") | 20 |
+| A "told me / says" claim filed on the teller ("Uma Popescu told me that Shirin Teixeira drives a Subaru" → Uma: "told me: that Shirin Teixeira drives a Subaru") | 17 |
+| A pronoun with no name cue ("they", or a name not labelled), 10 of them in the frame "In her free time, Priya loves chess." | 15 |
+| The fact put on the anchor of "X's relation" ("Shirin's colleague is allergic to mustard" → Shirin) | 7 |
+| A pronoun that matches the name | 6 |
+| Other | 4 |
+
+**A defect in the practice world: pronouns are random.**
+- The generator gives each person she, he or they at random, whatever the first name (`brain/messy_world.py`, line
+  466; only family roles are fixed). No design reason is recorded.
+- So where a name has a usual gender, the pronoun often clashes with it. The 4B uses that cue, as a person would, and
+  looks for someone else.
+- Same-message pronoun facts are filed right **40% of the time when the pronoun clashes** with the name (25 cases),
+  against 82–91% when it matches or carries no cue (29 cases).
+- The frame "In her free time, &lt;name&gt; loves …" puts the pronoun before the name. It fails even when the gender
+  matches (Priya, Nadia, Kasia). That is a real weakness, but this generator uses the frame far more than chat does.
+- Caveats: the gender labels are the analyst's own (`FEM`, `MASC` in the script), and the counts are small.
+
+**Bounds, so the verdict does not rest on the defect** (arithmetic on the diagnosis, not a run):
+- With "told me / says" claims dropped (a reporting verb is not a fact about the teller): 52 / 793 = **6.6%**.
+- Also counting every clashing pronoun and every "In her free time" case as right: 22 / 793 = **2.8%**.
+
+Even the most generous reading stays above the 1.5% line. The STOP stands with or without the defect. B's index carries
+the same defect, so the comparison with B is fair as it stands.
+
+### What step 3 means
+
+1. **The problem has moved.**
+   - Who is who *across* messages ("my dad", "Goose", "Kofi's flatmate") is now solved: code plus about 1–2 owner
+     questions a day. Forgetting passes as a result.
+   - What is left is reading *one sentence*: which person a fact belongs to (the pronoun, the teller, the anchor). The
+     owner cannot be asked about that, because it comes up in nearly every message. The describer has to get it right
+     alone.
+   - This is a narrower problem than before. It needs no memory, so it can be trained from generated examples.
+2. **The pre-registered next step is the bigger describer (27B) diagnostic.** Before it runs, its pre-registration
+   should:
+   - report wrong merges with and without clashing pronouns and the "In her free time" frame. A bigger model likely
+     leans harder on name-gender cues, so the unsplit number would understate it on this world;
+   - add the reporting-verb filter as a dev change, registered before the run.
+3. **For test 2's FREEZE.**
+   - The random pronouns affect every arm of test 2, including its sealed exam, which uses the same generator.
+   - Before FREEZE, the owner should decide: should pronouns mostly follow the name's usual gender, with a realistic
+     minority of exceptions reported separately?
+   - Changing this changes the world hash (`b424cd579d89fec5`) and must be logged as a dev change.
+4. **Not tried, by design.** The describer's format could be changed so that each fact names its person directly, as
+   B's rows do, instead of pointing at a pronoun mention. That would be prompt tuning on the practice world, which this
+   project said it would stop doing.

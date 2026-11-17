@@ -1,0 +1,45 @@
+=== 2026-11-17 12:02:35 step 3: the owner confirms definitions
+B's dev index: registered wrong 6.27% (step 2 reference 6.27%); everyday wrong 6.53% (46/704)
+none (step 2 as is): everyday wrong 10.10% (81/802); registered 9.42%; via 45.0; forgetting worst 49.2 avg 83.9; filed 79.1; links 86.1; unresolved 9.2% (6 s)
+A (every definition): everyday wrong 8.52% (69/810); registered 7.36%; via 65.0; forgetting worst 92.1 avg 97.1; filed 81.1; links 100.0; unresolved 4.3% (0 s)
+B: 281 questions in 3 rounds; 60 confirmations found no true definition
+B (asking policy): everyday wrong 8.77% (71/810); registered 7.73%; via 65.0; forgetting worst 92.1 avg 97.4; filed 81.0; links 100.0; unresolved 3.2% (0 s)
+# Step 3: the owner confirms definitions (dev, first 1,500 messages, 1,465 after deletion)
+
+Pre-registration: reports/Two ends check 2026.md, step 3. Free CPU simulation on the 4B's cached descriptions.
+
+| Measure | Step 2 as is | A: every definition confirmed | B: asking policy | Line | B's index (test 2) |
+|---|---|---|---|---|---|
+| Wrong merges, everyday facts (primary) | 10.10% | 8.52% | 8.77% | <= 1.5% (stop > 3%) | 6.53% |
+| Wrong merges, registered count | 9.42% | 7.36% | 7.73% | reported | 6.27% |
+| "X's flatmate" filed right | 45.0% | 65.0% | 65.0% | >= 75% | 11.1% |
+| Worst-person forgetting | 49.2% | 92.1% | 92.1% | >= 90% | 62.2% |
+| Average forgetting | 83.9% | 97.1% | 97.4% | reported |  |
+| Facts filed right | 79.1% | 81.1% | 81.0% | >= 85% | 78.2% |
+| Hard-case merges | 32.8% | 26.3% | 27.0% | reported | 33.3% |
+| Link precision | 86.1% | 100.0% | 100.0% | reported | 57.1% |
+| Mentions left unresolved | 9.2% | 4.3% | 3.2% | reported |  |
+| Owner questions | – | 204 (1.16 a day, 13.9 per 100 messages) | 281 (1.60 a day, 19.2 per 100 messages) | B: <= 2 a day |  |
+| Rows left carrying a deleted value | 0 | 0 | 0 | reported |  |
+| Verdict (dev) | STOP | STOP | STOP |  |  |
+
+Filed right by how the person was mentioned (n facts):
+
+| Mention | Step 2 as is | A | B |
+|---|---|---|---|
+| fname | 96.6% (118) | 96.6% (118) | 96.6% (118) |
+| fname_ctx | 96.2% (52) | 98.1% (52) | 96.2% (52) |
+| full | 98.6% (216) | 98.6% (216) | 98.6% (216) |
+| nick | 91.7% (12) | 91.7% (12) | 91.7% (12) |
+| pronoun | 66.7% (54) | 64.8% (54) | 64.8% (54) |
+| pronoun_prev | 97.1% (35) | 100.0% (35) | 100.0% (35) |
+| role | 81.6% (49) | 98.0% (49) | 98.0% (49) |
+| via | 45.0% (20) | 65.0% (20) | 65.0% (20) |
+
+Wrong everyday rows, by how the person the fact is really about was mentioned:
+
+- none: {"pronoun": 21, "full": 18, "role": 12, "fname": 12, "via": 10, "fname_ctx": 4, "nick": 3, "pronoun_prev": 1}
+- A: {"pronoun": 23, "full": 18, "fname": 12, "via": 10, "nick": 3, "role": 2, "fname_ctx": 1}
+- B: {"pronoun": 23, "full": 18, "fname": 12, "via": 10, "nick": 3, "fname_ctx": 3, "role": 2}
+
+B's questions by type: {"confirm a proposed definition": 225, "who is my <role>": 6, "  of which: not a person": 30, "who is <name> from <group>": 21, "who is <first name or nickname>": 13, "who is X's <relation>": 16}; rounds: 3; confirmations where the message held no true definition: 60; true definitions recovered: 165 of 204.

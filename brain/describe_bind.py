@@ -142,8 +142,13 @@ def grounded(val, text):
     return not words or any(w in t or (len(w) > 4 and w[:4] in t) for w in words)
 
 
-def to_parse(W, descs_by_id, ids):
-    """Describer JSON -> the engineer's parse format: {note id: {date, order, descs, ante, claims, styles, texts}}."""
+def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None):
+    """Describer JSON -> the engineer's parse format: {note id: {date, order, descs, ante, claims, styles, texts}}.
+
+    Step 3 (owner confirms definitions): keep_defs=False drops every definition the describer or the apposition rule
+    proposes (roles, nicknames, groups, links; the apposition *binding* stays); confirmed = {note id: [entity-level
+    definitions the owner gave at that message]}; binds = {note id: {mention index: entity}} (the owner's answer to
+    "who is this?"). See confirmed_claims() in resolve() for the formats."""
     by = {n["id"]: n for n in W.notes}
     P = {}
     prev = None
@@ -189,13 +194,16 @@ def to_parse(W, descs_by_id, ids):
                     ante[j] = ("here", fulls[0])
         claims = []
         for j, f_ in alias.items():
-            claims.append(("role", f_, descs[j][1], bool(re.search(r"\bnew\b", low))))
+            if keep_defs:
+                claims.append(("role", f_, descs[j][1], bool(re.search(r"\bnew\b", low))))
         for c in d.get("claims", []):
             a = c.get("about", -1)
             if not valid(a):
                 continue
             a = alias.get(a, a)
             lab, val, st = (c.get("label") or "").strip().lower(), (c.get("value") or "").strip(), c.get("status")
+            if lab in ("nickname", "known from", "relation to me") and not keep_defs:
+                continue
             if lab in ("nickname", "known from", "relation to me") and not grounded(val, n["text"]):
                 continue                                 # definitions only: facts may be paraphrased ("flies planes")
             if lab == "nickname":
@@ -210,7 +218,7 @@ def to_parse(W, descs_by_id, ids):
                 claims.append(("fact", a, lab, val))
             elif st == "no longer":
                 claims.append(("fact", a, lab, "none"))
-        for lk in d.get("links", []):
+        for lk in ([] if not keep_defs else d.get("links", [])):
             a, b = lk.get("from", -1), lk.get("to", -1)
             if not (valid(a) and valid(b)) or a == b:
                 continue
@@ -220,7 +228,8 @@ def to_parse(W, descs_by_id, ids):
                 a, b = b, a
             claims.append(("rel", a, noun, b, noun in SYM))
         P[i] = {"date": n["date"], "order": (n["date"], i), "descs": descs, "ante": ante, "claims": claims,
-                "styles": styles, "texts": [(m.get("text") or "").strip().lower() for m in ms]}
+                "styles": styles, "texts": [(m.get("text") or "").strip().lower() for m in ms],
+                "confirmed": list((confirmed or {}).get(i, [])), "bind": dict((binds or {}).get(i, {}))}
         prev = {"id": i, "descs": descs, "styles": styles, "texts": P[i]["texts"]}
     return P
 
@@ -235,6 +244,12 @@ def resolve(P, iters=5):
             for dd in ([d, d[1]] if d[0] == "via" else [d]):
                 if dd[0] == "full":
                     first_seen.setdefault(dd[1], P[i]["date"])
+        # step 3: the owner names people by full name, so a confirmed person is known from that message on
+        for c in P[i].get("confirmed", ()):
+            for e in ((c[1], c[3]) if c[0] == "rel" else (c[1],)):
+                first_seen.setdefault(e, P[i]["date"])
+        for e in P[i].get("bind", {}).values():
+            first_seen.setdefault(e, P[i]["date"])
     first_of = defaultdict(set)
     for e in first_seen:
         first_of[e.split()[0]].add(e)
@@ -256,6 +271,18 @@ def resolve(P, iters=5):
                         relof[(b, c[2])].append((p["date"], a))     # "a is b's noun"
                         if c[4]:
                             relof[(a, c[2])].append((p["date"], b))
+            # step 3: definitions the owner confirmed, entity-level (no mention binding needed)
+            for c in p.get("confirmed", ()):
+                if c[0] == "role":                                  # ("role", entity, role, since)
+                    roles[c[2]].append((c[3], c[1]))
+                elif c[0] == "nick":                                # ("nick", entity, nickname)
+                    nick[c[2]].append((p["date"], c[1]))
+                elif c[0] == "circle":                              # ("circle", entity, words)
+                    circle[c[1]] |= c[2]
+                elif c[0] == "rel":                                 # ("rel", a, noun, b, symmetric): a is b's noun
+                    relof[(c[3], c[2])].append((p["date"], c[1]))
+                    if c[4]:
+                        relof[(c[1], c[2])].append((p["date"], c[3]))
         recent, new = [], {}
         # (dev fix 3) definitions by majority over the whole history, so one misread definition cannot redirect every
         # later mention; a role changes hands only when a message says "new" (my new boss)
@@ -329,6 +356,8 @@ def resolve(P, iters=5):
                 if d[0] == "pron":
                     continue
                 new[(i, k)] = res(d, p["date"])
+            for k, e in p.get("bind", {}).items():             # step 3: the owner said who this mention is
+                new[(i, k)] = e
             for k, a in p["ante"].items():
                 new[(i, k)] = new.get((i, a[1])) if a[0] == "here" else (new.get(a[1]) or bind.get(a[1]))
             for k in range(len(p["descs"])):
@@ -397,6 +426,19 @@ class View:
                 elif c[0] == "circle" and c[2]:
                     self.ix.add(i, self.pid(e), "known from", " ".join(sorted(c[2])))
                     self.meta[e]["circle"] = " ".join(sorted(c[2]))
+            for c in p.get("confirmed", ()):                   # step 3: definitions the owner confirmed
+                if c[0] == "role":
+                    self.ix.add(i, self.pid(c[1]), "relation to me", c[2])
+                    self.meta[c[1]]["role"] = c[2]
+                elif c[0] == "nick":
+                    self.ix.add(i, self.pid(c[1]), "nickname", c[2])
+                    self.meta[c[1]]["nickname"] = c[2]
+                elif c[0] == "circle" and c[2]:
+                    self.ix.add(i, self.pid(c[1]), "known from", " ".join(sorted(c[2])))
+                    self.meta[c[1]]["circle"] = " ".join(sorted(c[2]))
+                elif c[0] == "rel":
+                    self.ix.add(i, self.pid(c[1]), c[2], self.title(c[3]), link=self.pid(c[3]))
+                    self.links.append((c[1], c[2], c[3], p["date"]))
             for k, e in enumerate(ent):
                 if k not in used and p["styles"][k] != "source" or (k not in used and p["styles"][k] == "source"):
                     if not any(r["note"] == i and r["pid"] == self.pid(e) for r in self.ix.rows[-8:]):
