@@ -1,0 +1,19 @@
+== step 2 as is: true pronoun facts written down, share filed under the right person
+   pronoun       no name cue (they, or a name not labelled)  95.0% of 20
+   pronoun       pronoun clashes with the name               71.4% of 28
+   pronoun       pronoun matches the name                    80.0% of 10
+   pronoun_prev  no name cue (they, or a name not labelled) 100.0% of 7
+   pronoun_prev  pronoun clashes with the name              100.0% of 12
+   pronoun_prev  pronoun matches the name                    93.8% of 16
+== A: true pronoun facts written down, share filed under the right person
+   pronoun       no name cue (they, or a name not labelled)  95.0% of 20
+   pronoun       pronoun clashes with the name               67.9% of 28
+   pronoun       pronoun matches the name                    80.0% of 10
+   pronoun_prev  no name cue (they, or a name not labelled) 100.0% of 7
+   pronoun_prev  pronoun clashes with the name              100.0% of 12
+   pronoun_prev  pronoun matches the name                   100.0% of 16
+== A: 25 wrong everyday rows of 726, by cause
+    15  pronoun: pronoun clashes with the name
+     6  pronoun: no name cue (they, or a name not labelled)
+     4  pronoun: pronoun matches the name
+   of the pronoun rows, in the frame 'In her free time, <name> loves ...': 1

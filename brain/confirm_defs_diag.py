@@ -3,7 +3,9 @@ from, and how pronoun filing depends on whether the pronoun matches the usual ge
 Written after seeing step 3's results; it changes no measure and no verdict.
 
     python brain/confirm_defs_diag.py
+    python brain/confirm_defs_diag.py --descs results/two_ends/describe_all_27b.jsonl --filter    # step 4's 27B
 """
+import argparse
 import os
 import re
 import sys
@@ -32,13 +34,18 @@ def cue(p):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--descs", nargs="*", help="description files (default: the 4B's)")
+    ap.add_argument("--filter", action="store_true", help="step 4's reporting-verb filter")
+    a = ap.parse_args()
     W = TE.dev_world()
-    descs = CD.load_descs()
+    descs = CD.load_descs(a.descs)
+    fl = a.filter
     ids = [n["id"] for n in W.notes if n["id"] not in W.deleted_ids]
     by = {n["id"]: n for n in W.notes}
     confA = {i: CD.truth_defs(W, by[i]) for i in ids if CD.truth_defs(W, by[i])}
-    conds = {"step 2 as is": DB.to_parse(W, descs, ids),
-             "A": DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confA)}
+    conds = {"step 2 as is": DB.to_parse(W, descs, ids, drop_reporting=fl),
+             "A": DB.to_parse(W, descs, ids, keep_defs=False, confirmed=confA, drop_reporting=fl)}
     for label, P in conds.items():
         V = DB.View(W, P, DB.resolve(P))
         wq = MI.write_quality(W, V.ix)

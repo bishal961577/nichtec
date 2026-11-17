@@ -142,6 +142,22 @@ def grounded(val, text):
     return not words or any(w in t or (len(w) > 4 and w[:4] in t) for w in words)
 
 
+# Post-hoc dev change after step 4 (off unless set; every registered number is computed with it off): the describer's
+# "previous" may name a mention in the same message, the teller included ("Fadil Morozov says his street ..."), and
+# names match as whole words ("he" is not part of "Hedda").
+ANTE_V2 = False
+
+
+def wmatch(t, pw):
+    if not t or not pw:
+        return False
+    if t == pw:
+        return True
+    if t in PRON or pw in PRON:
+        return False
+    return bool(re.search(r"\b" + re.escape(t) + r"\b", pw) or re.search(r"\b" + re.escape(pw) + r"\b", t))
+
+
 REPORTING = re.compile(r"^(told|tells|says|said|heard|hears|reported|reports|mentioned|mentions|according)\b")
 
 
@@ -171,7 +187,16 @@ def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None, dr
             pw = (ms[k].get("previous") or "").strip().lower()
             here = [j for j, x in enumerate(descs) if x[0] != "pron" and styles[j] != "source"]
             hit = None
-            if pw and prev is not None:
+            if ANTE_V2 and pw:
+                texts_here = [(m.get("text") or "").strip().lower() for m in ms]
+                same = next((j for j, x in enumerate(descs) if j != k and x[0] != "pron" and wmatch(texts_here[j], pw)),
+                            None)
+                if same is not None:
+                    ante[k] = ("here", same)
+                    continue
+                if prev is not None:
+                    hit = next(((prev["id"], j) for j, t in enumerate(prev["texts"]) if wmatch(t, pw)), None)
+            elif pw and prev is not None:
                 for j, t in enumerate(prev["texts"]):
                     if t and (t == pw or pw in t or t in pw):
                         hit = (prev["id"], j)

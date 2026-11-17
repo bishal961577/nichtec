@@ -601,3 +601,112 @@ approval.
 - One H100, about 20–40 minutes with start-up: about $1.50–3.
 - The endpoint is protected by a vLLM API key, held as the cloud environment's network secret.
 - The URL is never written into the repository.
+
+### Step 4 results (17 November 2026): STOP as registered, narrowly; post-hoc, most of what remains was the resolver's pronoun rule
+
+The run used `brain/bigger_describer.py`; the outputs are `results/two_ends/bigger_summary.md`, `bigger_result.json`,
+`bigger.log` and `describe_all_27b.jsonl`.
+- The 27B described all 1,500 dev messages in 3.9 minutes on one H100. All 1,500 replies were valid JSON, at 145
+  tokens out and 1,452 in per message.
+- The 4B reference reproduced exactly under the same code.
+- **Infrastructure.** The first deploy crashed after loading. vLLM's default of 1,024 sequences in flight needs more
+  of Qwen3.5's linear-attention state blocks than fit beside the 27B (801). Modal then held the GPU until its
+  30-minute start-up limit, about 40 H100 minutes lost.
+- **The fix**, in `brain/modal_qwen27b.py`:
+  - at most 64 sequences in flight;
+  - a cache for the FP8 kernel build;
+  - a watchdog that ends the container when vLLM dies.
+
+  The second start took 7 minutes.
+
+| Measure | 4B own | 4B A | 4B B | 27B own | 27B A | 27B B | Line |
+|---|---|---|---|---|---|---|---|
+| **Wrong merges, everyday facts (primary)** | 8.17% | 6.57% | 6.83% | 4.02% | **3.44%** | 3.72% | ≤ 1.5% (stop > 3%) |
+| Same, without the pronoun quirk | 5.11% | 3.23% | 3.51% | 2.92% | **1.98%** | 2.29% | interpretation |
+| "X's flatmate" filed right | 45.0% | 65.0% | 65.0% | 81.0% | 100% | 100% | ≥ 75% |
+| Worst-person forgetting | 49.2% | 92.1% | 92.1% | 42.9% | 100% | 100% | ≥ 90% |
+| Facts filed right | 78.8% | 80.8% | 80.7% | 88.0% | 89.1% | 88.9% | ≥ 85% |
+| Link precision | 86.1% | 100% | 100% | 90.1% | 100% | 100% | reported |
+| Mentions left unresolved | 9.2% | 4.3% | 3.2% | 22.6% | 1.4% | 0.6% | reported |
+| Owner questions | – | 204 | 281 | – | 204 | 332 (1.89 a day) | B ≤ 2 a day |
+
+**Writing end on the 300 sample** (corrected scorer), 4B → 27B:
+
+| Measure | 4B | 27B | Line |
+|---|---|---|---|
+| Claims on the right mention, easy | 96.2% | **100%** | 98 |
+| Claims on the right mention, hard | 89.8% | **97.1%** | 93 |
+| Relation direction | 64.7% | **100%** | 95 |
+| Lures tagged | 93.3% | 95.0% | 90 |
+| Definitions | 92.3% | **84.6%** | 98 |
+| Recall | 96.1% | 98.4% | – |
+
+**Verdict, as registered: STOP.**
+- The 27B with every definition confirmed files 3.44% of everyday facts under the wrong person, above the 3% stop line.
+- Without the pronoun quirk it files 1.98%, above 1.5%. The registered reading of that case: "even a model 7 times
+  larger cannot attach facts within one sentence in this format; the format becomes the suspect". With 13 wrong rows of
+  655, the interval around 1.98% is wide (roughly 1–3.4%).
+
+**What the 27B fixed** (post-hoc diagnosis, `brain/confirm_defs_diag.py --descs … --filter`, output in
+`results/two_ends/bigger_diag.txt`):
+- Of the 4B's 69 wrong rows in step 3, the 27B makes none of these kinds:
+  - "told me / says" junk on the teller;
+  - facts put on the anchor of "X's relation";
+  - other errors.
+- One "In her free time" case is left.
+- **All 25 of its remaining wrong rows are pronouns:** 15 clash with the name, 6 have no name cue, 4 match the name.
+
+**Where those 25 come from, read row by row:**
+- **14 are the resolver's fault, not the describer's.** The 27B's "previous" field named the right person, but the
+  code dropped it:
+  - **The code looks for that person only in the previous message.** In "Heard from Lucia Zulu today. He says his
+    street in Dresden is lovely", "He" was given as Lucia Zulu. The code did not find her in the previous message and
+    fell back to someone there.
+  - **The code never lets a pronoun refer to the teller.** The 27B marks "Fadil Morozov says…" and "Beatriz texted
+    me…" as told by Fadil or Beatriz.
+  - **Names matched as substrings.** "he" counted as part of "Hedda".
+- **11 are the describer's own:**
+  - 8 are clashing pronouns: "Got a message from Petra. He adopted a ferret" → Ivan from the previous message;
+  - 1 is the "In their free time" frame;
+  - 2 are genuine slips.
+
+**Post-hoc: the rule fixed** (`brain/bigger_posthoc.py`, `results/two_ends/bigger_posthoc.md`; a switch,
+`describe_bind.ANTE_V2`, off for every registered number).
+- **The fix.** The describer's "previous" may name someone in the same message, the teller included, and names match as
+  whole words.
+- **Checks.** With the switch off, the 27B summary reproduces exactly. With it on, truth-built descriptions still give
+  0% wrong merges.
+
+| Condition A | 4B | 4B fixed | 27B | 27B fixed | Line |
+|---|---|---|---|---|---|
+| Wrong merges, everyday facts | 6.57% | 5.56% | 3.44% | **1.52%** (11 of 726) | ≤ 1.5% |
+| Same, without the pronoun quirk | 3.23% | 2.66% | 1.98% | **0.61%** | – |
+| "X's flatmate" / worst forgetting / facts filed | 65 / 92.1 / 80.8 | 65 / 92.1 / 81.7 | 100 / 100 / 89.1 | **100 / 100 / 90.5** | 75 / 90 / 85 |
+
+With the asking policy (B) instead of confirming everything, the 27B fixed gives 1.79% (0.92% without the quirk) at
+1.89 questions a day.
+
+**This is not a pass.**
+- The rule was changed after seeing these rows, on the world the resolver was tuned on.
+- It can only be judged on a fresh world with lines registered first.
+
+### What step 4 means
+
+1. **The design works with a good enough describer, on dev, after a post-hoc fix to its code:**
+   - the 27B describes;
+   - the owner confirms new people (about 1–2 questions a day);
+   - code binds and deletes by recomputation.
+
+   With these three, 1.5% wrong-person facts (0.6% without the world's pronoun quirk), 100% forgetting and 100% "X's
+   flatmate". This is the first configuration in this project to reach all the filing lines, if only in a post-hoc
+   reading.
+2. **The 4B is the weak link.** Even with the fix it files 5.6% wrong. The 27B's writing-end scores show where it is
+   better: the hard attachment cases (97% against 90%), relation direction (100% against 65%), and no junk claims.
+3. **The 27B is worse at proposing definitions on its own** (84.6% against 92.3%; its own-definition forgetting is
+   42.9%). Owner confirmation is part of the design, not an extra.
+4. **Next, in order:**
+   - a judged confirmation on a fresh-seed world: the 27B, the fixed rule, conditions A and B, lines registered first.
+     It costs about $1–2 now that the server starts in 7 minutes;
+   - only if that passes, the route to the phone: teach the 4B from the 27B's descriptions of generated worlds
+     (teacher and student);
+   - still open for test 2's FREEZE: the pronoun quirk.
