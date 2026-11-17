@@ -710,3 +710,65 @@ With the asking policy (B) instead of confirming everything, the 27B fixed gives
    - only if that passes, the route to the phone: teach the 4B from the 27B's descriptions of generated worlds
      (teacher and student);
    - still open for test 2's FREEZE: the pronoun quirk.
+
+## Step 5: the judged run on a fresh world (pre-registered before its model calls, 17 November 2026)
+
+The owner approved it. Step 4's post-hoc configuration is judged on a world the resolver was never tuned on.
+
+**World.** `messy_world.World("dev", seed=20261117)`, first 1,500 messages. The seed is new, used nowhere in this
+project:
+- dev is 101;
+- test 2's are 20261115 and 7, and the scored seed comes from the beacon;
+- 20261116 picks step 1's writing sample.
+
+| Property | Value |
+|---|---|
+| Messages after 25 deletions | 1,475 |
+| Days | 185 |
+| Messages carrying a definition | 203 |
+| Messages touched by the pronoun quirk | 63 |
+| People | 260 |
+
+- **What it tests.** The same generator and sentence templates as dev, so it tests new people, names, facts and
+  sequences, **not new phrasing**.
+- **What it leaves out.** Dev slots and relations only. Nothing sealed is read.
+
+**Frozen configuration.**
+- **Describer.** Qwen3.5-27B-FP8, describer v3, thinking off, memory-blind; the same settings as step 4.
+- **Resolver.** As in step 4's post-hoc reading:
+  - the antecedent rule fixed (`describe_bind.ANTE_V2`);
+  - the reporting-verb filter on.
+- **Labels.** The usual-gender labels now cover all 233 first names the generator can pick (`brain/fresh_check.py`),
+  fixed before the run. They are a superset of the dev labels; 18 names are left as unisex.
+- **No changes after seeing the results.**
+
+**Checks run before any model call** (`python brain/fresh_check.py --selfcheck`): truth-built descriptions on this world
+give 0.14% wrong merges, 100% "X's flatmate", worst forgetting 98.2% and 2 unresolved mentions of 1,544, with either
+rule. So the resolver itself makes a few errors off the world it was tuned on, against 0% on dev. That floor is small
+beside the 1.5% line.
+
+**Lines (condition A, every definition confirmed):**
+
+| Measure | Pass | Stop |
+|---|---|---|
+| Wrong merges, everyday facts | ≤ 1.5% | > 3% |
+| "X's flatmate" filed right | ≥ 75% | – |
+| Worst-person forgetting | ≥ 90% | – |
+| Facts filed right | ≥ 85% | – |
+
+**Also reported:**
+- the split without the quirk (interpretation);
+- condition B, with the same lines plus ≤ 2 questions a day;
+- the 27B's own definitions;
+- wrong rows by mention style;
+- link precision, unresolved mentions, valid JSON and tokens.
+
+**What the results would mean (decided now):**
+- **PASS.** "Describe, confirm, bind" generalises past the world it was tuned on, within this generator's phrasing.
+  Next: teach the 4B from the 27B's descriptions (teacher and student), and an answer run with the 4B reader.
+- **BETWEEN** (1.5–3%). Dev's 1.52% was partly fitted to dev. Look at the errors before teaching the 4B anything.
+- **STOP** (> 3%). Step 4's post-hoc reading did not hold. The configuration was fitted to dev.
+
+**Not tested:** new phrasing, real chat (the owner's 300 labelled messages), and answers.
+
+**Cost.** One H100 already running: about 5 minutes of describing, about $0.50.
