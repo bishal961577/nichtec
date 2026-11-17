@@ -4,3 +4,10 @@ messages touched by the pronoun quirk: 66 of 1465
 4B, filter: A (every definition): everyday wrong 6.57% (52/791); registered 5.66%; via 65.0; forgetting worst 92.1 avg 97.1; filed 80.8; links 100.0; unresolved 4.3% (0 s)
 B: 281 questions in 3 rounds; 60 confirmations found no true definition
 4B, filter: B (asking policy): everyday wrong 6.83% (54/791); registered 6.01%; via 65.0; forgetting worst 92.1 avg 97.4; filed 80.7; links 100.0; unresolved 3.2% (0 s)
+=== 2026-11-17 14:13:14 step 4: the bigger describer
+messages touched by the pronoun quirk: 66 of 1465
+4B, filter: none (own definitions): everyday wrong 8.17% (64/783); registered 7.83%; via 45.0; forgetting worst 49.2 avg 83.9; filed 78.8; links 86.1; unresolved 9.2% (6 s)
+4B, filter: A (every definition): everyday wrong 6.57% (52/791); registered 5.66%; via 65.0; forgetting worst 92.1 avg 97.1; filed 80.8; links 100.0; unresolved 4.3% (0 s)
+B: 281 questions in 3 rounds; 60 confirmations found no true definition
+4B, filter: B (asking policy): everyday wrong 6.83% (54/791); registered 6.01%; via 65.0; forgetting worst 92.1 avg 97.4; filed 80.7; links 100.0; unresolved 3.2% (0 s)
+model served: Qwen/Qwen3.5-27B-FP8
