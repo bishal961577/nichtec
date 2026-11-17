@@ -1,0 +1,154 @@
+{
+ "none": {
+  "everyday_wrong_pct": 2.5604551920341394,
+  "everyday_rows": 703,
+  "everyday_wrong_rows": 18,
+  "wrong_by_owner_style": {
+   "pronoun": 10,
+   "fname_ctx": 4,
+   "fname": 2,
+   "no fact": 1,
+   "role": 1
+  },
+  "registered_wrong_pct": 2.7901785714285716,
+  "hard_merge_pct": 12.0,
+  "via_pct": 86.7,
+  "forget_worst_pct": 36.92307692307693,
+  "forget_avg_pct": 57.30352016132878,
+  "facts_filed_pct": 91.31121642969984,
+  "link_precision_pct": 88.11881188118812,
+  "unresolved_pct": 21.44638403990025,
+  "filed_right_by_style": {
+   "fname": 99.1,
+   "fname_ctx": 93.0,
+   "full": 100.0,
+   "nick": 100.0,
+   "pronoun": 87.5,
+   "pronoun_prev": 100.0,
+   "role": 100.0,
+   "via": 86.7
+  },
+  "filed_n_by_style": {
+   "fname": 109,
+   "fname_ctx": 57,
+   "full": 223,
+   "nick": 20,
+   "pronoun": 72,
+   "pronoun_prev": 42,
+   "role": 56,
+   "via": 15
+  },
+  "rows_left_after_deletion": 0,
+  "people_split_into_several_ids": 18,
+  "everyday_wrong_split_pct": 1.7214397496087637,
+  "everyday_rows_split": 639,
+  "everyday_wrong_rows_split": 11,
+  "verdict": "BETWEEN"
+ },
+ "A": {
+  "everyday_wrong_pct": 1.6997167138810199,
+  "everyday_rows": 706,
+  "everyday_wrong_rows": 12,
+  "wrong_by_owner_style": {
+   "pronoun": 10,
+   "role": 1,
+   "fname": 1
+  },
+  "registered_wrong_pct": 1.431980906921241,
+  "hard_merge_pct": 3.8461538461538463,
+  "via_pct": 100.0,
+  "forget_worst_pct": 100.0,
+  "forget_avg_pct": 100.0,
+  "facts_filed_pct": 91.78515007898895,
+  "link_precision_pct": 100.0,
+  "unresolved_pct": 1.6209476309226933,
+  "filed_right_by_style": {
+   "fname": 100.0,
+   "fname_ctx": 100.0,
+   "full": 100.0,
+   "nick": 100.0,
+   "pronoun": 87.5,
+   "pronoun_prev": 100.0,
+   "role": 100.0,
+   "via": 100.0
+  },
+  "filed_n_by_style": {
+   "fname": 108,
+   "fname_ctx": 57,
+   "full": 223,
+   "nick": 19,
+   "pronoun": 72,
+   "pronoun_prev": 42,
+   "role": 54,
+   "via": 15
+  },
+  "rows_left_after_deletion": 0,
+  "people_split_into_several_ids": 17,
+  "everyday_wrong_split_pct": 0.9345794392523364,
+  "everyday_rows_split": 642,
+  "everyday_wrong_rows_split": 6,
+  "questions": 203,
+  "verdict": "BETWEEN"
+ },
+ "B": {
+  "everyday_wrong_pct": 1.6997167138810199,
+  "everyday_rows": 706,
+  "everyday_wrong_rows": 12,
+  "wrong_by_owner_style": {
+   "pronoun": 10,
+   "role": 1,
+   "fname": 1
+  },
+  "registered_wrong_pct": 1.4723926380368098,
+  "hard_merge_pct": 3.8461538461538463,
+  "via_pct": 100.0,
+  "forget_worst_pct": 100.0,
+  "forget_avg_pct": 100.0,
+  "facts_filed_pct": 91.78515007898895,
+  "link_precision_pct": 100.0,
+  "unresolved_pct": 0.6234413965087282,
+  "filed_right_by_style": {
+   "fname": 100.0,
+   "fname_ctx": 100.0,
+   "full": 100.0,
+   "nick": 100.0,
+   "pronoun": 87.5,
+   "pronoun_prev": 100.0,
+   "role": 100.0,
+   "via": 100.0
+  },
+  "filed_n_by_style": {
+   "fname": 108,
+   "fname_ctx": 57,
+   "full": 223,
+   "nick": 19,
+   "pronoun": 72,
+   "pronoun_prev": 42,
+   "role": 54,
+   "via": 15
+  },
+  "rows_left_after_deletion": 0,
+  "people_split_into_several_ids": 7,
+  "everyday_wrong_split_pct": 0.9345794392523364,
+  "everyday_rows_split": 642,
+  "everyday_wrong_rows_split": 6,
+  "questions": 306,
+  "questions_by_type": {
+   "confirm a proposed definition": 269,
+   "who is my <role>": 21,
+   "who is X's <relation>": 15,
+   "  of which: not a person": 6,
+   "who is <first name or nickname>": 1
+  },
+  "confirmations_with_nothing_true": 103,
+  "rounds": 2,
+  "true_definitions_recovered": 166,
+  "true_definitions_total": 203,
+  "verdict": "BETWEEN"
+ },
+ "unparsed": 0,
+ "tokens": {
+  "out": 140.74066666666667,
+  "in": 1451.8166666666666
+ }
+}

@@ -772,3 +772,52 @@ beside the 1.5% line.
 **Not tested:** new phrasing, real chat (the owner's 300 labelled messages), and answers.
 
 **Cost.** One H100 already running: about 5 minutes of describing, about $0.50.
+
+### Step 5 results (17 November 2026): BETWEEN, as registered
+
+`brain/fresh_check.py` (`results/two_ends/fresh_summary.md`, `fresh_result.json`, `fresh.log`,
+`describe_fresh_27b.jsonl`). The server was woken in 18 seconds. It described all 1,500 fresh messages in 4.0 minutes,
+all valid JSON.
+
+| Measure | own definitions | A: every definition confirmed | B: asking policy | Line | Dev, post-hoc (A) |
+|---|---|---|---|---|---|
+| **Wrong merges, everyday facts (primary)** | 2.56% | **1.70%** (12 of 706) | 1.70% | ≤ 1.5% (stop > 3%) | 1.52% |
+| Same, without the pronoun quirk | 1.72% | 0.93% | 0.93% | interpretation | 0.61% |
+| Wrong merges, registered count | 2.79% | 1.43% | 1.47% | reported | – |
+| "X's flatmate" filed right | 86.7% | 100% | 100% | ≥ 75% | 100% |
+| Worst-person forgetting | 36.9% | 100% | 100% | ≥ 90% | 100% |
+| Facts filed right | 91.3% | 91.8% | 91.8% | ≥ 85% | 90.5% |
+| Link precision | 88.1% | 100% | 100% | reported | – |
+| Owner questions | – | 203 (1.10 a day) | 306 (1.65 a day) | B ≤ 2 a day | – |
+
+**Verdict: BETWEEN.**
+- Every line passes except the primary one, which misses by about 1 row (1.70% against 1.5%).
+- The registered reading: "dev's 1.52% was partly fitted to dev; look at the errors before teaching the 4B anything".
+- On the numbers, the fresh result is within noise of dev's: 12 of 706 against 11 of 726, each with an interval of
+  roughly 1–3%. So the fresh world shows **no sign of fitting beyond chance**. Both worlds sit just above the line.
+
+**The errors** (`results/two_ends/fresh_errors.txt`; diagnosis after the results). All 12 are pronouns whose person is
+named in the **same** message, where the 27B's "previous" points to someone in the previous message instead:
+- **8 come from a clash between the pronoun and the name's usual gender.** "Got a message from Dmitri Okonkwo. In her
+  free time, She loves fishing." → Maya from the previous message. Six fall in the quirk set; the other two are Noor,
+  labelled unisex, and "My boss … her".
+- **4 are other errors:**
+  - singular "they" ("Got a message from Flora Lindgren. They have a pet corn snake.");
+  - a nickname not taken as the person ("Got a message from Kit. Correction: Her hobby is …", twice);
+  - "Svenja says her street …" → Edda from the previous message.
+- **None are** teller junk, anchors, definitions or links.
+
+### What step 5 means
+
+1. **The describe, confirm and bind design holds on a world it was not tuned on**, within this generator's phrasing:
+   - wrong-person facts 1.7% (0.9% without the quirk);
+   - 100% forgetting and 100% "X's flatmate";
+   - about 1.1–1.7 owner questions a day.
+
+   It misses the pre-registered 1.5% by about one row, so the verdict is BETWEEN, not PASS.
+2. **What is left is one mechanism:** a pronoun whose person is in the same message, resolved to someone earlier. It is
+   mostly triggered when the pronoun does not match the gender the name suggests.
+   - That case is far more common in this world than in real chat, because pronouns here are random.
+   - But it is also the case that **misfiles real people whose pronouns differ from what their name suggests**. An
+     accountable memory should not misfile them more than anyone else.
+3. **Still untested:** new phrasing, real chat, the 4B as describer after teaching, and answers.
