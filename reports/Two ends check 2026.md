@@ -821,3 +821,77 @@ named in the **same** message, where the 27B's "previous" points to someone in t
    - But it is also the case that **misfiles real people whose pronouns differ from what their name suggests**. An
      accountable memory should not misfile them more than anyone else.
 3. **Still untested:** new phrasing, real chat, the 4B as describer after teaching, and answers.
+
+## Step 6: the real-chat check on REALTALK (pre-registered before its model calls, 18 November 2026)
+
+The owner approved it, in place of labelling their own messages.
+
+**Data.**
+- **Source.** REALTALK (Lee et al. 2025, arXiv 2502.13270; github.com/danny911kr/REALTALK at commit `48b3ab8`,
+  Apache-2.0): 21 days of real messaging-app chats between consenting participants.
+- **Selection.** Chats 1–4, 1,761 messages, between four participants who each appear in two of them: Emi, Elise, Kevin
+  and Paola.
+- **Kept out of the repository.** The data stay in a local clone outside the repository. Nothing that quotes a message
+  is committed: not the descriptions, not the judging files. Only claim ids, person ids, the summary and the log are.
+
+**Setting: one memory per person.** Each participant is an owner, whose journal is their own messages across their two
+chats, in time order (Elise 464, Emi 439, Kevin 453, Paola 405).
+- **Describing.** Each message is described memory-blind from its writer's point of view, with the chat's previous
+  message (either speaker) for context.
+- **Binding.** Each journal is bound on its own.
+- **The closest real-chat stand-in for "the owner tells their AI about their life".** The difference: these messages
+  are written to a person, so "you" is that person.
+
+**The configuration** (`brain/realchat.py`):
+- **Describer.** Qwen3.5-27B-FP8: describer v3, thinking off, memory-blind, the same settings as steps 4–5.
+- **One registered change, for chat.** The first line names the writer and the listener. One added rule: "you", "your",
+  "u" and "ur" mean the chat partner, listed as a mention of kind "first name" with the partner's name. "We" and "us" are
+  not mentions. The rest of v3 is unchanged, including "facts about me, the writer, are not claims".
+- **Resolver.** Frozen at step 5: the antecedent rule fixed, the reporting-verb filter on, the 27B's own definitions (no
+  confirmation simulated: REALTALK has no answer key for definitions).
+
+**Judging** (there is no answer key, so the analyst, Claude, is the judge; a different model family from the
+describer). Two passes, written before any description was seen:
+1. **Pass 1, claims.** Each claim is shown with its message and the chat's four previous messages, in random order. The
+   mention it was attached to and where it was filed are **not** shown. The judge writes who it is about:
+   - a person id;
+   - `OWNER` (a fact about the writer);
+   - or `NONE`: no fact about a person. That covers a question, a guess or a greeting. A plan, a past event or a
+     feeling stated or clearly implied is a fact.
+2. **Pass 2, people.** Each of the resolver's people that holds a claim is shown with its mention words and example
+   messages. The judge writes which person id it is.
+
+A claim is **filed right** when the two passes agree. `OWNER` claims are counted as wrong-person (a fact about the
+writer filed under someone else).
+
+**Sampling rule.** If there are more than 600 claims, every claim not attached to the partner's mention is judged, plus
+200 of the partner's drawn at random (seed 6), and the overall rate is weighted.
+
+**Check on the judge.** The owner checks 30 judged claims drawn at random (claim, context, the judge's label). If fewer
+than 27 of 30 agree, no verdict is drawn and the step is reported as "judge not reliable enough".
+
+**Lines (pooled over the four journals):**
+
+| Measure | Pass | Stop |
+|---|---|---|
+| Wrong-person rate, over judged claims that are facts about a person | ≤ 1.5% | > 3% |
+
+**Also reported:**
+- wrong-person rates for claims on the partner's mention, on third parties and on pronouns;
+- the share of claims that are no fact (`NONE`);
+- the share of facts about the writer turned into claims;
+- claims per message, and valid JSON.
+
+**What the results would mean (decided now):**
+- **PASS.** Filing survives real phrasing in this sample. Next: pronouns confirmed by the owner, then teach the 4B.
+- **BETWEEN.** Look at which real-chat phenomena break it before any 4B work.
+- **STOP.** Real phrasing breaks filing as configured, so the synthetic results do not transfer. Diagnose before any 4B
+  work.
+
+**Not measured:**
+- recall: facts the describer misses, because there is no independent fact list;
+- definitions and confirmation;
+- answers;
+- owners other than four 18–25-year-old US English speakers chatting with study partners.
+
+**Cost.** About 1,761 calls on the 27B server, under $1.
