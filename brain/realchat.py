@@ -56,6 +56,33 @@ HEAD = ("You read one message that I, {owner}, sent to {partner} in a chat, and 
         "{partner}, list it as a mention with \"text\" as written, \"kind\" \"first name\" and \"name\" \"{partner}\". "
         "\"We\" and \"us\" are not mentions.")
 CHAT_DESCRIBE = TE.DESCRIBE.replace(FIRST, HEAD, 1)
+# Step 7: describer v4 for chat, written after step 6's diagnosis (non-facts written down as claims; "your X" read as
+# "my X"; the writer's own facts handed to the partner; pets, companies, countries and "we" as people).
+RULES_V4 = (
+    "\n\nRules for chat, before the general ones below:\n"
+    "- \"You\", \"your\", \"u\" and \"ur\" mean {partner}. When the message says something about {partner}, "
+    "list \"you\" as a mention with \"kind\" \"first name\" and \"name\" \"{partner}\".\n"
+    "- {partner}'s relatives and friends are named through {partner}: \"your mom\", \"ur sister\", \"your friend\" "
+    "are \"through someone\" mentions with \"through\" \"{partner}\" and the relation word (\"mom\"). Only "
+    "\"my ...\" is my relation.\n"
+    "- I am {owner}, the writer: \"I\", \"me\", \"my\", \"we\" and \"us\" are never mentions, and nothing about "
+    "me is a claim, even when the message also asks {partner} something (\"Yes, I've been to Italy, have you?\" has "
+    "no claim).\n"
+    "- Only people are mentions: not pets, sports teams, companies, brands, countries or places.\n"
+    "- A claim is a fact the message tells about a person. A question, greeting, thanks, compliment, reaction "
+    "(\"that sounds amazing\"), wish (\"enjoy your trip\") or advice is not a claim. \"Did you get the job?\" has "
+    "no claim; \"Congrats on the new job!\" has one: a new job.")
+CHAT_DESCRIBE_V4 = TE.DESCRIBE.replace(FIRST, HEAD + RULES_V4, 1)
+# stage -> chats, describer, description file, results folder, judging sample (cap, partner n, other n, seed)
+STAGES = {
+    "step6": dict(chats=(1, 2, 3, 4), prompt=CHAT_DESCRIBE, desc="describe.jsonl", out="realchat",
+                  sample=(600, 200, None, 6)),
+    "step7dev": dict(chats=(1, 2, 3, 4), prompt=CHAT_DESCRIBE_V4, desc="describe_v4.jsonl", out="realchat_v4_dev",
+                     sample=(450, 150, 300, 7)),
+    "step7": dict(chats=(5, 6, 7, 8, 9, 10), prompt=CHAT_DESCRIBE_V4, desc="describe_v4.jsonl", out="realchat_v4",
+                  sample=(450, 150, 300, 7)),
+}
+STAGE = STAGES["step6"]
 
 
 class Journal:
@@ -67,12 +94,13 @@ class Journal:
 
 def load(data):
     msgs = []
-    for c in CHATS:
+    for c in STAGE["chats"]:
         f = glob.glob(os.path.join(data, f"Chat_{c}_*.json"))
         assert len(f) == 1, (c, f)
         d = json.load(open(f[0], encoding="utf-8"))
-        names = {d["name"]["speaker_1"].strip().lower(): d["name"]["speaker_1"].strip().capitalize(),
-                 d["name"]["speaker_2"].strip().lower(): d["name"]["speaker_2"].strip().capitalize()}
+        up = lambda x: x.strip()[:1].upper() + x.strip()[1:]       # "elise" -> "Elise"; "Fahim Khan" kept
+        names = {d["name"]["speaker_1"].strip().lower(): up(d["name"]["speaker_1"]),
+                 d["name"]["speaker_2"].strip().lower(): up(d["name"]["speaker_2"])}
         chat = []
         for k in sorted((k for k in d if re.fullmatch(r"session_\d+", k)), key=lambda k: int(k.split("_")[1])):
             for m in d[k]:
@@ -110,11 +138,11 @@ def prompt(m):
     prev = m["prev"]
     while prev is not None and not prev["text"]:
         prev = prev["prev"]
-    return CHAT_DESCRIBE.format(owner=m["speaker"], partner=m["partner"], prev=line(prev), msg=line(m))
+    return STAGE["prompt"].format(owner=m["speaker"], partner=m["partner"], prev=line(prev), msg=line(m))
 
 
 def describe(llm, msgs, log, workers, work):
-    path = os.path.join(work, "describe.jsonl")
+    path = os.path.join(work, STAGE["desc"])
     done = {}
     if os.path.exists(path):
         for ln in open(path, encoding="utf-8"):
@@ -169,13 +197,19 @@ def bind_all(J, descs):
 
 
 def sample(recs):
-    """Claims to judge: all of them up to 600; else all not on the partner's mention plus 200 of the partner's."""
-    if len(recs) <= 600:
+    """Claims to judge (the stage's registered rule). Step 6: all up to 600, else all not on the partner's mention plus
+    200 of the partner's (seed 6). Step 7: all up to 450, else up to 300 not on the partner's mention and 150 on it,
+    each drawn at random (seed 7). Each stratum is weighted by its size over its sample."""
+    cap, n_part, n_other, seed = STAGE["sample"]
+    if len(recs) <= cap:
         return recs, {}
     by = {m: [r for r in recs if (r["mention_is_partner"]) == m] for m in (True, False)}
-    pick = random.Random(6).sample(by[True], min(200, len(by[True])))
-    w = {r["cid"]: len(by[True]) / len(pick) for r in pick}
-    return by[False] + pick, w
+    rng = random.Random(seed)
+    pick_p = rng.sample(by[True], min(n_part, len(by[True])))
+    pick_o = by[False] if n_other is None else rng.sample(by[False], min(n_other, len(by[False])))
+    w = {r["cid"]: len(by[True]) / len(pick_p) for r in pick_p}
+    w.update({r["cid"]: len(by[False]) / len(pick_o) for r in pick_o})
+    return pick_o + pick_p, w
 
 
 def context(m, k=4):
@@ -266,9 +300,13 @@ def main():
     ap.add_argument("--model", default="Qwen/Qwen3.5-27B-FP8")
     ap.add_argument("--workers", type=int, default=32)
     ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--stage", choices=sorted(STAGES), default="step6")
     ap.add_argument("--export", action="store_true")
     ap.add_argument("--score", action="store_true")
     a = ap.parse_args()
+    global STAGE, OUT
+    STAGE = STAGES[a.stage]
+    OUT = os.path.join(TE.OUT, STAGE["out"])
     msgs = load(a.data)
     J, keep = journals(msgs)
     os.makedirs(OUT, exist_ok=True)
@@ -278,7 +316,7 @@ def main():
         print(s, flush=True)
         logf.write(s + "\n")
         logf.flush()
-    log(f"=== {time.strftime('%Y-%m-%d %H:%M:%S')} step 6: REALTALK chats {CHATS}: {len(keep)} messages with text "
+    log(f"=== {time.strftime('%Y-%m-%d %H:%M:%S')} {a.stage}: REALTALK chats {STAGE['chats']}: {len(keep)} messages with text "
         f"(of {len(msgs)}); journals: " + ", ".join(f"{o} {len(W.notes)}" for o, W in J.items()))
     if a.dry:
         print(prompt(keep[40]))
@@ -289,7 +327,7 @@ def main():
         llm = G.Endpoint(a.base_url, a.model, 1)
         log(f"model served: {llm.model}")
         describe(llm, keep, log, a.workers, a.work)
-    path = os.path.join(a.work, "describe.jsonl")
+    path = os.path.join(a.work, STAGE["desc"])
     if not os.path.exists(path):
         raise SystemExit("no descriptions yet: run with --base-url")
     descs = {}
