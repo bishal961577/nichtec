@@ -1049,3 +1049,116 @@ verdict.
   rather than one message.
 
 **Cost.** About 7,183 calls on the running 27B server: about 10 minutes, about $1.
+
+### Step 7 results (judged 18 November 2026)
+
+**Verdict: STOP, on both lines,** pending the owner's check of 30 labels (below). The judge's own slips are fixed
+post-hoc in a logged second count; that count is also STOP on both lines.
+
+| Chats 5–10, describer v4b | As registered | Judge's slips fixed (post-hoc, logged) | Pass | Stop |
+|---|---|---|---|---|
+| Wrong-person rate (weighted, 322 judged facts) | **9.12%** | 7.44% | ≤ 1.5% | > 3% |
+| Facts captured and filed right (19 facts) | **26.3%** (5) | 36.8% (7) | ≥ 70% | < 50% |
+
+**Also reported** (as registered):
+
+| Measure | Value |
+|---|---|
+| Claims, and claims per message | 978, 0.14 (step 6, v3 on chats 1–4: 1,113 and 0.63) |
+| Judged | 450: 322 facts about a person, 128 no fact |
+| Share of claims that are no fact (weighted) | 26.5% (step 6: 40.4%) |
+| A fact about the writer filed under someone | 3.9% of judged facts |
+| Wrong-person, partner's mention | 19.8% (step 6: 3.5%) |
+| Wrong-person, third parties | 6.7% (4.4% with the judge's slips fixed; step 6: 8.5%) |
+| Wrong-person, pronouns | 6.6% (4.6% fixed; step 6: 12.5%) |
+| People split under several records | 32 of 132 people holding judged claims; 130 of the 242 records are one-message pronoun placeholders |
+
+**The judge's slips** (`results/two_ends/realchat_v4/reconcile_log.json`, 11 changes). A second count fixes only these
+two kinds, both found while reading the disagreements:
+- the two passes naming one person in two ways;
+- a pass misreading a record's own example messages.
+
+Semantic calls stay as judged, even arguable ones. Examples:
+- "owed money: 200" filed under the man owed it;
+- "community with: Akib" filed under the neighbour.
+
+The fixes:
+- Vanessa's ex was named "creepy man" (Nebraas's word) in two pass-1 labels.
+- Pass 1 missed that "bro" was Naruto.
+- Pass 2 read a record of the boyfriend's family as the boyfriend.
+- Three coworker records and one recall fact used different names. One of these merges was planned before scoring and
+  then forgotten.
+
+The fixes can only lower the error count. This is why the registered count is the verdict and the fixed one is shown
+beside it.
+
+**Two leniencies in the judging**, both in the system's favour:
+- **Nebraas's partner** is "girlfriend" to Vanessa and "boyfriend" to Nicolas, in the same stories (the bakery
+  coworker, the Weeknd concert), and was judged as one person.
+- **Nebraas's two roommates** (the best friend and the one "a bit like Julio") were not told apart, so a mix-up between
+  them is not counted.
+
+**What the 27 remaining wrong-person errors are** (unweighted, after the fixes):
+
+| Kind | Errors | Example (paraphrased) |
+|---|---|---|
+| A "you" that is not the partner, filed under the partner | 13 | 11 general "you" (living in the city "you can walk to the pharmacy"; "the bagels come out wrinkled when you boil them"); 1 "you" inside a quoted text message; 1 "pal" meaning someone else |
+| The writer's own feeling or relation filed under the other person | 5 | "never heard of him" filed on Logan Paul as "known to me: never heard"; "I don't care about him" filed on Gordon Ramsay as "interest: none" |
+| The writer's own fact filed under the partner | 2 | "neither do I have a nuclear engineering background" became the partner's background |
+| "Your family" filed under the partner, not as the partner's family | 2 | |
+| One third party's fact filed under another | 3 | Harry Potter's "meets his godfather" filed on Sirius Black; Dr Phil's baldness filed on Gypsy Blanchard |
+| Arguable relation wording | 2 | the two semantic calls above |
+
+The first kind is self-inflicted: v4's rule says "you" means the partner. Even if all 13 were right, the rate would be
+4.30%, still over the stop line.
+
+**Why 12 of the 19 recall facts were missed** (the recall labels were written before any description was seen):
+
+| Reason | Facts missed |
+|---|---|
+| The describer wrote nothing for the message. In most of these, the person is named only in an earlier message ("like Shutter Island, Inception and Catch Me If You Can", the actor named two lines before) | 8 (7 messages) |
+| v4b's "a message that only asks has no claim" rule ("how did the cat adoption go?" says the partner is adopting a cat), or a plan that is not written as a claim | 2 |
+| Only a definition was written, not the fact | 1 |
+| The describer wrote the fact, but the binder dropped it as "past" | 1 |
+
+**A pipeline leak found in this step.** The frozen binder (step 5's) keeps a claim only if its status is "true now",
+"correction" or "no longer". On the exam chats it silently drops 510 of the describer's 1,507 non-definition claims
+(34%):
+- 249 marked "past";
+- 233 "plan or wish";
+- 27 "tried or temporary";
+- 1 other.
+
+The judging rules count a past event or a plan as a fact. So in real chat this filter throws away a third of what the
+describer writes. It came from the synthetic world and I did not check it during development. Here it costs at most
+one recall fact (8 of 19, 42%, still under the stop line). On a describer that writes more it would matter more.
+
+**Check on the judge.** 30 claims are drawn from the 450 labels by step 6's rule (seed 30, over the claim ids;
+`spotcheck_ids.json`) and given to the owner: 24 facts about a person and 6 no fact. If the owner agrees with fewer than
+27, the verdict is withdrawn and the step is reported as "judge not reliable enough".
+
+**What it means.** The registered meaning of STOP applies: better instructions alone do not make the 27B read real chat
+well enough in the describe-then-bind form. The describe step itself needs rethinking. The errors say why:
+- **Most of what is wrong needs the conversation, not the message:**
+  - who "she" is (130 records are pronouns the resolver could not attach, so Nicolas's crush is spread over 16
+    records);
+  - whether "you" is the partner or anyone;
+  - facts whose person was named a few lines earlier (8 of the 12 recall misses).
+- **Two parts are self-inflicted and cheap to fix,** but fixing them does not reach the lines:
+  - the "you means the partner" rule (4.30% without those errors);
+  - the status filter (42% recall at most).
+- **v4b moved the errors rather than removing them.** It cut junk from 40% to 26%, and claims on the partner's mention from two thirds of
+  the judged weight to a fifth. The partner claims left are mostly the hard ones: general "you".
+- **The wrong-person measure does not see splits,** and splits are as large a problem for a memory as wrong filing.
+  "Everything about my crush" lives in 16 places.
+
+**Next, for the owner to choose** (REALTALK has no unread chats left, so any new judged run needs another human chat
+set):
+1. **Describe with the conversation** (the analyst's recommendation). The describer sees the last few messages from
+   both people and writes who each "she", "he" or "you" is, in words the resolver can bind ("my crush", "Vanessa's
+   ex", or "nobody, general you"). The binder keeps past events and plans. Develop on REALTALK, then judge once on a
+   new, unread chat set.
+2. **Fix the two cheap problems only** and re-measure on chats 5–10 as development. It costs little, but the numbers
+   above say it cannot pass.
+3. **Change where memory comes from.** Use the owner's own notes and messages, where the writer is the owner and "I"
+   is unambiguous, before other people's chat.

@@ -1,0 +1,2256 @@
+[
+{
+"cid": "4143.287",
+"truth": "Muhhamed:sister's husband",
+"filed": "Muhhamed:sister's husband",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2645.170",
+"truth": "name:Leonardo DiCaprio",
+"filed": "name:Leonardo DiCaprio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6354.207",
+"truth": "name:Faker",
+"filed": "name:Faker",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4364.289",
+"truth": "name:Will Hunting",
+"filed": "name:Will Hunting",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5077.907",
+"truth": "Vanessa:toxic ex",
+"filed": "Vanessa:toxic ex",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1630.15",
+"truth": "Akib:wife's best friend",
+"filed": "Akib:wife's best friend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4476.662",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1473.795",
+"truth": "OWNER",
+"filed": "NONE",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "6921.213",
+"truth": "Fahim Khan:intern Monet",
+"filed": "Fahim Khan:intern Monet",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1482.341",
+"truth": "Nebraas:boyfriend's family",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "2111.368",
+"truth": "Nebraas:boyfriend's family|OWNER",
+"filed": "Nebraas:boyfriend's family",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "680.7",
+"truth": "Akib:friend (lent the bike)",
+"filed": "Akib:friend (lent the bike)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2595.165",
+"truth": "OWNER",
+"filed": "name:Logan Paul",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "1415.575",
+"truth": "Nicolas:visiting friend",
+"filed": "Nicolas:visiting friend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2522.828",
+"truth": "Vanessa:client (old lady with dog)",
+"filed": "Vanessa:client (old lady with dog)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3534.437",
+"truth": "Nebraas:parents",
+"filed": "Nebraas:parents",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6818.138",
+"truth": "Akib:neighbours (young couple)",
+"filed": "Akib:neighbours (young couple)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5470.699",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5025.901",
+"truth": "Nebraas:yelling man at work",
+"filed": "Nebraas:yelling man at work",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5432.933",
+"truth": "Vanessa:creepy man",
+"filed": "Vanessa:creepy man",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3259.58",
+"truth": "name:Boss Baby",
+"filed": "name:Boss Baby",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2839.620",
+"truth": "Nicolas:crush's friends|Nicolas:friends",
+"filed": "Nicolas:crush's friends",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "6545.754",
+"truth": "OWNER",
+"filed": "name:Gordon Ramsay",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "6373.539",
+"truth": "Nebraas:best friend (roommate)",
+"filed": "Nebraas:best friend (roommate)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6307.535",
+"truth": "Nebraas:best friend (roommate)",
+"filed": "Nebraas:best friend (roommate)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5498.116",
+"truth": "name:Kanye West",
+"filed": "name:Kanye West",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3899.656",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3827.878",
+"truth": "Vanessa:personal trainer",
+"filed": "Vanessa:personal trainer",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6469.542",
+"truth": "Nebraas:grandparents",
+"filed": "Nebraas:grandparents",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3309.66",
+"truth": "name:Po",
+"filed": "name:Po",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "7118.222",
+"truth": "name:Harry Potter",
+"filed": "name:Sirius Black",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "3323.71",
+"truth": "name:Tai Lung",
+"filed": "name:Tai Lung",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1554.248",
+"truth": "name:Peter B. Parker",
+"filed": "name:Peter B. Parker",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2095.602",
+"truth": "other:the mom (Gypsy Rose story)",
+"filed": "other:the mom (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5065.190",
+"truth": "other:irradiated man (video)",
+"filed": "other:irradiated man (video)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5711.122",
+"truth": "Akib:neighbours (winter fishing)",
+"filed": "Akib:neighbours (winter fishing)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5017.468",
+"truth": "other:homeless man (Nebraas's work)",
+"filed": "other:homeless man (Nebraas's work)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1938.812",
+"truth": "Nebraas:girlfriend's new friend (dino wrestling)",
+"filed": "Nebraas:girlfriend's new friend (dino wrestling)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3214.56",
+"truth": "name:Leif Erikson",
+"filed": "name:Leif Erikson",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5498.114",
+"truth": "name:Kanye West",
+"filed": "name:Kanye West",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5508.495",
+"truth": "other:girl the gf's friend likes",
+"filed": "other:girl the gf's friend likes",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2693.832",
+"truth": "name:Dr Phil",
+"filed": "name:Dr Phil",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2479.29",
+"truth": "name:Albert Einstein",
+"filed": "name:Albert Einstein",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1258.247",
+"truth": "name:Superman",
+"filed": "name:Superman",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4883.900",
+"truth": "Nicolas:rude regular customer",
+"filed": "Nicolas:rude regular customer",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5866.512",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2641.168",
+"truth": "name:Leonardo DiCaprio",
+"filed": "name:Leonardo DiCaprio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5430.929",
+"truth": "Vanessa:creepy man",
+"filed": "Vanessa:creepy man",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "891.326",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5109.475",
+"truth": "Vanessa:creepy man",
+"filed": "Vanessa:toxic ex",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "2076.814",
+"truth": "other:the boyfriend (Gypsy Rose story)",
+"filed": "other:the boyfriend (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5434.940",
+"truth": "Vanessa:neighbors|Vanessa:creepy man",
+"filed": "Vanessa:neighbors",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3864.647",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "6094.128",
+"truth": "name:Martin Luther King Jr.",
+"filed": "name:Martin Luther King Jr.",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4524.667",
+"truth": "Nicolas:zoom interviewer",
+"filed": "Nicolas:zoom interviewer",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3194.631",
+"truth": "Nebraas:best friend (roommate)",
+"filed": "Nebraas:best friend (roommate)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3879.654",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4476.661",
+"truth": "OWNER",
+"filed": "Nicolas:crush",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "3372.429",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas:flirty coworker",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4166.95",
+"truth": "Akib:math class partner",
+"filed": "Akib:math class partner",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1971.163",
+"truth": "other:overpowered anime character",
+"filed": "name:Naruto",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "5077.909",
+"truth": "Vanessa:toxic ex",
+"filed": "Vanessa:toxic ex",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5017.470",
+"truth": "Nebraas:yelling man at work",
+"filed": "Nebraas:yelling man at work",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1482.343",
+"truth": "Nebraas:boyfriend's family",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "3877.652",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5065.189",
+"truth": "other:irradiated man (video)",
+"filed": "other:irradiated man (video)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5472.700",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2448.26",
+"truth": "name:Barack Obama",
+"filed": "name:Barack Obama",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1181.245",
+"truth": "Muhhamed:sister",
+"filed": "Muhhamed:sister",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5690.712",
+"truth": "other:someone Nicolas knows (disrespectful)",
+"filed": "other:someone Nicolas knows (disrespectful)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5506.493",
+"truth": "Nebraas:best friend (roommate)",
+"filed": "Nebraas:best friend (roommate)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2605.166",
+"truth": "name:Mike Tyson|name:Muhammad Ali",
+"filed": "name:Mike Tyson|name:Muhammad Ali",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2479.30",
+"truth": "other:Einstein's nurse",
+"filed": "other:Einstein's nurse",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3043.854",
+"truth": "Nebraas:sister",
+"filed": "Nebraas:sister",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3073.410",
+"truth": "Nebraas:friend (tattoo artist)",
+"filed": "Nebraas:friend (tattoo artist)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1450.338",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5474.702",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5515.498",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6086.197",
+"truth": "name:Cormac McCarthy|name:William Faulkner",
+"filed": "name:William Faulkner",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5352.486",
+"truth": "name:Andrew Tate",
+"filed": "name:Andrew Tate",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3192.268",
+"truth": "name:Jude",
+"filed": "name:Jude",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5208.682",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4129.454",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2669.830",
+"truth": "name:Eostre",
+"filed": "name:Eostre",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "7172.231",
+"truth": "Fahim Khan:brother",
+"filed": "Fahim Khan:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4969.304",
+"truth": "other:European royal heirs",
+"filed": "other:European royal heirs",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5424.928",
+"truth": "Vanessa:creepy man",
+"filed": "Vanessa:creepy man",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4030.281",
+"truth": "name:Naruto",
+"filed": "other:Naruto's tailed beast",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "824.239",
+"truth": "name:Tom Holland",
+"filed": "name:Tom Holland",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2695.835",
+"truth": "name:Gypsy Rose Blanchard|name:Dr Phil",
+"filed": "name:Gypsy Rose Blanchard",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4878.672",
+"truth": "Nicolas:rude regular customer",
+"filed": "Nicolas:rude regular customer",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2669.831",
+"truth": "name:Eostre",
+"filed": "name:Eostre",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2559.32",
+"truth": "name:Elon Musk",
+"filed": "name:Elon Musk",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2554.31",
+"truth": "name:Elon Musk",
+"filed": "name:Elon Musk",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1903.364",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3529.643",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas:flirty coworker",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1384.335",
+"truth": "Nebraas:best friend (roommate)",
+"filed": "Nebraas:best friend (roommate)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "7172.230",
+"truth": "Fahim Khan:brother",
+"filed": "Fahim Khan:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5035.472",
+"truth": "Nebraas:yelling man at work",
+"filed": "Nebraas:yelling man at work",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2577.609",
+"truth": "name:MrBeast",
+"filed": "name:MrBeast",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5508.496",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3754.88",
+"truth": "Akib:math class partner",
+"filed": "Akib:math class partner",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3827.876",
+"truth": "Vanessa:personal trainer",
+"filed": "Vanessa:personal trainer",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2080.815",
+"truth": "name:Gypsy Rose Blanchard",
+"filed": "name:Gypsy Rose Blanchard",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3503.637",
+"truth": "Nicolas:aunt",
+"filed": "Nicolas:aunt",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "295.235",
+"truth": "Muhhamed:boss",
+"filed": "Muhhamed:boss",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1181.244",
+"truth": "Muhhamed:sister",
+"filed": "Muhhamed:sister",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4476.660",
+"truth": "OWNER",
+"filed": "Nicolas:crush",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "597.3",
+"truth": "OWNER",
+"filed": "Fahim Khan",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "3281.868",
+"truth": "name:Cunningham|name:Knox",
+"filed": "name:Knox",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1783.799",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas:flirty coworker",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4166.94",
+"truth": "Akib:math class partner",
+"filed": "Akib:math class partner",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4465.890",
+"truth": "Vanessa:personal trainer",
+"filed": "Vanessa:personal trainer",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3877.651",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6355.209",
+"truth": "name:Faker",
+"filed": "name:Faker",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2084.595",
+"truth": "other:the boyfriend (Gypsy Rose story)",
+"filed": "other:the boyfriend (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4490.458",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4219.96",
+"truth": "Fahim Khan",
+"filed": "Fahim Khan",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "6372.537",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3041.628",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4756.186",
+"truth": "other:schoolteacher (11/22/63)",
+"filed": "other:schoolteacher (11/22/63)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6086.200",
+"truth": "name:Cormac McCarthy|name:William Faulkner",
+"filed": "name:William Faulkner",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "6819.140",
+"truth": "Akib:neighbours (young couple)",
+"filed": "Akib:neighbours (young couple)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1849.805",
+"truth": "Vanessa:parents|Vanessa:family",
+"filed": "Vanessa:parents|Vanessa:family",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5077.906",
+"truth": "Vanessa:toxic ex",
+"filed": "Vanessa:toxic ex",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3090.630",
+"truth": "name:Gordon Ramsay",
+"filed": "name:Gordon Ramsay",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4366.886",
+"truth": "Vanessa:toxic ex",
+"filed": "Vanessa:toxic ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5281.479",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4117.182",
+"truth": "other:unnamed artist (Fahim)",
+"filed": "other:unnamed artist (Fahim)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6397.748",
+"truth": "name:Joryu",
+"filed": "name:Joryu",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6848.144",
+"truth": "name:Martin Luther",
+"filed": "name:Martin Luther",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2429.24",
+"truth": "name:Martin Luther King Jr.",
+"filed": "name:Martin Luther King Jr.",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1652.17",
+"truth": "Akib:wife",
+"filed": "Akib:wife",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5498.115",
+"truth": "name:Kanye West",
+"filed": "name:Kanye West",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5687.711",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1572.156",
+"truth": "other:the eldest son (Fahim's book)",
+"filed": "other:the eldest son (Fahim's book)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6969.768",
+"truth": "Nicolas:gambler who owes him",
+"filed": "Nicolas:gambler who owes him",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2087.819",
+"truth": "name:Gypsy Rose Blanchard|other:Gypsy's doctors",
+"filed": "name:Gypsy Rose Blanchard",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1555.251",
+"truth": "name:Peter B. Parker",
+"filed": "name:Peter B. Parker",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6555.756",
+"truth": "name:Joryu",
+"filed": "name:Joryu",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "888.325",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1555.252",
+"truth": "name:Miles Morales",
+"filed": "name:Miles Morales",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2870.398",
+"truth": "Nebraas:parents",
+"filed": "Nebraas:parents",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5208.681",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4969.305",
+"truth": "other:European royal heirs",
+"filed": "other:European royal heirs",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4033.450",
+"truth": "Nebraas:boyfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1791.801",
+"truth": "Vanessa:friends",
+"filed": "Vanessa:friends",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6393.746",
+"truth": "name:Joryu",
+"filed": "name:Joryu",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3298.65",
+"truth": "name:Po",
+"filed": "name:Po",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5341.484",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2857.622",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5474.701",
+"truth": "Nicolas:roommate Julio|Nicolas:Julio's mom",
+"filed": "Nicolas:Julio's mom",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1415.576",
+"truth": "Nicolas:visiting friend",
+"filed": "Nicolas:visiting friend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2647.171",
+"truth": "name:Leonardo DiCaprio",
+"filed": "name:Leonardo DiCaprio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5591.708",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5354.692",
+"truth": "name:Andrew Tate",
+"filed": "name:Andrew Tate",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2173.22",
+"truth": "other:deli owner (Akib's store)",
+"filed": "other:deli owner (Akib's store)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2085.601",
+"truth": "other:the mom (Gypsy Rose story)",
+"filed": "other:the mom (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6922.214",
+"truth": "Fahim Khan:intern Monet",
+"filed": "Fahim Khan:intern Monet",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5870.954",
+"truth": "Nebraas:new hire",
+"filed": "Nebraas:new hire",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2644.169",
+"truth": "name:Leonardo DiCaprio",
+"filed": "name:Leonardo DiCaprio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6206.202",
+"truth": "name:Nexpo",
+"filed": "name:Nexpo",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1952.160",
+"truth": "Fahim Khan:brother",
+"filed": "Fahim Khan:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3583.644",
+"truth": "Nicolas:aunt",
+"filed": "Nicolas:aunt",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5498.118",
+"truth": "name:Kanye West",
+"filed": "name:Kanye West",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3287.61",
+"truth": "name:Kai|name:Tai Lung",
+"filed": "name:Kai",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "7088.314",
+"truth": "Fahim Khan|OWNER",
+"filed": "Fahim Khan",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1782.360",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas:flirty coworker",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2633.46",
+"truth": "name:George Milton|name:Lennie Small",
+"filed": "name:George Milton",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4991.110",
+"truth": "name:Stephen King",
+"filed": "name:Stephen King",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2785.616",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3309.67",
+"truth": "name:Po",
+"filed": "name:Po",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2129.604",
+"truth": "Nebraas:boyfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6970.771",
+"truth": "Nicolas:gambler who owes him",
+"filed": "Nicolas:gambler who owes him",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5314.689",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4030.280",
+"truth": "name:Naruto",
+"filed": "name:Naruto",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1120.330",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1521.347",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas:flirty coworker",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "902.327",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3503.638",
+"truth": "Nicolas:aunt",
+"filed": "Nicolas:aunt",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6811.136",
+"truth": "Akib:neighbours (young couple)|Akib:neighbours (winter fishing)",
+"filed": "Akib:neighbours (young couple)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2696.836",
+"truth": "name:Dr Phil",
+"filed": "name:Gypsy Rose Blanchard",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "2085.599",
+"truth": "other:the mom (Gypsy Rose story)",
+"filed": "other:the mom (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4877.668",
+"truth": "Nicolas:friend (starbucks manager)",
+"filed": "Nicolas:friend (starbucks manager)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1914.811",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3046.629",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2957.626",
+"truth": "Nicolas:friends",
+"filed": "Nicolas:friends|Nicolas:crush's friends",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1819.803",
+"truth": "Vanessa:college friend (hot dog eater)",
+"filed": "Vanessa:college friend (hot dog eater)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1745.798",
+"truth": "Vanessa:parents|Vanessa:family",
+"filed": "Vanessa:parents|Vanessa:family",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4507.666",
+"truth": "Nebraas:employer",
+"filed": "Nebraas:employer",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5025.902",
+"truth": "Nebraas:yelling man at work",
+"filed": "Nebraas:yelling man at work",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5876.716",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3192.269",
+"truth": "other:author of A Little Life",
+"filed": "other:author of A Little Life",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5315.921",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "7182.233",
+"truth": "Fahim Khan:brother",
+"filed": "Fahim Khan:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "4756.185",
+"truth": "other:schoolteacher (11/22/63)",
+"filed": "other:schoolteacher (11/22/63)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2594.40",
+"truth": "name:Logan Paul",
+"filed": "name:Logan Paul",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3281.866",
+"truth": "name:Cunningham|name:Knox",
+"filed": "name:Cunningham",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1708.254",
+"truth": "Akib",
+"filed": "Akib:neighbours (young couple)",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "3899.655",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5413.694",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6396.747",
+"truth": "name:Joryu",
+"filed": "name:Joryu",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5433.935",
+"truth": "Vanessa:creepy man",
+"filed": "Vanessa:creepy man",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3872.648",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2733.611",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6970.772",
+"truth": "Nicolas:gambler who owes him",
+"filed": "Nicolas:gambler who owes him",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3751.85",
+"truth": "Akib:math class partner",
+"filed": "Akib:math class partner",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5466.489",
+"truth": "Nebraas:girlfriend's friend (stalker)|Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend's friend (stalker)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4337.456",
+"truth": "Vanessa:creepy man",
+"filed": "Vanessa:toxic ex",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "5553.706",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "6818.139",
+"truth": "Akib:neighbours (young couple)",
+"filed": "Akib:neighbours (young couple)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2108.603",
+"truth": "other:the mom (Gypsy Rose story)",
+"filed": "other:the mom (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "3877.650",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4777.298",
+"truth": "other:Guardians of the Galaxy characters",
+"filed": "Fahim Khan",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "5110.913",
+"truth": "Vanessa:toxic ex",
+"filed": "Vanessa:toxic ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5864.509",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2917.51",
+"truth": "name:Galileo",
+"filed": "name:Galileo",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4972.308",
+"truth": "name:Princess Charlotte",
+"filed": "name:Princess Charlotte",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "3754.89",
+"truth": "Akib:math class partner",
+"filed": "Akib:math class partner",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4793.461",
+"truth": "Vanessa|Vanessa:family",
+"filed": "Vanessa:family",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1372.572",
+"truth": "Nicolas:roommate Julio",
+"filed": "Nicolas:roommate Julio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1448.794",
+"truth": "name:Dr Phil",
+"filed": "name:Dr Phil",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1152.333",
+"truth": "Nebraas:girlfriend",
+"filed": "Nebraas:girlfriend|Nebraas:boyfriend",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "825.241",
+"truth": "name:Tom Holland",
+"filed": "name:Tom Holland",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "6086.199",
+"truth": "name:Cormac McCarthy|name:William Faulkner",
+"filed": "name:William Faulkner",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1555.250",
+"truth": "name:Peter B. Parker",
+"filed": "name:Peter B. Parker",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5282.687",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "6969.769",
+"truth": "Nicolas:gambler who owes him",
+"filed": "Nicolas:gambler who owes him",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4756.187",
+"truth": "other:schoolteacher (11/22/63)",
+"filed": "other:schoolteacher (11/22/63)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2896.50",
+"truth": "Akib:new coworker",
+"filed": "Akib:new coworker",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5467.492",
+"truth": "Nebraas:girlfriend's friend (stalker)",
+"filed": "Nebraas:girlfriend's friend (stalker)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "2837.619",
+"truth": "Nicolas:crush",
+"filed": "Nicolas:crush",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1285.12",
+"truth": "name:Spider-Man",
+"filed": "name:Spider-Man",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2084.596",
+"truth": "other:the boyfriend (Gypsy Rose story)",
+"filed": "other:the boyfriend (Gypsy Rose story)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "4143.285",
+"truth": "Muhhamed:sister's husband",
+"filed": "Muhhamed:sister's husband",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1441.793",
+"truth": "name:Steve Harvey",
+"filed": "name:Steve Harvey",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "5288.481",
+"truth": "Nebraas:friends",
+"filed": "Nebraas:friends",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "7160.226",
+"truth": "other:man in Fahim's photo",
+"filed": "other:man in Fahim's photo",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5489.195",
+"truth": "Fahim Khan:brother",
+"filed": "Fahim Khan:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1384.334",
+"truth": "Nebraas:best friend (roommate)",
+"filed": "Nebraas:best friend (roommate)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "2641.167",
+"truth": "name:Leonardo DiCaprio",
+"filed": "name:Leonardo DiCaprio",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "5588.950",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2909.403",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4507.663",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1556.153",
+"truth": "Muhhamed",
+"filed": "Muhhamed",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2826.844",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6971.554",
+"truth": "Nicolas:gambler who owes him",
+"filed": "Nicolas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "2791.391",
+"truth": "Nicolas|Nicolas:crush",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1907.588",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5931.517",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4535.293",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3819.440",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4750.184",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2826.845",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3600.646",
+"truth": "Nicolas:aunt",
+"filed": "Nebraas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "3600.645",
+"truth": "Nicolas:aunt",
+"filed": "Nebraas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "3374.871",
+"truth": "OWNER|Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1757.585",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6296.969",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6044.965",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "607.149",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "641.238",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1525.350",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "562.556",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2102.365",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3924.657",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4015.279",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2810.393",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6718.976",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2773.172",
+"truth": "Muhhamed",
+"filed": "Muhhamed",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3343.869",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4535.291",
+"truth": "OWNER",
+"filed": "Akib",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "2382.825",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3299.421",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4793.460",
+"truth": "Vanessa|Vanessa:family",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3065.856",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2788.390",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2250.822",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3781.179",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3071.858",
+"truth": "Nebraas|Nebraas:friend (tattoo artist)",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6065.721",
+"truth": "OWNER",
+"filed": "Vanessa",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "5849.508",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1508.345",
+"truth": "Nicolas:family",
+"filed": "Nicolas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "3375.635",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "6039.964",
+"truth": "Vanessa:ice cream guy (5 scoops)",
+"filed": "Nicolas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "2726.839",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2726.842",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4507.664",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6366.970",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5800.507",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "596.148",
+"truth": "Akib",
+"filed": "Akib",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3779.178",
+"truth": "OWNER",
+"filed": "Akib",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "925.784",
+"truth": "Nicolas|name:Gordon Ramsay",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2751.387",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "416.778",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6065.723",
+"truth": "OWNER",
+"filed": "Vanessa",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "5054.904",
+"truth": "OWNER",
+"filed": "Nebraas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "1036.329",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5300.482",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "931.786",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2102.366",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1508.344",
+"truth": "Nicolas:family",
+"filed": "Nicolas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "2861.397",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2712.386",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3564.79",
+"truth": "Muhhamed",
+"filed": "Muhhamed",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4549.459",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2767.388",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5240.686",
+"truth": "OWNER",
+"filed": "Nebraas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "1497.796",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6750.764",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2726.841",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "2802.392",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3144.864",
+"truth": "Nicolas",
+"filed": "Nicolas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5131.916",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "6033.720",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3375.634",
+"truth": "Nebraas:flirty coworker",
+"filed": "Nebraas",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "3798.180",
+"truth": "Muhhamed",
+"filed": "Muhhamed",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4169.288",
+"truth": "OWNER",
+"filed": "Akib",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "1395.337",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5423.698",
+"truth": "Nebraas",
+"filed": "Nebraas",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "3835.441",
+"truth": "Vanessa",
+"filed": "Vanessa",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "4535.292",
+"truth": "OWNER",
+"filed": "Akib",
+"ok": false,
+"group": "partner"
+}
+]

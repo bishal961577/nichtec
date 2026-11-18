@@ -1,0 +1,79 @@
+[
+ {
+  "what": "entity",
+  "id": "Nebraas|?my bfs",
+  "from": "Nebraas:girlfriend|Nebraas:boyfriend",
+  "to": "Nebraas:boyfriend's family",
+  "why": "pass 2 misread the record: both of its example messages are about the boyfriend's family (the same family as another record), not the boyfriend"
+ },
+ {
+  "what": "claim",
+  "id": "4337.456",
+  "from": "Vanessa:creepy man",
+  "to": "Vanessa:toxic ex",
+  "why": "pass 1 named Vanessa's ex by the word Nebraas used ('creepy man'); the context shows it is the ex, labelled 'toxic ex' elsewhere"
+ },
+ {
+  "what": "claim",
+  "id": "5109.475",
+  "from": "Vanessa:creepy man",
+  "to": "Vanessa:toxic ex",
+  "why": "the same person as the line above (Vanessa's ex, 12 January)"
+ },
+ {
+  "what": "claim",
+  "id": "1971.163",
+  "from": "other:overpowered anime character",
+  "to": "name:Naruto",
+  "why": "pass 1 missed that the character is Naruto, who is named in the context shown"
+ },
+ {
+  "what": "entity",
+  "id": "Nebraas|?her #3372",
+  "from": "Nebraas:flirty coworker",
+  "to": "Nebraas:flirty coworker|Nebraas:coworker",
+  "why": "planned before scoring for recall fact r12 ('coworker'), but missed in pass 2"
+ },
+ {
+  "what": "entity",
+  "id": "Nebraas|?the from coworker",
+  "from": "Nebraas:flirty coworker",
+  "to": "Nebraas:flirty coworker|Nebraas:coworker",
+  "why": "planned before scoring for recall fact r12 ('coworker'), but missed in pass 2"
+ },
+ {
+  "what": "entity",
+  "id": "Nebraas|?this new girl #1521",
+  "from": "Nebraas:flirty coworker",
+  "to": "Nebraas:flirty coworker|Nebraas:coworker",
+  "why": "planned before scoring for recall fact r12 ('coworker'), but missed in pass 2"
+ },
+ {
+  "what": "entity",
+  "id": "Nicolas|?she #3529",
+  "from": "Nebraas:flirty coworker",
+  "to": "Nebraas:flirty coworker|Nebraas:coworker",
+  "why": "planned before scoring for recall fact r12 ('coworker'), but missed in pass 2"
+ },
+ {
+  "what": "entity",
+  "id": "Vanessa|?the from coworker",
+  "from": "Nebraas:flirty coworker",
+  "to": "Nebraas:flirty coworker|Nebraas:coworker",
+  "why": "planned before scoring for recall fact r12 ('coworker'), but missed in pass 2"
+ },
+ {
+  "what": "entity",
+  "id": "Vanessa|?the girl #1537",
+  "from": "Nebraas:flirty coworker",
+  "to": "Nebraas:flirty coworker|Nebraas:coworker",
+  "why": "planned before scoring for recall fact r12 ('coworker'), but missed in pass 2"
+ },
+ {
+  "what": "entity",
+  "id": "Akib|?he #6323",
+  "from": "Akib:old boss (boats)",
+  "to": "Akib:old boss (boats)|other:boat owner (Akib's story)",
+  "why": "recall fact r03 names the same man differently (registered before the run)"
+ }
+]
