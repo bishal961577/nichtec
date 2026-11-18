@@ -895,3 +895,52 @@ than 27 of 30 agree, no verdict is drawn and the step is reported as "judge not 
 - owners other than four 18–25-year-old US English speakers chatting with study partners.
 
 **Cost.** About 1,761 calls on the 27B server, under $1.
+
+### Step 6 results (18 November 2026): provisional STOP, verdict pending the owner's check of 30 labels
+
+`brain/realchat.py`. The committed files are `results/two_ends/realchat/`: `result.json`, `scored_claims.json`,
+`labels_claims.json`, `labels_entities.json`, `spotcheck_ids.json`, `run.log`, plus the first 16 characters of the
+descriptions' SHA-256. The descriptions themselves quote messages, so they stay outside the repository.
+
+- **Describing.** The 27B described all 1,761 messages in 4.0 minutes. 10 replies were not valid JSON. The result was
+  1,113 claims (0.63 per message), filed under 152 people.
+- **Judged.** 548 claims, under the registered rule: all 348 not on the partner's mention, plus 200 of the partner's.
+- **Two departures from the written protocol, both for reading effort, neither revealing any filing:**
+  - claims were judged in conversation order, not shuffled, so each context was read once;
+  - 2 previous messages were shown by default, with more read where needed.
+- **Two labelling conventions, fixed before scoring:**
+  - **Sets.** A set label counts as a match on overlap. It is used for identical claims about several people named
+    together, and for entities whose mentions the text cannot tell apart.
+  - **Writer facts.** A fact about the writer (`OWNER`) is always wrong-person, as registered.
+
+| Measure | Result |
+|---|---|
+| **Wrong-person rate, judged facts about a person (weighted)** | **5.47%** (line ≤ 1.5%, stop > 3%) |
+| On the partner's mention / on third parties / on pronouns | 3.5% / 8.5% (n = 176) / 12.5% (n = 48) |
+| Claims that are no fact about anyone (weighted) | 40.4% |
+| Facts about the writer turned into claims | 2.3% |
+| Without the 12 "your X" errors (below) | 3.73% |
+
+**Provisional verdict: STOP.** It becomes final only if the owner agrees with at least 27 of 30 random labels
+(`spotcheck_ids.json`, drawn with seed 30).
+
+**What breaks on real chat** (25 wrong of 339 judged person claims, unweighted):
+
+| Cause | Rows |
+|---|---|
+| **"Your X" read as "my X"**: "Your mother looks like she is a great cook" filed under the writer's own mum; "your brother", "your best friend", "your ex" likewise | 12 |
+| A fact about the writer made into a claim about someone else ("Yes I have been to Italy" → the partner) | 7 |
+| Filed under a non-person (a "we" mention, a pronoun for an office, Ancient Egypt) | 4 |
+| Other | 2 |
+
+**About "your X".**
+- **Where it comes from.** It is a gap in this step's registered chat adaptation, which defined "you" but not "your
+  &lt;relation&gt;".
+- **Why it matters less for the target.** It hardly arises when the owner talks to their own AI.
+- **Why it does not decide the verdict.** Without these 12 rows the rate is still 3.73%, above the stop line.
+
+**What real chat adds that the practice world never had:**
+- **Most of the 27B's claims are not facts.** 40% are questions ("What is your favorite thing about Las Vegas?" became
+  "favorite thing: Las Vegas"), greetings, reactions, and facts about pets, companies or countries.
+- **People use aliases.** Emi is "Kate" to Elise and "Bella" to Paola. The resolver splits these into separate people,
+  which this measure does not count as wrong-person.

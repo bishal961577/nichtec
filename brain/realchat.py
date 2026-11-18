@@ -228,7 +228,14 @@ def score(recs, ents, keep, descs, work, log):
         if truth == "NONE":
             n["none"] += wt
             continue
-        ok = truth == filed
+        # judging conventions (step 6), set before scoring:
+        # - a label may be a set "a|b|c": identical claims about several people named together ("I think it was:
+        #   Harvey, Mike, Jessica and Donna"), or an entity whose mentions the text cannot tell apart (two unnamed
+        #   friends who may be one person); a claim is right when the two sets overlap;
+        # - as registered, a fact about the writer (OWNER) is wrong-person wherever it is filed: OWNER never counts
+        #   towards a match.
+        want = {x for x in truth.split("|") if x != "OWNER"}
+        ok = bool(want & set(filed.split("|")))
         n["person"] += wt
         n["wrong"] += wt * (not ok)
         grp = "partner" if r["mention_is_partner"] else ("pronoun" if r["kind"] == "pron" else "third party")

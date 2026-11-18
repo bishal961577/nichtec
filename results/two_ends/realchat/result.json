@@ -1,0 +1,24 @@
+{
+ "claims": 1113,
+ "judged": 548,
+ "wrong_person_pct": 5.467896817925054,
+ "not_a_fact_pct": 40.35265049415985,
+ "owner_fact_as_claim_pct": 2.3310111090190144,
+ "by_group": {
+  "partner": {
+   "n": 439.87499999999915,
+   "wrong_pct": 3.478260869565224
+  },
+  "third party": {
+   "n": 176.0,
+   "wrong_pct": 8.522727272727273
+  },
+  "pronoun": {
+   "n": 48.0,
+   "wrong_pct": 12.5
+  }
+ },
+ "claims_per_message": 0.6320272572402045,
+ "unparsed": 10,
+ "verdict": "STOP"
+}

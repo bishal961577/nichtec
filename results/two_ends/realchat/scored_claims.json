@@ -1,0 +1,2375 @@
+[
+{
+"cid": "9.1",
+"truth": "name:Mother Teresa",
+"filed": "name:Mother Teresa",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "21.2",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "21.3",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "32.4",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "94.17",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "156.25",
+"truth": "name:Nicholas Carr",
+"filed": "name:Nicholas Carr",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "156.26",
+"truth": "name:Tara Westover",
+"filed": "name:Tara Westover",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "156.27",
+"truth": "name:Daniel Kahneman",
+"filed": "name:Daniel Kahneman",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "193.38",
+"truth": "Kevin:mother",
+"filed": "Elise:mom",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "216.39",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "221.40",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "232.43",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "277.46",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Elise:friend (Google analyst)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "277.47",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Elise:friend (Google analyst)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "277.48",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Elise:friend (Google analyst)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "277.49",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Elise:friend (Google analyst)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "280.50",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Elise:friend (Google analyst)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "280.51",
+"truth": "Elise:friend (Google analyst)",
+"filed": "NOTPERSON:thing",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "330.72",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "383.89",
+"truth": "Elise:brother",
+"filed": "Elise:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "392.91",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "453.106",
+"truth": "Elise:nail artist",
+"filed": "Elise:nail artist",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "581.116",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "590.117",
+"truth": "Elise:friend (wine and paint owner)",
+"filed": "Elise:friend (wine and paint owner)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "590.118",
+"truth": "Elise:friend (wine and paint owner)",
+"filed": "Elise:friend (wine and paint owner)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "590.119",
+"truth": "Elise:friend (wine and paint owner)",
+"filed": "Elise:friend (wine and paint owner)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "590.120",
+"truth": "Elise:friend (wine and paint owner)",
+"filed": "Elise:friend (wine and paint owner)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "590.121",
+"truth": "Elise:friend (wine and paint owner)",
+"filed": "Elise:friend (wine and paint owner)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "599.123",
+"truth": "name:Vasily Kandinsky",
+"filed": "name:Vasily Kandinsky",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "599.124",
+"truth": "name:Vasily Kandinsky",
+"filed": "name:Vasily Kandinsky",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "599.125",
+"truth": "name:Vasily Kandinsky",
+"filed": "name:Vasily Kandinsky",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "613.127",
+"truth": "Elise:friends",
+"filed": "Elise:friends",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "793.164",
+"truth": "name:Mike Ross",
+"filed": "name:Mike Ross",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "800.165",
+"truth": "name:Louis Litt",
+"filed": "name:Louis Litt",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "800.166",
+"truth": "name:Louis Litt",
+"filed": "name:Louis Litt",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "800.167",
+"truth": "name:Louis Litt",
+"filed": "name:Louis Litt",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "800.168",
+"truth": "name:Louis Litt",
+"filed": "name:Louis Litt",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "800.169",
+"truth": "name:Rick Hoffman",
+"filed": "name:Rick Hoffman",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "800.170",
+"truth": "name:Rick Hoffman",
+"filed": "name:Rick Hoffman",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "804.171",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "804.172",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "804.173",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "804.174",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "857.175",
+"truth": "name:Taylor Swift",
+"filed": "name:Taylor Swift",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "857.176",
+"truth": "name:Taylor Swift",
+"filed": "name:Taylor Swift",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "857.177",
+"truth": "name:Taylor Swift",
+"filed": "name:Taylor Swift",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "867.178",
+"truth": "name:Billie Eilish",
+"filed": "name:Billie Eilish",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "867.179",
+"truth": "name:Billie Eilish",
+"filed": "name:Billie Eilish",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "867.180",
+"truth": "name:Billie Eilish",
+"filed": "name:Billie Eilish",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "867.181",
+"truth": "name:Billie Eilish",
+"filed": "name:Billie Eilish",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "923.187",
+"truth": "other:cooking channel man",
+"filed": "other:cooking channel man",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "923.188",
+"truth": "other:cooking channel woman",
+"filed": "other:cooking channel woman",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "923.189",
+"truth": "other:cooking channel woman",
+"filed": "other:cooking channel woman",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1025.200",
+"truth": "Elise:ex",
+"filed": "Elise:ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1025.201",
+"truth": "Elise:ex",
+"filed": "Elise:ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1025.202",
+"truth": "Elise:ex",
+"filed": "Elise:ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1025.203",
+"truth": "Elise:ex",
+"filed": "Elise:ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1025.204",
+"truth": "Elise:ex",
+"filed": "Elise:ex",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1026.205",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1043.207",
+"truth": "Emi:mom",
+"filed": "Elise:mom",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "1377.231",
+"truth": "Elise:yoga teacher",
+"filed": "Elise:yoga teacher",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1377.232",
+"truth": "Elise:yoga teacher",
+"filed": "Elise:yoga teacher",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1378.233",
+"truth": "Elise:yoga teacher",
+"filed": "Elise:yoga teacher",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1438.238",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1449.240",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1453.245",
+"truth": "Elise:colleague (French)",
+"filed": "Elise:colleague (French)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1453.246",
+"truth": "Elise:colleague (French)",
+"filed": "Elise:colleague (French)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "73.251",
+"truth": "Emi:cousins",
+"filed": "OWNER",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "73.252",
+"truth": "OWNER",
+"filed": "OWNER",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "502.305",
+"truth": "OWNER",
+"filed": "OWNER",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "507.309",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "507.310",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "507.311",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "516.315",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "604.323",
+"truth": "name:Vasily Kandinsky",
+"filed": "name:Vasily Kandinsky",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "719.343",
+"truth": "Emi:date (from Boston)",
+"filed": "Emi:date (from Boston)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "719.344",
+"truth": "Emi:date (from Boston)",
+"filed": "Emi:date (from Boston)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "719.345",
+"truth": "Emi:date (from Boston)",
+"filed": "Emi:date (from Boston)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "719.346",
+"truth": "Emi:date (from Boston)",
+"filed": "Emi:date (from Boston)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "719.347",
+"truth": "Emi:date (from Boston)",
+"filed": "Emi:date (from Boston)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "732.348",
+"truth": "Emi:date (from Boston)",
+"filed": "Emi:date (from Boston)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "788.353",
+"truth": "Paola:friend (recommended The Alchemist)",
+"filed": "Emi:friend",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "798.355",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "798.356",
+"truth": "name:Mike Ross",
+"filed": "name:Mike Ross",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "798.357",
+"truth": "name:Mike Ross",
+"filed": "name:Mike Ross",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "798.358",
+"truth": "name:Mike Ross",
+"filed": "name:Mike Ross",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "803.359",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "803.360",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "803.361",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "803.362",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "803.363",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "803.364",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "803.365",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "808.367",
+"truth": "name:Harvey Specter|name:Mike Ross|name:Jessica Pearson|name:Donna Paulsen",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "808.368",
+"truth": "name:Harvey Specter|name:Mike Ross|name:Jessica Pearson|name:Donna Paulsen",
+"filed": "name:Mike Ross",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "808.369",
+"truth": "name:Harvey Specter|name:Mike Ross|name:Jessica Pearson|name:Donna Paulsen",
+"filed": "name:Jessica Pearson",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "808.370",
+"truth": "name:Harvey Specter|name:Mike Ross|name:Jessica Pearson|name:Donna Paulsen",
+"filed": "name:Donna Paulsen",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "853.373",
+"truth": "name:Jennifer Aniston",
+"filed": "name:Jennifer Aniston",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "853.374",
+"truth": "name:Jennifer Aniston",
+"filed": "name:Jennifer Aniston",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "853.375",
+"truth": "name:Anya Taylor-Joy",
+"filed": "name:Anya Taylor-Joy",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "853.376",
+"truth": "name:Anya Taylor-Joy",
+"filed": "name:Anya Taylor-Joy",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "853.377",
+"truth": "name:Taylor Swift",
+"filed": "name:Taylor Swift",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1009.404",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1039.426",
+"truth": "Emi:mom",
+"filed": "Emi:mom",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1144.446",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1209.453",
+"truth": "name:Delia Owens",
+"filed": "name:Delia Owens",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1209.454",
+"truth": "name:Jojo Moyes",
+"filed": "name:Jojo Moyes",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1209.455",
+"truth": "name:Louisa Clark|name:Will Traynor",
+"filed": "name:Louisa Clark",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1209.456",
+"truth": "name:Louisa Clark|name:Will Traynor",
+"filed": "name:Will Traynor",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1215.458",
+"truth": "name:Don Tillman",
+"filed": "name:Don Tillman",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1215.459",
+"truth": "name:Don Tillman",
+"filed": "name:Don Tillman",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1479.496",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1563.503",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1563.504",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1583.505",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1656.515",
+"truth": "Emi:boyfriend (Sydney)",
+"filed": "Emi:boyfriend (Sydney)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1734.536",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1734.537",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1741.538",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1741.539",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "7.542",
+"truth": "name:Mother Teresa",
+"filed": "name:Mother Teresa",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "14.545",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "18.546",
+"truth": "name:Dua Lipa|name:Rita Ora|name:Era Istrefi",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "18.547",
+"truth": "name:Dua Lipa|name:Rita Ora|name:Era Istrefi",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "18.548",
+"truth": "name:Dua Lipa|name:Rita Ora|name:Era Istrefi",
+"filed": "name:Rita Ora",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "18.549",
+"truth": "name:Dua Lipa|name:Rita Ora|name:Era Istrefi",
+"filed": "name:Rita Ora",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "18.550",
+"truth": "name:Dua Lipa|name:Rita Ora|name:Era Istrefi",
+"filed": "name:Era Istrefi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "18.551",
+"truth": "name:Dua Lipa|name:Rita Ora|name:Era Istrefi",
+"filed": "name:Era Istrefi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "23.552",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "23.553",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "23.554",
+"truth": "name:Dua Lipa|name:DaBaby",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "31.555",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "31.556",
+"truth": "name:Dua Lipa",
+"filed": "name:Dua Lipa",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "47.557",
+"truth": "Elise:best friend (San Francisco internship)",
+"filed": "Kevin:best friend",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "191.579",
+"truth": "Kevin:mother",
+"filed": "Kevin:mother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "195.580",
+"truth": "Kevin:mother",
+"filed": "Kevin:mother",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "279.584",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Kevin:friend (skincare)",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "279.585",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Kevin:friend (skincare)",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "279.586",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Kevin:friend (skincare)",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "281.588",
+"truth": "Elise:friend (Google analyst)",
+"filed": "Elise:friend (Google analyst)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "386.599",
+"truth": "Elise|Elise:family",
+"filed": "Kevin:family",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "386.600",
+"truth": "Elise:brother",
+"filed": "Kevin:family",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "450.608",
+"truth": "Kevin:friends",
+"filed": "Kevin:friends",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "620.635",
+"truth": "name:Wes Anderson",
+"filed": "name:Wes Anderson",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "620.636",
+"truth": "name:Wes Anderson",
+"filed": "name:Wes Anderson",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "620.637",
+"truth": "name:Wes Anderson",
+"filed": "name:Wes Anderson",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "823.678",
+"truth": "Kevin:mother",
+"filed": "Kevin:mother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "823.679",
+"truth": "OWNER",
+"filed": "Kevin:mother",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "951.687",
+"truth": "name:Jon Jones",
+"filed": "name:Jon Jones",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "951.688",
+"truth": "name:Jon Jones",
+"filed": "name:Jon Jones",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "951.689",
+"truth": "name:Conor McGregor",
+"filed": "name:Conor McGregor",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "951.690",
+"truth": "name:Conor McGregor",
+"filed": "name:Conor McGregor",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "955.691",
+"truth": "Paola:brother",
+"filed": "Kevin:brother",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "955.692",
+"truth": "Paola:brother",
+"filed": "Kevin:brother",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "1091.750",
+"truth": "Kevin:friend (skincare)",
+"filed": "Kevin:friend (skincare)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "1131.764",
+"truth": "OWNER",
+"filed": "NOTPERSON:thing",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "1373.805",
+"truth": "name:Tara Westover",
+"filed": "name:Tara Westover",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "475.865",
+"truth": "name:Rafael Nadal",
+"filed": "name:Rafael Nadal",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "492.866",
+"truth": "name:Cagatay Ulusoy",
+"filed": "name:Cagatay Ulusoy",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "504.869",
+"truth": "Paola:friends (in America)",
+"filed": "Paola:friends (in America)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "504.870",
+"truth": "Paola:friend (studying in Australia)",
+"filed": "Paola:friend (studying in Australia)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "504.871",
+"truth": "Paola:friend (studying in Australia)",
+"filed": "Paola:friend (studying in Australia)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "504.872",
+"truth": "Paola:friend (studying in Australia)|OWNER",
+"filed": "Paola:friend (studying in Australia)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "618.876",
+"truth": "name:Wes Anderson",
+"filed": "name:Wes Anderson",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "635.884",
+"truth": "name:Jordan Peele",
+"filed": "name:Jordan Peele",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "635.885",
+"truth": "name:James Wan",
+"filed": "name:James Wan",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "635.886",
+"truth": "name:Ed Warren|name:Lorraine Warren",
+"filed": "name:Ed Warren",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "635.887",
+"truth": "name:Ed Warren|name:Lorraine Warren",
+"filed": "name:Lorraine Warren",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "642.894",
+"truth": "name:Claude Monet",
+"filed": "name:Claude Monet",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "648.896",
+"truth": "name:Erin Morgenstern",
+"filed": "name:Erin Morgenstern",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "648.897",
+"truth": "name:Erin Morgenstern",
+"filed": "name:Erin Morgenstern",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "752.907",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "752.908",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "752.909",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "752.910",
+"truth": "name:Harvey Specter",
+"filed": "name:Harvey Specter",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "752.911",
+"truth": "name:Harvey Specter|name:Mike Ross",
+"filed": "name:Mike Ross",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "757.916",
+"truth": "Paola:friend (at Disney World)",
+"filed": "Paola:friend (at Disney World)",
+"ok": true,
+"group": "pronoun"
+},
+{
+"cid": "783.920",
+"truth": "Paola:friend (recommended The Alchemist)",
+"filed": "Paola:friend (recommended The Alchemist)|Paola:friend (studies law)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "826.931",
+"truth": "Paola:brother",
+"filed": "Paola:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "826.932",
+"truth": "Paola:brother|OWNER",
+"filed": "Paola:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "950.959",
+"truth": "name:Conor McGregor",
+"filed": "name:Conor McGregor",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "956.960",
+"truth": "Paola:brother",
+"filed": "Paola:brother",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "999.964",
+"truth": "Emi|OWNER",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1014.967",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1014.968",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1060.969",
+"truth": "Paola:friend (studies law)",
+"filed": "Paola:friend (recommended The Alchemist)|Paola:friend (studies law)",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1135.976",
+"truth": "Paola:friends|OWNER",
+"filed": "Paola:friends",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1142.977",
+"truth": "name:John Nash",
+"filed": "name:John Nash",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1142.978",
+"truth": "name:Gillian Flynn",
+"filed": "name:Gillian Flynn",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.983",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.984",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.985",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.986",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.987",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.988",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1163.989",
+"truth": "name:Tom Brady",
+"filed": "name:Tom Brady",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1228.994",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1228.995",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1230.996",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1399.1022",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1469.1035",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1478.1037",
+"truth": "Emi|OWNER",
+"filed": "NOTPERSON:group 'we'",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "1478.1038",
+"truth": "Emi|OWNER",
+"filed": "NOTPERSON:group 'we'",
+"ok": false,
+"group": "pronoun"
+},
+{
+"cid": "1499.1041",
+"truth": "name:Monica Geller|name:Chandler Bing|name:Phoebe Buffay",
+"filed": "name:Monica Geller",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1499.1042",
+"truth": "name:Monica Geller|name:Chandler Bing|name:Phoebe Buffay",
+"filed": "name:Chandler Bing",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1499.1043",
+"truth": "name:Monica Geller|name:Chandler Bing|name:Phoebe Buffay",
+"filed": "name:Phoebe Buffay",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1501.1046",
+"truth": "name:Dwight Schrute",
+"filed": "name:Dwight Schrute",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1604.1062",
+"truth": "name:Lucinda Riley",
+"filed": "name:Lucinda Riley",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1618.1065",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1660.1082",
+"truth": "Emi:boyfriend (Sydney)",
+"filed": "Paola:ex",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "1678.1084",
+"truth": "name:Claude Monet",
+"filed": "NOTPERSON:thing",
+"ok": false,
+"group": "third party"
+},
+{
+"cid": "1678.1085",
+"truth": "name:Claude Monet",
+"filed": "name:Claude Monet",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1678.1086",
+"truth": "name:Claude Monet",
+"filed": "name:Claude Monet",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1678.1087",
+"truth": "name:Claude Monet",
+"filed": "name:Claude Monet",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1684.1088",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1686.1089",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1686.1090",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1690.1091",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1696.1094",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1722.1103",
+"truth": "Paola:aunt",
+"filed": "Paola:aunt",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1729.1105",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1738.1109",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1749.1110",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1753.1111",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "third party"
+},
+{
+"cid": "1648.841",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1082.747",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "5.0",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1715.854",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1070.732",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1697.1095",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1320.467",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1095.752",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "649.330",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1369.804",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1385.806",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "780.154",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1534.830",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1441.820",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1209.452",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1712.1100",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "642.891",
+"truth": "OWNER",
+"filed": "Emi",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "1403.1023",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "723.146",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "448.602",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "686.662",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "974.706",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1631.1071",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1641.1075",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "649.329",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1434.489",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1716.856",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1004.966",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "386.598",
+"truth": "Elise:brother",
+"filed": "Elise",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "643.326",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "851.940",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1184.768",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "812.926",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1037.422",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1620.509",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "374.594",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1716.857",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "723.147",
+"truth": "OWNER",
+"filed": "Emi",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "1171.765",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1287.790",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "642.889",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1630.1069",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1221.462",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1663.519",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1082.746",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1287.787",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "96.18",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "405.294",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "141.23",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1456.825",
+"truth": "Paola|Paola:friends",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "738.905",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "698.903",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "481.620",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1287.793",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1427.487",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1445.239",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "378.85",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1733.862",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "660.650",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "970.702",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1037.423",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "624.879",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "977.707",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "977.708",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "553.623",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1275.782",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "871.681",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1070.733",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1612.508",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "681.661",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "604.324",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1042.713",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1095.751",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "147.24",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1369.803",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1051.430",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1501.1044",
+"truth": "Emi|OWNER",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1105.437",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1181.767",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1055.435",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "686.663",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "775.674",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1346.1006",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1403.1024",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1071.737",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1077.741",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "140.262",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1125.760",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1069.729",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "449.607",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "348.286",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "481.619",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "776.918",
+"truth": "Emi",
+"filed": "Emi",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "850.938",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "756.915",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1434.488",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1519.827",
+"truth": "Paola|OWNER",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "978.711",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "382.88",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "507.312",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "248.45",
+"truth": "OWNER",
+"filed": "Kevin",
+"ok": false,
+"group": "partner"
+},
+{
+"cid": "1166.213",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "462.612",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1125.761",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "296.276",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1232.463",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "784.675",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1372.1015",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "624.881",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1070.731",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1674.846",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1674.845",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1037.421",
+"truth": "Elise",
+"filed": "Elise",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "1077.740",
+"truth": "Paola",
+"filed": "Paola",
+"ok": true,
+"group": "partner"
+},
+{
+"cid": "451.105",
+"truth": "Kevin",
+"filed": "Kevin",
+"ok": true,
+"group": "partner"
+}
+]
