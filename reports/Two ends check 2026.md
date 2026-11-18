@@ -1162,3 +1162,105 @@ set):
    above say it cannot pass.
 3. **Change where memory comes from.** Use the owner's own notes and messages, where the writer is the owner and "I"
    is unambiguous, before other people's chat.
+
+## Step 8: let the models work out who is who (pre-registered before the exam is read, 18 November 2026)
+
+The owner asked why everything is hand-written, and approved this plan instead of more rules: the describer sees the
+conversation, the chat rules go, and the small model teaches itself. Code: `brain/convchat.py`, `brain/whoquiz.py`,
+`brain/who_train.py`, `brain/modal_who4b.py`.
+
+**The systems** (all bind with step 5's resolver; one memory per owner):
+- **A. Conversation describer v5 (27B).** It sees the 12 messages before the latest one, from both people, and
+  writes for each person mentioned "who" they are: a name, "my crush", "Ana's boss", or "nobody" for a general "you".
+  - Step 7's chat rules are removed; the base describer (step 6's) is kept for the output format.
+  - The code binds the "who" words. A group ("Julio and Nebraas") becomes one mention per member, minus the writer.
+  - Claims marked past, plan or tried are kept, fixing step 7's 34% leak.
+- **B. A, with the self-taught 4B deciding which person each he/she/they is.**
+  - The 27B still decides whether a pronoun is one particular person at all (not "nobody", the writer or a group).
+  - The 4B (Qwen3.5-4B with LoRA) answers the rest; "unclear" leaves the mention unattached.
+  - A and B hold exactly the same claims and differ only in where pronoun claims are filed.
+  - The 4B learned only from a quiz the chat made by itself: a person named outright ("my sister", "Julio") is
+    hidden behind a pronoun, and the answer is the hidden words.
+  - Quiz sources: REALTALK chats 1–8 and EmpatheticDialogues' train split, 1,170 items. Held out for checking:
+    REALTALK 9–10 and the valid split, 155 items.
+  - No person labels were used. The only hand-written part is the quiz maker (which words count as a person, which
+    pronoun replaces them).
+- **B0. As B, with the 4B before training** (the control for the training).
+- **0. Step 7's frozen system** (v4b, one message at a time) as a baseline.
+
+**Development on REALTALK chats 5–10** (already read; judged by the analyst unblinded, 120 random claims):
+
+| | Step 7's system | A |
+|---|---|---|
+| Wrong-person | 8.4% (27/322, step 7's blind count) | 7.9% (6/76) |
+| Recall facts captured and filed right (step 7's 19) | 5–7 | 10 |
+| One-message pronoun placeholders | 130 of 242 records | 0 |
+| Claims that are no fact about a person | 26% | 37% |
+
+- One dev fix: as a two-word "name", a group had taken over every later "Julio". Groups are now split.
+- The A errors are:
+  - the writer's own feeling or plan filed under its object (3; "I love Gordon Ramsay");
+  - a pronoun given the wrong person (2);
+  - a merge (1).
+- A new problem: one person described in different words far apart ("the stalker", "the weird guy"). The describer
+  sees 12 messages, not the journal.
+- **Expectation, written before the exam:** on REALTALK-like chat, A would still be STOP on wrong-person.
+
+**The exam: EmpatheticDialogues' test split** (Rashkin et al. 2019, CC BY-NC 4.0; tarball sha256 `56f234d7…`).
+- **What it is:** 2,547 conversations, about 4 turns each, 10,973 messages. Real people (paid crowdworkers) type to
+  each other about something that happened to them, often involving family, partners, friends and coworkers.
+- **Unread:** nothing but counts has been read from it.
+- **Limits, stated now:**
+  - The conversations are short and between strangers, so this tests reading a conversation, not keeping track of
+    people over weeks.
+  - A dataset this well known may be in the 27B's or the 4B's pre-training text. It holds no who-is-who labels, so
+    the task itself has not been seen.
+- **Journals:** each speaker's messages in one conversation are a journal ("Speaker A" opens; "Speaker B" replies).
+
+**Measures**, step 7's, judged the same way:
+1. **Wrong-person rate.**
+   - Systems A, B and B0 share one sample: 450 claims, up to 150 on the partner's mention and 300 others, each
+     drawn at random (seed 80), each stratum weighted.
+   - Pass 1 labels the claims once, for all three.
+   - Pass 2 labels the union of their records: a record is named by its words, so one name gets one label.
+   - System 0: 150 random claims (seed 82), with their own two passes.
+2. **Facts captured and filed right.**
+   - 150 messages are drawn at random (seed 81) and labelled for the facts about people other than the writer,
+     **before any exam description is seen**. Their SHA-256 is committed before the run.
+   - Each fact is matched to a claim, or MISS. A, B and B0 share the match, since their claims are the same.
+3. **Also reported:**
+   - the rates by group (partner, third party, pronoun);
+   - the share of claims that are no fact;
+   - claims per message;
+   - **people kept in one record:** of people with two or more judged claims filed right, the share whose claims all
+     sit in one record.
+
+**Lines** (for A and for B; PASS needs both, STOP comes with either):
+
+| Measure | Pass | Stop |
+|---|---|---|
+| Wrong-person rate | ≤ 1.5% | > 3% |
+| Facts captured and filed right | ≥ 70% | < 50% |
+
+**Check on the judge.** As before: the owner checks 30 labels drawn by step 6's rule (seed 30), and fewer than 27
+agreements means no verdict.
+
+**What the results would mean (decided now):**
+- **A passes.** With the conversation in view, the 27B reads short real chat well enough to file facts. What remains
+  is naming people the same way across weeks (seen in dev), which this exam does not test. Next: give the describer
+  the journal's list of names, and test on long chat.
+- **A is STOP or BETWEEN.** Even with the conversation, misfiling remains. The kinds of error decide the next step:
+  - writer's facts attached to others: a structured "about me" field, or the owner confirming;
+  - wrong pronoun choices: more training;
+  - merges: the binder.
+- **B against A and B0** (wrong-person on the pronoun group, and overall):
+  - **B below B0:** the quiz taught the 4B something that carries over to real pronouns.
+  - **B at or below A:** a phone-sized model can take over the who-step from the 27B. Next: teach the 4B the rest of
+    the describer the same way.
+  - **B not below B0:** the self-made quiz did not carry over. It is too easy (the answer is always nearby) or too
+    noisy.
+
+**Cost.**
+- Training: about 15–25 minutes on one H100 (the owner runs `modal run brain/modal_who4b.py`).
+- Exam: two describers on about 11,000 messages (roughly 30 minutes of the 27B), plus the 4B's answers on one L40S.
+- In all, about $4–6.
