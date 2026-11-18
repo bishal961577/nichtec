@@ -1,0 +1,27 @@
+[
+ {
+  "record": "hit:12084_conv:24169|Speaker A|?my teenage daughter",
+  "was": "24169:A's teenage daughter",
+  "now": "24169:A's daughter"
+ },
+ {
+  "record": "hit:2553_conv:5107|Speaker A|?my mum",
+  "was": "5107:A's mom",
+  "now": "5107:A's mother"
+ },
+ {
+  "record": "hit:4430_conv:8861|Speaker B|lin manuel",
+  "was": "name:Lin Manuel",
+  "now": "name:Lin-Manuel Miranda"
+ },
+ {
+  "record": "hit:49_conv:98|Speaker A|?parents of the newborn girl's parents",
+  "was": "98:the newborn girl's parents",
+  "now": "other:parents of the newborn in the article"
+ },
+ {
+  "record": "hit:556_conv:1112|Speaker A|?my mum",
+  "was": "1112:A's mom",
+  "now": "1112:A's mother"
+ }
+]
