@@ -161,7 +161,7 @@ def wmatch(t, pw):
 REPORTING = re.compile(r"^(told|tells|says|said|heard|hears|reported|reports|mentioned|mentions|according)\b")
 
 
-def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None, drop_reporting=False):
+def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None, drop_reporting=False, keep_status=False):
     """Describer JSON -> the engineer's parse format: {note id: {date, order, descs, ante, claims, styles, texts}}.
 
     Step 3 (owner confirms definitions): keep_defs=False drops every definition the describer or the apposition rule
@@ -248,6 +248,8 @@ def to_parse(W, descs_by_id, ids, keep_defs=True, confirmed=None, binds=None, dr
                 claims.append(("fact", a, lab, val))
             elif st == "no longer":
                 claims.append(("fact", a, lab, "none"))
+            elif keep_status and st in ("past", "plan or wish", "tried or temporary"):
+                claims.append(("fact", a, lab, val))      # (step 8) real chat: a past event or a plan is a fact too
         for lk in ([] if not keep_defs else d.get("links", [])):
             a, b = lk.get("from", -1), lk.get("to", -1)
             if not (valid(a) and valid(b)) or a == b:
