@@ -896,7 +896,7 @@ than 27 of 30 agree, no verdict is drawn and the step is reported as "judge not 
 
 **Cost.** About 1,761 calls on the 27B server, under $1.
 
-### Step 6 results (18 November 2026): provisional STOP, verdict pending the owner's check of 30 labels
+### Step 6 results (18 November 2026): STOP (the owner agreed with 30 of 30 checked labels)
 
 `brain/realchat.py`. The committed files are `results/two_ends/realchat/`: `result.json`, `scored_claims.json`,
 `labels_claims.json`, `labels_entities.json`, `spotcheck_ids.json`, `run.log`, plus the first 16 characters of the
@@ -921,8 +921,10 @@ descriptions' SHA-256. The descriptions themselves quote messages, so they stay 
 | Facts about the writer turned into claims | 2.3% |
 | Without the 12 "your X" errors (below) | 3.73% |
 
-**Provisional verdict: STOP.** It becomes final only if the owner agrees with at least 27 of 30 random labels
-(`spotcheck_ids.json`, drawn with seed 30).
+**Verdict: STOP.** The owner checked 30 random labels (`spotcheck_ids.json`, drawn with seed 30) and agreed with all 30,
+above the registered 27.
+- 30 of 30 still allows a judge error rate of up to about 10% (95% upper bound).
+- The labels are therefore checked, not proven.
 
 **What breaks on real chat** (25 wrong of 339 judged person claims, unweighted):
 
@@ -944,3 +946,33 @@ descriptions' SHA-256. The descriptions themselves quote messages, so they stay 
   "favorite thing: Las Vegas"), greetings, reactions, and facts about pets, companies or countries.
 - **People use aliases.** Emi is "Kate" to Elise and "Bella" to Paola. The resolver splits these into separate people,
   which this measure does not count as wrong-person.
+
+### What step 6 means
+
+1. **The synthetic results do not transfer to real phrasing as configured.** On real chat the same describer and
+   resolver file 5.5% of facts about people under the wrong person. On generated worlds the figure was 1.5–1.7%. Third
+   parties (8.5%) and pronouns (12.5%) are worst.
+2. **Real chat has failure types the practice world never had:**
+   - questions, greetings and reactions written down as facts (40% of claims);
+   - "your X" read as "my X";
+   - the writer's own facts handed to the other person;
+   - one person split under aliases.
+
+   None of these comes from memory or from who is who across messages. All of them come from reading one real message
+   from the right point of view.
+3. **What this test is not:**
+   - two young strangers chatting with each other, not an owner telling their own AI about their life;
+   - four people, with few third parties;
+   - judged by Claude and spot-checked by the owner.
+4. **Next, by the registered reading** ("diagnose before any 4B work"):
+   - no teaching of the 4B yet;
+   - the diagnosis above names the problems: a describer that writes down non-facts, and that loses the writer's
+     point of view.
+   - **REALTALK chats 5–10** (7,183 messages, six other people) have not been read by anyone in this project. A chat
+     describer could be developed on chats 1–4 and judged once on chats 5–10, with lines registered first.
+5. **A question for the owner.**
+   - The 1.5% line was the analyst's judgement.
+   - With receipts (every fact linked to its message) and owner confirmation, a wrong-person fact is visible and
+     correctable.
+   - What misfiling rate is acceptable for the product is the owner's call, and it changes which next step is worth
+     doing.
