@@ -67,20 +67,26 @@ RULES_V4 = (
     "\"my ...\" is my relation.\n"
     "- I am {owner}, the writer: \"I\", \"me\", \"my\", \"we\" and \"us\" are never mentions, and nothing about "
     "me is a claim, even when the message also asks {partner} something (\"Yes, I've been to Italy, have you?\" has "
-    "no claim).\n"
+    "no claim). When \"we\" or \"me and\" includes someone else (\"me and my mom\"), that person is a mention.\n"
     "- Only people are mentions: not pets, sports teams, companies, brands, countries or places.\n"
-    "- A claim is a fact the message tells about a person. A question, greeting, thanks, compliment, reaction "
-    "(\"that sounds amazing\"), wish (\"enjoy your trip\") or advice is not a claim. \"Did you get the job?\" has "
-    "no claim; \"Congrats on the new job!\" has one: a new job.")
+    "- A claim is a fact the message tells or repeats about a person. A message that only asks, greets, thanks, "
+    "compliments, reacts (\"that sounds amazing\") or advises has no claim: \"How was your trip?\", \"Did you get "
+    "the job?\". But a reaction that names a fact keeps it: \"Congrats on the new job!\" (a new job), \"Enjoy your "
+    "anniversary trip to Santorini!\" (an anniversary trip to Santorini).")
+# Dev log (chats 1-4): v4a, the first version, had "A question, greeting, thanks, compliment, reaction ("that sounds
+# amazing"), wish ("enjoy your trip") or advice is not a claim" and no "me and my mom" sentence. It cut claims on
+# step 6's no-fact messages from 272 to 43, but 102 of step 6's 314 facts judged filed right were on messages where it
+# wrote no claim at all (40 of them questions; the rest mostly reactions that repeat a fact, "your anniversary trip",
+# and "me and my mom"). v4 (this text, called v4b in the report) is the version frozen for step 7.
 CHAT_DESCRIBE_V4 = TE.DESCRIBE.replace(FIRST, HEAD + RULES_V4, 1)
 # stage -> chats, describer, description file, results folder, judging sample (cap, partner n, other n, seed)
 STAGES = {
     "step6": dict(chats=(1, 2, 3, 4), prompt=CHAT_DESCRIBE, desc="describe.jsonl", out="realchat",
                   sample=(600, 200, None, 6)),
-    "step7dev": dict(chats=(1, 2, 3, 4), prompt=CHAT_DESCRIBE_V4, desc="describe_v4.jsonl", out="realchat_v4_dev",
+    "step7dev": dict(chats=(1, 2, 3, 4), prompt=CHAT_DESCRIBE_V4, desc="describe_v4b.jsonl", out="realchat_v4_dev",
                      sample=(450, 150, 300, 7)),
-    "step7": dict(chats=(5, 6, 7, 8, 9, 10), prompt=CHAT_DESCRIBE_V4, desc="describe_v4.jsonl", out="realchat_v4",
-                  sample=(450, 150, 300, 7)),
+    "step7": dict(chats=(5, 6, 7, 8, 9, 10), prompt=CHAT_DESCRIBE_V4, desc="describe_v4b.jsonl", out="realchat_v4",
+                  sample=(450, 150, 300, 7), recall=(150, 70)),
 }
 STAGE = STAGES["step6"]
 
@@ -221,9 +227,33 @@ def context(m, k=4):
     return list(reversed(out))
 
 
+def recall_messages(keep):
+    """Step 7's recall sample: messages drawn at random (registered size and seed), labelled for the facts about people
+    they tell before the descriptions are seen."""
+    n, seed = STAGE["recall"]
+    return random.Random(seed).sample(sorted(m["id"] for m in keep), n)
+
+
+def recall_export(keep, work, log):
+    by = {m["id"]: m for m in keep}
+    with open(os.path.join(work, "recall_to_label.jsonl"), "w", encoding="utf-8") as f:
+        for mid in recall_messages(keep):
+            m = by[mid]
+            f.write(json.dumps({"mid": mid, "owner": m["speaker"], "partner": m["partner"], "before": context(m),
+                                "message": line(m)}, ensure_ascii=False) + "\n")
+    log(f"recall export: {STAGE['recall'][0]} messages; file in WORK")
+
+
 def export(recs, ents, keep, J, work, log):
     by = {m["id"]: m for m in keep}
     todo, w = sample(recs)
+    rec_ids = set(recall_messages(keep)) if STAGE.get("recall") else set()
+    if rec_ids:                                         # the system's claims on the recall messages, for matching
+        with open(os.path.join(work, "recall_claims.jsonl"), "w", encoding="utf-8") as f:
+            for r in recs:
+                if r["id"] in rec_ids:
+                    f.write(json.dumps({"cid": r["cid"], "mid": r["id"], "claim": f"{r['label']}: {r['value']}",
+                                        "entity": r["entity"]}, ensure_ascii=False) + "\n")
     rng = random.Random(61)
     order = list(todo)
     rng.shuffle(order)                                  # judged in random order, not grouped by filing
@@ -232,7 +262,8 @@ def export(recs, ents, keep, J, work, log):
             m = by[r["id"]]
             f.write(json.dumps({"cid": r["cid"], "owner": r["owner"], "partner": m["partner"], "before": context(m),
                                 "message": line(m), "claim": f"{r['label']}: {r['value']}"}, ensure_ascii=False) + "\n")
-    held = Counter(r["entity"] for r in recs)
+    need = {r["cid"] for r in todo} | {r["cid"] for r in recs if r["id"] in rec_ids}
+    held = Counter(r["entity"] for r in recs if r["cid"] in need)
     with open(os.path.join(work, "entities_to_label.jsonl"), "w", encoding="utf-8") as f:
         for e, n in sorted(held.items()):
             owner = e.split("|", 1)[0]
@@ -286,6 +317,22 @@ def score(recs, ents, keep, descs, work, log):
            "claims_per_message": len(recs) / len(keep),
            "unparsed": sum(1 for m in keep if descs.get(m["id"]) is None)}
     res["verdict"] = ("PASS" if res["wrong_person_pct"] <= 1.5 else "STOP" if res["wrong_person_pct"] > 3 else "BETWEEN")
+    facts_p, match_p = os.path.join(work, "labels_recall_facts.json"), os.path.join(work, "labels_recall_match.json")
+    if STAGE.get("recall") and os.path.exists(facts_p) and os.path.exists(match_p):
+        # step 7: recall = facts about people in the recall sample (labelled before the descriptions were seen) that
+        # the system filed under the right person; a fact counts once, through the claim matched to it, or MISS
+        facts, match = json.load(open(facts_p)), json.load(open(match_p))
+        rmap = {r["cid"]: r for r in recs}
+        got = 0
+        for fid, fct in facts.items():
+            cid = match.get(fid, "MISS")
+            if cid != "MISS" and cid in rmap:
+                want = {x for x in fct["person"].split("|") if x != "OWNER"}
+                got += bool(want & set(ment.get(rmap[cid]["entity"], "UNKNOWN").split("|")))
+        res["recall_facts"] = len(facts)
+        res["recall_pct"] = pct(got, len(facts))
+        wp, rc = res["wrong_person_pct"], res["recall_pct"]
+        res["verdict"] = ("PASS" if wp <= 1.5 and rc >= 70 else "STOP" if wp > 3 or rc < 50 else "BETWEEN")
     json.dump(res, open(os.path.join(OUT, "result.json"), "w"), indent=1)
     json.dump(rows, open(os.path.join(OUT, "scored_claims.json"), "w"), indent=0)
     log(json.dumps(res))
@@ -303,6 +350,7 @@ def main():
     ap.add_argument("--stage", choices=sorted(STAGES), default="step6")
     ap.add_argument("--export", action="store_true")
     ap.add_argument("--score", action="store_true")
+    ap.add_argument("--recall-export", action="store_true", help="step 7: the recall sample, before describing")
     a = ap.parse_args()
     global STAGE, OUT
     STAGE = STAGES[a.stage]
@@ -320,6 +368,10 @@ def main():
         f"(of {len(msgs)}); journals: " + ", ".join(f"{o} {len(W.notes)}" for o, W in J.items()))
     if a.dry:
         print(prompt(keep[40]))
+        return
+    if a.recall_export:
+        os.makedirs(a.work, exist_ok=True)
+        recall_export(keep, a.work, log)
         return
     assert not os.path.abspath(a.work).startswith(os.path.abspath(MI.ROOT)), "WORK must be outside the repository"
     os.makedirs(a.work, exist_ok=True)

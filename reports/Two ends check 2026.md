@@ -976,3 +976,76 @@ above the registered 27.
      correctable.
    - What misfiling rate is acceptable for the product is the owner's call, and it changes which next step is worth
      doing.
+
+## Step 7: a chat describer, judged once on unread chats (pre-registered before its model calls, 18 November 2026)
+
+The owner approved option 1 after step 6. The 1.5% line stays: the owner gave no other bar.
+
+**Development on chats 1–4** (step 6's data, already read; `brain/realchat.py --stage step7dev`). Describer v4 adds
+rules for chat aimed at step 6's diagnosis. It was compared with v3 using step 6's labels, by message, with no new
+labelling.
+
+| Chats 1–4 | v3 (step 6) | v4a | v4b (frozen) |
+|---|---|---|---|
+| Claims per message | 0.63 | 0.26 | 0.27 |
+| Claims on step 6's no-fact messages (147) | 272 | 43 | **33** |
+| Claims on messages ending in "?" (654) | 485 | 124 | 117 |
+| Facts judged right in step 6 on messages where it writes no claim at all | – | 102 of 314 | 98 of 314 (46 of them questions) |
+
+The two versions:
+- **v4a.** A question, greeting, thanks, compliment, reaction, wish or advice is not a claim. "Your X" is the partner's
+  X (a "through someone" mention). The writer and "we"/"us" are never mentions, and nothing about the writer is a
+  claim. Only people are mentions.
+- **v4b** (one dev revision). A message that *only* asks, greets, thanks or reacts has no claim, but a reaction that
+  names a fact keeps it ("Congrats on the new job!"). In "me and my mom", the mom is a mention.
+
+On step 6's 18 error messages, v4b gives "your mother" its own person, "the mother of your mother" (the partner's
+mother), and writes no claim for "Yes I have been to Italy", "my name is Bella" or "we both found activities".
+
+v4b is **frozen**: the prompt, the resolver (step 5's), the filter and the code.
+
+**The exam: REALTALK chats 5–10.** 7,183 messages and six people (Nicolas, Nebraas, Vanessa, Akib, Muhhamed, Fahim
+Khan), each in two chats. Their journals hold 520–1,730 messages. Until this commit only counts and names were read from
+them, never a message. As in step 6, nothing that quotes them is committed.
+
+**Measures:**
+1. **Wrong-person rate**, as in step 6: two blind judging passes on a registered sample of claims.
+   - **Sample.** Up to 300 claims not on the partner's mention and 150 on it, each drawn at random (seed 7), with
+     each stratum weighted.
+   - **Conventions.** Step 6's: sets match on overlap, and `OWNER` is always wrong.
+2. **Facts captured (new).** 150 messages are drawn at random (seed 70) and labelled by the judge, **before the
+   descriptions are seen**, for the facts about people other than the writer that they state or clearly imply (step
+   6's rules).
+   - After the run, each fact is matched to the system's claim that expresses it, or `MISS`.
+   - It counts as captured when that claim is filed under the right person.
+   - Without this measure, a describer that writes almost nothing could pass the first one.
+
+**Lines:**
+
+| Measure | Pass | Stop |
+|---|---|---|
+| Wrong-person rate | ≤ 1.5% | > 3% |
+| Facts captured and filed right | ≥ 70% | < 50% |
+
+PASS needs both. STOP comes with either. Anything else is BETWEEN.
+- The 70% and 50% are the analyst's judgement: a memory that misses more than half of what it is told is not usable.
+- The practice runs suggest at least 17% of non-question facts are lost, so 70% is a real test, not a formality.
+
+**Also reported:**
+- rates by group (partner, third party, pronoun);
+- the share of claims that are no fact;
+- claims per message;
+- people split under aliases.
+
+**Check on the judge.** As in step 6: the owner checks 30 random claim labels, and fewer than 27 agreements means no
+verdict.
+
+**What the results would mean (decided now):**
+- **PASS.** A big model with chat rules reads real chat well enough to file facts. Next: teach the 4B from its
+  descriptions, judged on held-out chat.
+- **BETWEEN.** The rules help but do not reach the lines. Look at which errors remain before more work.
+- **STOP.** Better instructions do not make a 27B read real chat well enough in the describe-then-bind form. The
+  describe step itself needs rethinking: for example reading several messages together, or keeping the conversation
+  rather than one message.
+
+**Cost.** About 7,183 calls on the running 27B server: about 10 minutes, about $1.
