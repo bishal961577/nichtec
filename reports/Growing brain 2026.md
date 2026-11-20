@@ -278,4 +278,33 @@ It showed two flaws in the machine, not in any arm. Both are fixed for every arm
 - **Each arm drew its own random samples,** so identical arms on day 1 named different questions. **Now** every arm
   uses the same draws (common random numbers), so differences between arms come from their memories.
 
-**After dev:** none yet.
+**Dev run 1** (worlds 1 and 2, commit 6c8e709; 39-40 minutes a world; results in
+`results/growing_brain/dev_run1/`). All three validity checks passed. Dev numbers are for tuning, not a result:
+
+| | composed days, mean over rounds | composed days, final | base days, final |
+|---|---|---|---|
+| none | 71.3 | 78.3 | 98.1 |
+| notes | 76.3 | 83.1 | 100.0 |
+| brain | 75.6 | 84.5 | 98.8 |
+| oracle | 86.6 | 100.0 | 100.0 |
+| notes+all (every known event offered) | 81.7 | 95.0 | 100.0 |
+| brain+all | 79.7 | 90.2 | 98.8 |
+
+- **Kept at the end, on never-met creatures:** notes 93.0%, brain 94.7%. The nightly training learned the laws
+  well enough to apply them to creatures the brain never saw, not only the creatures it was trained on.
+- **Feature reading:** 100.0% for the frozen model and 98.7% for the brain at the end.
+- **What held both memories back was naming, not memory.** The +all references show the knowledge was there
+  (notes 95.0%, brain 90.2% final on composed days), but the agents seldom asked about an earlier event.
+  - In world 1, neither kept a single event question on any composed day.
+  - The raw replies show why: the 4B mostly asked about today's own event ("Does the candle flare near it?" on the
+    candle's day), which is circular and correctly dropped. The prompt's single example, "written exactly like:
+    <first event's question>", seems to have invited this.
+  - When events were named (world 2, days 6-12), composed laws were often solved (100%).
+
+**Change after dev run 1 (prompt only, the same for every arm):**
+- The known events are listed as ready questions. Notes: each event with its written law and its question. Brain:
+  each event with its question only.
+- One sentence says an earlier event can be part of today's law.
+- The naming instruction now says not to ask whether today's event happens.
+
+Dev is rerun once with this prompt (dev run 2) to check that it works, before the FREEZE.

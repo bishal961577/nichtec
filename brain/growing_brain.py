@@ -232,23 +232,26 @@ def ftext(f, world):
 
 
 def naming_prompt(arm, day, world, tested, notes):
+    """Dev change (section 10): known events are offered as ready questions (the old single example was parroted
+    as a question about today's event), and asking whether today's event happens is ruled out in every arm."""
     ev = world["events"]
     known = ""
     if arm != "none" and day > 0:
         if arm == "notes":
-            head = "Events you learned about before, with the law you found for each:\n"
-            lines = [f"- {ev[k][0]}: {ftext(notes[k], world) if notes.get(k) else '(no law found)'}"
-                     for k in range(day)]
+            head = "Events you learned about before, each with the law you found for it and the question to ask:\n"
+            lines = [f"- {ev[k][0]} (law: {ftext(notes[k], world) if notes.get(k) else 'none found'}). "
+                     f"Question: {ev[k][1]}" for k in range(day)]
         else:
-            head = "Events you learned about before:\n"
-            lines = [f"- {ev[k][0]}" for k in range(day)]
-        known = (head + "\n".join(lines) + "\nYou may use a known event as a question, written exactly like: "
-                 f"{ev[0][1]}\n\n")
+            head = "Events you learned about before, each with the question to ask:\n"
+            lines = [f"- {ev[k][0]}. Question: {ev[k][1]}" for k in range(day)]
+        known = (head + "\n".join(lines) + "\nAn earlier event can be part of today's law, so you may list these "
+                 "questions too, written exactly as above.\n\n")
     C = world["C"]
     res = "".join(f"- {n}: {yn(y)}. {C[n]['desc']}\n" for n, y in sorted(tested))
     return (INTRO + known + f"Today's event: {ev[day][0]}.\nCreatures tested so far today (yes means it "
             f"happened), each with its description:\n" + res +
             "\nList up to 8 short yes-or-no questions about a creature that could help explain these results. "
+            f"Do not ask whether {ev[day][0]}: that is what your questions should explain. "
             "Write one question per line, nothing else.")
 
 

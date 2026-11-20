@@ -1,0 +1,106 @@
+{
+ "worlds": 2,
+ "arms": {
+  "none": {
+   "composed": 71.27,
+   "early": 84.61,
+   "late": 84.84,
+   "faster": 0.23,
+   "final_composed": 78.33,
+   "final_base": 98.09,
+   "final_composed_unmet": 69.44
+  },
+  "notes": {
+   "composed": 76.35,
+   "early": 84.6,
+   "late": 80.72,
+   "faster": -3.89,
+   "final_composed": 83.1,
+   "final_base": 100.0,
+   "final_composed_unmet": 76.39
+  },
+  "brain": {
+   "composed": 75.64,
+   "early": 83.18,
+   "late": 80.72,
+   "faster": -2.46,
+   "final_composed": 84.52,
+   "final_base": 98.81,
+   "final_composed_unmet": 76.39
+  }
+ },
+ "refs": {
+  "oracle": {
+   "composed": 86.63,
+   "base": 85.47,
+   "final_composed": 100.0,
+   "final_base": 100.0
+  },
+  "notes+all": {
+   "composed": 81.71,
+   "base": 81.91,
+   "final_composed": 95.0,
+   "final_base": 100.0
+  },
+  "brain+all": {
+   "composed": 79.68,
+   "base": 81.75,
+   "final_composed": 90.24,
+   "final_base": 98.81
+  }
+ },
+ "keeps": {
+  "notes": 93.0,
+  "brain": 94.71
+ },
+ "reading": {
+  "base": 100.0,
+  "brain_end": 98.72
+ },
+ "transfer_brain_minus_notes": {
+  "mean": -0.71,
+  "se": 3.49,
+  "ci_low": -45.08,
+  "ci_high": 43.65,
+  "up": 1,
+  "down": 1,
+  "n": 2
+ },
+ "faster_brain_minus_notes": {
+  "mean": 1.43,
+  "se": 4.92,
+  "ci_low": -61.1,
+  "ci_high": 63.96,
+  "up": 1,
+  "down": 1,
+  "n": 2
+ },
+ "transfer_brain_minus_none": {
+  "mean": 4.37,
+  "se": 5.63,
+  "ci_low": -67.24,
+  "ci_high": 75.98,
+  "up": 1,
+  "down": 1,
+  "n": 2
+ },
+ "transfer_notes_minus_none": {
+  "mean": 5.08,
+  "se": 2.14,
+  "ci_low": -22.16,
+  "ci_high": 32.32,
+  "up": 2,
+  "down": 0,
+  "n": 2
+ },
+ "verdict": {
+  "call": "NOTEBOOK ENOUGH",
+  "checks": {
+   "world learnable: oracle final >= 95 on both day types": true,
+   "memory needed: no-memory final on composed days <= oracle - 10": true,
+   "head start reads descriptions: base feature reading >= 90": true
+  },
+  "reading_damage": 1.28,
+  "brain_carried_anything": true
+ }
+}
