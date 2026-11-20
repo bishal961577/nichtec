@@ -11,3 +11,46 @@
    self-check passed: 703 claims, 18 filed wrong by the fixed routes (2.56%, test 2's everyday count 2.56%), routing floor 5 wrong
 27B fresh, every definition confirmed (Qwen3.5-27B-FP8): 706 everyday fact claims over 167 days
    self-check passed: 706 claims, 12 filed wrong by the fixed routes (1.70%, test 2's everyday count 1.70%), routing floor 0 wrong
+=== 2026-11-20 21:58:43 learning routes by driving, stage all, {"shown": 3, "cap": 2, "step": 0.6, "margin": 1.0, "seeds": 10, "boot": 2000, "sweep": [1, 10]}
+4B dev, own definitions (Qwen3.5-4B): 783 everyday fact claims over 167 days
+   self-check passed: 783 claims, 58 filed wrong by the fixed routes (7.41%, test 2's everyday count 7.41%), routing floor 26 wrong
+   fixed 7.41% wrong | patch 4.62% (21.8 corrections) | drive 4.38% (21.1 corrections; moved 3.9: 3.3 wrong->right, 0.6 right->wrong)
+   never shown: patch 7.22% (36.2 of 502) | drive 6.80% | reduction 5.8% (CI of the difference -0.04 to 0.86 points) -> NO GAIN  [2 s]
+   sweep, 1 shown a day: reduction 2.5% (CI -0.02 to 0.40), 9.2 corrections -> NO GAIN
+   sweep, 10 shown a day: reduction 20.6% (CI 0.30 to 2.59), 37.7 corrections -> BETWEEN
+   switches thrown (seeds of 10): {'pron | full | - | - | before': 5, 'pron | name | - | - | after': 3, 'pron | full* | - | - | after': 2, 'pron | fctx | - | - | after': 1}
+4B dev, every definition confirmed (Qwen3.5-4B): 791 everyday fact claims over 167 days
+   self-check passed: 791 claims, 44 filed wrong by the fixed routes (5.56%, test 2's everyday count 5.56%), routing floor 13 wrong
+   fixed 5.56% wrong | patch 3.68% (14.9 corrections) | drive 3.35% (14.7 corrections; moved 5.7: 3.7 wrong->right, 0.8 right->wrong)
+   never shown: patch 5.71% (29.1 of 510) | drive 5.16% | reduction 9.6% (CI of the difference 0.08 to 1.03 points) -> NO GAIN  [2 s]
+   sweep, 1 shown a day: reduction 3.5% (CI -0.03 to 0.42), 6.8 corrections -> NO GAIN
+   sweep, 10 shown a day: reduction 16.0% (CI -0.14 to 2.08), 26.6 corrections -> NO GAIN
+   switches thrown (seeds of 10): {'pron | full | - | - | before': 6, 'pron | full* | - | - | after': 4, 'pron | name | - | - | after': 4, 'fctx | via | - | - | after': 2, 'pron | full | - | - | after': 1}
+27B dev, own definitions (Qwen3.5-27B-FP8): 722 everyday fact claims over 166 days
+   self-check passed: 722 claims, 18 filed wrong by the fixed routes (2.49%, test 2's everyday count 2.49%), routing floor 8 wrong
+   fixed 2.49% wrong | patch 1.73% (5.5 corrections) | drive 1.70% (5.4 corrections; moved 0.3: 0.3 wrong->right, 0.0 right->wrong)
+   never shown: patch 2.81% (12.5 of 445) | drive 2.77% | reduction 1.6% (CI of the difference 0.00 to 0.11 points) -> NO GAIN  [2 s]
+   sweep, 1 shown a day: reduction 1.3% (CI 0.00 to 0.09), 2.4 corrections -> NO GAIN
+   sweep, 10 shown a day: reduction 19.8% (CI 0.00 to 1.68), 9.7 corrections -> INCONCLUSIVE
+   switches thrown (seeds of 10): {'pron | full | - | - | before': 1}
+27B dev, every definition confirmed (Qwen3.5-27B-FP8): 726 everyday fact claims over 166 days
+   self-check passed: 726 claims, 11 filed wrong by the fixed routes (1.52%, test 2's everyday count 1.52%), routing floor 0 wrong
+   fixed 1.52% wrong | patch 1.07% (3.2 corrections) | drive 1.03% (3.2 corrections; moved 0.3: 0.3 wrong->right, 0.0 right->wrong)
+   never shown: patch 1.74% (7.8 of 449) | drive 1.67% | reduction 3.8% (CI of the difference 0.00 to 0.18 points) -> INCONCLUSIVE  [2 s]
+   sweep, 1 shown a day: reduction 3.1% (CI 0.00 to 0.13), 1.4 corrections -> INCONCLUSIVE
+   sweep, 10 shown a day: reduction 24.6% (CI 0.00 to 1.63), 4.9 corrections -> INCONCLUSIVE
+   switches thrown (seeds of 10): {'pron | full | - | - | before': 1}
+27B fresh, own definitions (Qwen3.5-27B-FP8): 703 everyday fact claims over 167 days
+   self-check passed: 703 claims, 18 filed wrong by the fixed routes (2.56%, test 2's everyday count 2.56%), routing floor 5 wrong
+   fixed 2.56% wrong | patch 1.62% (6.6 corrections) | drive 1.35% (6.4 corrections; moved 2.1: 2.1 wrong->right, 0.0 right->wrong)
+   never shown: patch 2.51% (10.8 of 430) | drive 2.07% | reduction 17.6% (CI of the difference 0.07 to 0.93 points) -> BETWEEN  [2 s]
+   sweep, 1 shown a day: reduction 2.1% (CI 0.00 to 0.12), 3.3 corrections -> NO GAIN
+   sweep, 10 shown a day: reduction 36.6% (CI 0.08 to 1.41), 11.4 corrections -> INCONCLUSIVE
+   switches thrown (seeds of 10): {'pron | full | - | - | before': 7}
+27B fresh, every definition confirmed (Qwen3.5-27B-FP8): 706 everyday fact claims over 167 days
+   self-check passed: 706 claims, 12 filed wrong by the fixed routes (1.70%, test 2's everyday count 1.70%), routing floor 0 wrong
+   fixed 1.70% wrong | patch 1.18% (3.7 corrections) | drive 0.85% (3.6 corrections; moved 2.4: 2.4 wrong->right, 0.0 right->wrong)
+   never shown: patch 1.92% (8.3 of 432) | drive 1.39% | reduction 27.7% (CI of the difference 0.11 to 1.13 points) -> INCONCLUSIVE  [2 s]
+   sweep, 1 shown a day: reduction 2.8% (CI 0.00 to 0.12), 1.3 corrections -> NO GAIN
+   sweep, 10 shown a day: reduction 40.4% (CI 0.08 to 1.89), 6.4 corrections -> INCONCLUSIVE
+   switches thrown (seeds of 10): {'pron | full | - | - | before': 8, 'pron | name* | - | rep | before': 1}

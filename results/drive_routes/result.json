@@ -1,0 +1,622 @@
+{
+ "cfg": {
+  "shown": 3,
+  "cap": 2,
+  "step": 0.6,
+  "margin": 1.0,
+  "seeds": 10,
+  "boot": 2000,
+  "sweep": [
+   1,
+   10
+  ]
+ },
+ "4B dev, own definitions": {
+  "fixed": {
+   "claims": 783.0,
+   "wrong_all": 58.0,
+   "never_shown": 501.7,
+   "wrong_never_shown": 36.2,
+   "corrections": 0.0,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 7.407407407407407,
+   "registered_final_wrong": 58,
+   "registered_final_rows": 783,
+   "wrong_all_pct": 7.407407407407407,
+   "wrong_never_shown_pct": 7.215467410803269,
+   "switches_thrown_in_seeds": {}
+  },
+  "patch": {
+   "claims": 783.0,
+   "wrong_all": 36.2,
+   "never_shown": 501.7,
+   "wrong_never_shown": 36.2,
+   "corrections": 21.8,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 4.853128991060026,
+   "registered_final_wrong": 38,
+   "registered_final_rows": 783,
+   "wrong_all_pct": 4.623243933588761,
+   "wrong_never_shown_pct": 7.215467410803269,
+   "switches_thrown_in_seeds": {}
+  },
+  "drive": {
+   "claims": 783.0,
+   "wrong_all": 34.3,
+   "never_shown": 501.7,
+   "wrong_never_shown": 34.1,
+   "corrections": 21.1,
+   "owner_could_not_say": 0.0,
+   "moved": 3.9,
+   "moved_right_to_wrong": 0.6,
+   "moved_wrong_to_right": 3.3,
+   "registered_final_pct": 4.597701149425287,
+   "registered_final_wrong": 36,
+   "registered_final_rows": 783,
+   "wrong_all_pct": 4.38058748403576,
+   "wrong_never_shown_pct": 6.796890572055013,
+   "switches_thrown_in_seeds": {
+    "pron | full | - | - | before": 5,
+    "pron | name | - | - | after": 3,
+    "pron | full* | - | - | after": 2,
+    "pron | fctx | - | - | after": 1
+   }
+  },
+  "primary": {
+   "relative_reduction_pct": 5.8011049723756924,
+   "diff_pct_points": 0.41857683874825646,
+   "ci95_pct_points": [
+    -0.04010427110487311,
+    0.8555713994703604
+   ],
+   "patch_wrong_never_shown_per_seed": 36.2,
+   "verdict": "NO GAIN"
+  },
+  "sweep": {
+   "1": {
+    "primary": {
+     "relative_reduction_pct": 2.4640657084188944,
+     "diff_pct_points": 0.1839926402943881,
+     "ci95_pct_points": [
+      -0.01569365976145584,
+      0.40241448692152904
+     ],
+     "patch_wrong_never_shown_per_seed": 48.7,
+     "verdict": "NO GAIN"
+    },
+    "corrections_drive": 9.2,
+    "corrections_patch": 9.3
+   },
+   "10": {
+    "primary": {
+     "relative_reduction_pct": 20.55555555555555,
+     "diff_pct_points": 1.3410656034795219,
+     "ci95_pct_points": [
+      0.2956393200295643,
+      2.5892232330300913
+     ],
+     "patch_wrong_never_shown_per_seed": 18.0,
+     "verdict": "BETWEEN"
+    },
+    "corrections_drive": 37.7,
+    "corrections_patch": 39.7
+   }
+  },
+  "claims": 783,
+  "days": 167,
+  "routing_floor_wrong": 26,
+  "registered_start_pct": 7.407407407407407,
+  "model": "Qwen3.5-4B"
+ },
+ "4B dev, every definition confirmed": {
+  "fixed": {
+   "claims": 791.0,
+   "wrong_all": 44.0,
+   "never_shown": 509.6,
+   "wrong_never_shown": 29.1,
+   "corrections": 0.0,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 5.562579013906448,
+   "registered_final_wrong": 44,
+   "registered_final_rows": 791,
+   "wrong_all_pct": 5.562579013906448,
+   "wrong_never_shown_pct": 5.710361067503925,
+   "switches_thrown_in_seeds": {}
+  },
+  "patch": {
+   "claims": 791.0,
+   "wrong_all": 29.1,
+   "never_shown": 509.6,
+   "wrong_never_shown": 29.1,
+   "corrections": 14.9,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 3.7926675094816686,
+   "registered_final_wrong": 30,
+   "registered_final_rows": 791,
+   "wrong_all_pct": 3.678887484197219,
+   "wrong_never_shown_pct": 5.710361067503925,
+   "switches_thrown_in_seeds": {}
+  },
+  "drive": {
+   "claims": 791.0,
+   "wrong_all": 26.5,
+   "never_shown": 509.6,
+   "wrong_never_shown": 26.3,
+   "corrections": 14.7,
+   "owner_could_not_say": 0.0,
+   "moved": 5.7,
+   "moved_right_to_wrong": 0.8,
+   "moved_wrong_to_right": 3.7,
+   "registered_final_pct": 3.413400758533502,
+   "registered_final_wrong": 27,
+   "registered_final_rows": 791,
+   "wrong_all_pct": 3.350189633375474,
+   "wrong_never_shown_pct": 5.160910518053376,
+   "switches_thrown_in_seeds": {
+    "pron | full | - | - | before": 6,
+    "pron | full* | - | - | after": 4,
+    "pron | name | - | - | after": 4,
+    "fctx | via | - | - | after": 2,
+    "pron | full | - | - | after": 1
+   }
+  },
+  "primary": {
+   "relative_reduction_pct": 9.621993127147766,
+   "diff_pct_points": 0.5494505494505493,
+   "ci95_pct_points": [
+    0.07636502481863303,
+    1.0311246897078477
+   ],
+   "patch_wrong_never_shown_per_seed": 29.1,
+   "verdict": "NO GAIN"
+  },
+  "sweep": {
+   "1": {
+    "primary": {
+     "relative_reduction_pct": 3.4946236559139865,
+     "diff_pct_points": 0.19691002726446527,
+     "ci95_pct_points": [
+      -0.03001200480192076,
+      0.4221251819505098
+     ],
+     "patch_wrong_never_shown_per_seed": 37.2,
+     "verdict": "NO GAIN"
+    },
+    "corrections_drive": 6.8,
+    "corrections_patch": 6.8
+   },
+   "10": {
+    "primary": {
+     "relative_reduction_pct": 16.025641025641026,
+     "diff_pct_points": 0.8843296781039971,
+     "ci95_pct_points": [
+      -0.13956734124214928,
+      2.077151335311572
+     ],
+     "patch_wrong_never_shown_per_seed": 15.6,
+     "verdict": "NO GAIN"
+    },
+    "corrections_drive": 26.6,
+    "corrections_patch": 28.4
+   }
+  },
+  "claims": 791,
+  "days": 167,
+  "routing_floor_wrong": 13,
+  "registered_start_pct": 5.562579013906448,
+  "model": "Qwen3.5-4B"
+ },
+ "27B dev, own definitions": {
+  "fixed": {
+   "claims": 722.0,
+   "wrong_all": 18.0,
+   "never_shown": 444.8,
+   "wrong_never_shown": 12.5,
+   "corrections": 0.0,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 2.4930747922437675,
+   "registered_final_wrong": 18,
+   "registered_final_rows": 722,
+   "wrong_all_pct": 2.4930747922437675,
+   "wrong_never_shown_pct": 2.810251798561151,
+   "switches_thrown_in_seeds": {}
+  },
+  "patch": {
+   "claims": 722.0,
+   "wrong_all": 12.5,
+   "never_shown": 444.8,
+   "wrong_never_shown": 12.5,
+   "corrections": 5.5,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 1.5235457063711912,
+   "registered_final_wrong": 11,
+   "registered_final_rows": 722,
+   "wrong_all_pct": 1.7313019390581716,
+   "wrong_never_shown_pct": 2.810251798561151,
+   "switches_thrown_in_seeds": {}
+  },
+  "drive": {
+   "claims": 722.0,
+   "wrong_all": 12.3,
+   "never_shown": 444.8,
+   "wrong_never_shown": 12.3,
+   "corrections": 5.4,
+   "owner_could_not_say": 0.0,
+   "moved": 0.3,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.3,
+   "registered_final_pct": 1.5235457063711912,
+   "registered_final_wrong": 11,
+   "registered_final_rows": 722,
+   "wrong_all_pct": 1.703601108033241,
+   "wrong_never_shown_pct": 2.7652877697841727,
+   "switches_thrown_in_seeds": {
+    "pron | full | - | - | before": 1
+   }
+  },
+  "primary": {
+   "relative_reduction_pct": 1.5999999999999903,
+   "diff_pct_points": 0.04496402877697836,
+   "ci95_pct_points": [
+    0.0,
+    0.11366219595362534
+   ],
+   "patch_wrong_never_shown_per_seed": 12.5,
+   "verdict": "NO GAIN"
+  },
+  "sweep": {
+   "1": {
+    "primary": {
+     "relative_reduction_pct": 1.2903225806451535,
+     "diff_pct_points": 0.033715441672285795,
+     "ci95_pct_points": [
+      0.0,
+      0.08536793580331235
+     ],
+     "patch_wrong_never_shown_per_seed": 15.5,
+     "verdict": "NO GAIN"
+    },
+    "corrections_drive": 2.4,
+    "corrections_patch": 2.5
+   },
+   "10": {
+    "primary": {
+     "relative_reduction_pct": 19.753086419753085,
+     "diff_pct_points": 0.6736842105263157,
+     "ci95_pct_points": [
+      0.0,
+      1.676891615541922
+     ],
+     "patch_wrong_never_shown_per_seed": 8.1,
+     "verdict": "INCONCLUSIVE"
+    },
+    "corrections_drive": 9.7,
+    "corrections_patch": 9.9
+   }
+  },
+  "claims": 722,
+  "days": 166,
+  "routing_floor_wrong": 8,
+  "registered_start_pct": 2.4930747922437675,
+  "model": "Qwen3.5-27B-FP8"
+ },
+ "27B dev, every definition confirmed": {
+  "fixed": {
+   "claims": 726.0,
+   "wrong_all": 11.0,
+   "never_shown": 448.6,
+   "wrong_never_shown": 7.8,
+   "corrections": 0.0,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 1.5151515151515151,
+   "registered_final_wrong": 11,
+   "registered_final_rows": 726,
+   "wrong_all_pct": 1.5151515151515151,
+   "wrong_never_shown_pct": 1.7387427552385197,
+   "switches_thrown_in_seeds": {}
+  },
+  "patch": {
+   "claims": 726.0,
+   "wrong_all": 7.8,
+   "never_shown": 448.6,
+   "wrong_never_shown": 7.8,
+   "corrections": 3.2,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 0.8264462809917356,
+   "registered_final_wrong": 6,
+   "registered_final_rows": 726,
+   "wrong_all_pct": 1.0743801652892562,
+   "wrong_never_shown_pct": 1.7387427552385197,
+   "switches_thrown_in_seeds": {}
+  },
+  "drive": {
+   "claims": 726.0,
+   "wrong_all": 7.5,
+   "never_shown": 448.6,
+   "wrong_never_shown": 7.5,
+   "corrections": 3.2,
+   "owner_could_not_say": 0.0,
+   "moved": 0.3,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.3,
+   "registered_final_pct": 0.8264462809917356,
+   "registered_final_wrong": 6,
+   "registered_final_rows": 726,
+   "wrong_all_pct": 1.0330578512396693,
+   "wrong_never_shown_pct": 1.6718680338831922,
+   "switches_thrown_in_seeds": {
+    "pron | full | - | - | before": 1
+   }
+  },
+  "primary": {
+   "relative_reduction_pct": 3.8461538461538436,
+   "diff_pct_points": 0.06687472135532757,
+   "ci95_pct_points": [
+    0.0,
+    0.17781729273171828
+   ],
+   "patch_wrong_never_shown_per_seed": 7.8,
+   "verdict": "INCONCLUSIVE"
+  },
+  "sweep": {
+   "1": {
+    "primary": {
+     "relative_reduction_pct": 3.124999999999989,
+     "diff_pct_points": 0.050234427327528586,
+     "ci95_pct_points": [
+      0.0,
+      0.13101867016049767
+     ],
+     "patch_wrong_never_shown_per_seed": 9.6,
+     "verdict": "INCONCLUSIVE"
+    },
+    "corrections_drive": 1.4,
+    "corrections_patch": 1.4
+   },
+   "10": {
+    "primary": {
+     "relative_reduction_pct": 24.590163934426236,
+     "diff_pct_points": 0.625260525218841,
+     "ci95_pct_points": [
+      0.0,
+      1.6333197223356473
+     ],
+     "patch_wrong_never_shown_per_seed": 6.1,
+     "verdict": "INCONCLUSIVE"
+    },
+    "corrections_drive": 4.9,
+    "corrections_patch": 4.9
+   }
+  },
+  "claims": 726,
+  "days": 166,
+  "routing_floor_wrong": 0,
+  "registered_start_pct": 1.5151515151515151,
+  "model": "Qwen3.5-27B-FP8"
+ },
+ "27B fresh, own definitions": {
+  "fixed": {
+   "claims": 703.0,
+   "wrong_all": 18.0,
+   "never_shown": 430.3,
+   "wrong_never_shown": 10.8,
+   "corrections": 0.0,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 2.5604551920341394,
+   "registered_final_wrong": 18,
+   "registered_final_rows": 703,
+   "wrong_all_pct": 2.5604551920341394,
+   "wrong_never_shown_pct": 2.509876830118522,
+   "switches_thrown_in_seeds": {}
+  },
+  "patch": {
+   "claims": 703.0,
+   "wrong_all": 11.4,
+   "never_shown": 430.3,
+   "wrong_never_shown": 10.8,
+   "corrections": 6.6,
+   "owner_could_not_say": 0.9,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 1.2802275960170697,
+   "registered_final_wrong": 9,
+   "registered_final_rows": 703,
+   "wrong_all_pct": 1.6216216216216217,
+   "wrong_never_shown_pct": 2.509876830118522,
+   "switches_thrown_in_seeds": {}
+  },
+  "drive": {
+   "claims": 703.0,
+   "wrong_all": 9.5,
+   "never_shown": 430.3,
+   "wrong_never_shown": 8.9,
+   "corrections": 6.4,
+   "owner_could_not_say": 0.9,
+   "moved": 2.1,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 2.1,
+   "registered_final_pct": 0.9957325746799431,
+   "registered_final_wrong": 7,
+   "registered_final_rows": 703,
+   "wrong_all_pct": 1.3513513513513513,
+   "wrong_never_shown_pct": 2.068324424819893,
+   "switches_thrown_in_seeds": {
+    "pron | full | - | - | before": 7
+   }
+  },
+  "primary": {
+   "relative_reduction_pct": 17.59259259259259,
+   "diff_pct_points": 0.44155240529862905,
+   "ci95_pct_points": [
+    0.06934812760055475,
+    0.9345794392523366
+   ],
+   "patch_wrong_never_shown_per_seed": 10.8,
+   "verdict": "BETWEEN"
+  },
+  "sweep": {
+   "1": {
+    "primary": {
+     "relative_reduction_pct": 2.083333333333337,
+     "diff_pct_points": 0.052155771905423975,
+     "ci95_pct_points": [
+      0.0,
+      0.12110726643598628
+     ],
+     "patch_wrong_never_shown_per_seed": 14.4,
+     "verdict": "NO GAIN"
+    },
+    "corrections_drive": 3.3,
+    "corrections_patch": 3.3
+   },
+   "10": {
+    "primary": {
+     "relative_reduction_pct": 36.58536585365852,
+     "diff_pct_points": 0.6326444538169549,
+     "ci95_pct_points": [
+      0.08496176720475795,
+      1.408450704225352
+     ],
+     "patch_wrong_never_shown_per_seed": 4.1,
+     "verdict": "INCONCLUSIVE"
+    },
+    "corrections_drive": 11.4,
+    "corrections_patch": 12.9
+   }
+  },
+  "claims": 703,
+  "days": 167,
+  "routing_floor_wrong": 5,
+  "registered_start_pct": 2.5604551920341394,
+  "model": "Qwen3.5-27B-FP8"
+ },
+ "27B fresh, every definition confirmed": {
+  "fixed": {
+   "claims": 706.0,
+   "wrong_all": 12.0,
+   "never_shown": 432.1,
+   "wrong_never_shown": 8.3,
+   "corrections": 0.0,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 1.6997167138810199,
+   "registered_final_wrong": 12,
+   "registered_final_rows": 706,
+   "wrong_all_pct": 1.6997167138810199,
+   "wrong_never_shown_pct": 1.920851654709558,
+   "switches_thrown_in_seeds": {}
+  },
+  "patch": {
+   "claims": 706.0,
+   "wrong_all": 8.3,
+   "never_shown": 432.1,
+   "wrong_never_shown": 8.3,
+   "corrections": 3.7,
+   "owner_could_not_say": 0.0,
+   "moved": 0.0,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 0.0,
+   "registered_final_pct": 1.274787535410765,
+   "registered_final_wrong": 9,
+   "registered_final_rows": 706,
+   "wrong_all_pct": 1.1756373937677054,
+   "wrong_never_shown_pct": 1.920851654709558,
+   "switches_thrown_in_seeds": {}
+  },
+  "drive": {
+   "claims": 706.0,
+   "wrong_all": 6.0,
+   "never_shown": 432.1,
+   "wrong_never_shown": 6.0,
+   "corrections": 3.6,
+   "owner_could_not_say": 0.0,
+   "moved": 2.4,
+   "moved_right_to_wrong": 0.0,
+   "moved_wrong_to_right": 2.4,
+   "registered_final_pct": 0.8498583569405099,
+   "registered_final_wrong": 6,
+   "registered_final_rows": 706,
+   "wrong_all_pct": 0.8498583569405099,
+   "wrong_never_shown_pct": 1.388567461235825,
+   "switches_thrown_in_seeds": {
+    "pron | full | - | - | before": 8,
+    "pron | name* | - | rep | before": 1
+   }
+  },
+  "primary": {
+   "relative_reduction_pct": 27.710843373493987,
+   "diff_pct_points": 0.532284193473733,
+   "ci95_pct_points": [
+    0.1110864252388358,
+    1.1259191176470589
+   ],
+   "patch_wrong_never_shown_per_seed": 8.3,
+   "verdict": "INCONCLUSIVE"
+  },
+  "sweep": {
+   "1": {
+    "primary": {
+     "relative_reduction_pct": 2.8037383177569986,
+     "diff_pct_points": 0.05191209551825571,
+     "ci95_pct_points": [
+      0.0,
+      0.11978097193702936
+     ],
+     "patch_wrong_never_shown_per_seed": 10.7,
+     "verdict": "NO GAIN"
+    },
+    "corrections_drive": 1.3,
+    "corrections_patch": 1.3
+   },
+   "10": {
+    "primary": {
+     "relative_reduction_pct": 40.42553191489362,
+     "diff_pct_points": 0.7969798657718121,
+     "ci95_pct_points": [
+      0.08169934640522877,
+      1.8852459016393441
+     ],
+     "patch_wrong_never_shown_per_seed": 4.7,
+     "verdict": "INCONCLUSIVE"
+    },
+    "corrections_drive": 6.4,
+    "corrections_patch": 7.3
+   }
+  },
+  "claims": 706,
+  "days": 167,
+  "routing_floor_wrong": 0,
+  "registered_start_pct": 1.6997167138810199,
+  "model": "Qwen3.5-27B-FP8"
+ }
+}

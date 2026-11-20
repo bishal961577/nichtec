@@ -111,3 +111,49 @@ were right, and two corrections are thin evidence.
    equals patch; routing uses no truth.
 2. Run once: `python brain/drive_routes.py --stage all`. Results in `results/drive_routes/`.
 3. Write up, whatever the result.
+
+## 10. Result (run once, 20 November 2026, commit 5d59996; 23 seconds on a CPU; `results/drive_routes/`)
+
+**Main verdict (4B, dev, own definitions): NO GAIN.** Driving filed 5.8% fewer of the never-shown facts wrong than
+spot fixes alone (7.22% to 6.80%), against a 30% line, and the interval of the difference reaches zero (-0.04 to
++0.86 points).
+
+| Condition | Wrong at start (fixed) | Wrong at the end: patch / drive | Corrections given | Never-shown facts wrong: patch / drive | Reduction | Verdict |
+|---|---|---|---|---|---|---|
+| **4B dev, own definitions (main)** | 7.41% | 4.62% / 4.38% | 21.8 | 7.22% / 6.80% | 5.8% | **NO GAIN** |
+| 4B dev, every definition confirmed | 5.56% | 3.68% / 3.35% | 14.9 | 5.71% / 5.16% | 9.6% | NO GAIN |
+| 27B dev, own definitions | 2.49% | 1.73% / 1.70% | 5.5 | 2.81% / 2.77% | 1.6% | NO GAIN |
+| 27B dev, every definition confirmed | 1.52% | 1.07% / 1.03% | 3.2 | 1.74% / 1.67% | 3.8% | INCONCLUSIVE |
+| 27B fresh, own definitions | 2.56% | 1.62% / 1.35% | 6.6 | 2.51% / 2.07% | 17.6% | BETWEEN |
+| 27B fresh, every definition confirmed | 1.70% | 1.18% / 0.85% | 3.7 | 1.92% / 1.39% | 27.7% | INCONCLUSIVE |
+
+Corrections are means over the 10 seeds. About 36-39% of facts were shown to the owner at least once.
+
+**What happened:**
+- **The switches learned the right thing, but almost never had enough to learn from.** Over about six months of
+  messages the owner gave the 4B memory about 22 corrections, and the 27B memory 3-7, because few facts are filed
+  wrong and the owner only sees a few a day. Each switch needs two net corrections, and the corrections were spread
+  over several kinds of mistakes, so only a handful of switches were ever thrown: on average 4 facts were re-routed in
+  the main condition.
+- **When a switch was thrown, it was usually right.** Main condition: 3.3 facts moved from wrong to right, 0.6 from
+  right to wrong. On the fresh world: 2.1-2.4 wrong to right, 0 right to wrong. The switch thrown most often is the
+  same in every condition: a fact the describer put on a pronoun belongs to the full name earlier in the same message,
+  which the antecedent rule did not pick.
+- **Spot fixes did most of the work.** Correcting the facts the owner happened to see cut the 4B's wrong filings from
+  7.41% to 4.62%. Learning from those corrections added only 0.24 points more.
+- **More feedback helps, in proportion.** With 10 facts shown a day (about 38 corrections for the 4B), the reduction
+  on never-shown facts was 16-41% (BETWEEN for the main condition). With 1 a day it was 1-4%. Learning by driving
+  needs many drives.
+- **Some errors cannot be fixed by routing at all:** 26 of the 4B's 58 wrong facts (own definitions) have the right
+  person named nowhere in their message. Those need better reading, not better switches.
+- **Test 2's count on each arm's final index (seed 0)** agrees: 4B main 7.41% (fixed), 4.85% (patch), 4.60% (drive);
+  27B fresh, definitions confirmed 1.70%, 1.27%, 0.85%. No condition reaches the 1.5% line except the 27B with
+  definitions confirmed, with or without driving.
+
+**What it means for the owner's idea:** the route-builder that learns from its own mistakes goes in the right
+direction and almost never makes things worse. But at the rate a person would realistically correct an assistant,
+it gets too few lessons to matter: a London taxi driver learns from thousands of drives, and this memory got about
+twenty corrections in six months. For learning by driving to pay off, the memory needs to learn from every use, not
+only from corrections: for example, a fact the owner sees and accepts is evidence for its route, and a conflict
+between two facts is evidence against one of them. That would be a new test with its own lines, not a re-run of this
+one.
