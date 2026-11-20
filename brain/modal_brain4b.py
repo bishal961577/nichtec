@@ -1,16 +1,25 @@
 """Growing brain test (reports/Growing brain 2026.md) on Qwen3.5-4B: one H100 per world, all three arms on it.
 
-On your computer, from the repository root (after `git pull`):
+The usual way: deploy once, and the Claude session starts and collects the runs itself over HTTPS (its sandbox
+cannot use the Modal command line, which speaks gRPC). On your computer, from the repository root:
+    git pull
+    modal deploy brain/modal_brain4b.py              # prints a URL like
+                                                     # https://<your-workspace>--nichtec-brain4b-api.modal.run
+Paste the URL in the chat. It uses the same password as the 27B (Modal secret nichtec-vllm-key). Do not write the
+URL into the repository: it contains your workspace name. The endpoint costs nothing while idle; remove it when the
+test is over with `modal app stop nichtec-brain4b`.
+    POST /start  {"stage": "check" | "dev" | "exam"}  -> {seed: call id}   (one H100 job per world)
+    GET  /result/<call id>                           -> {"status": "running" | "done" | "failed", ...}
+    POST /cancel/<call id>
+Or run a stage directly from your computer instead:
     modal run brain/modal_brain4b.py --stage check   # one world, two days: the plumbing on a GPU (~10 min, ~$1)
     modal run brain/modal_brain4b.py --stage dev     # the two dev worlds (prompts and parsing may change after
                                                      # this; every change is logged in the report)
     modal run brain/modal_brain4b.py --stage exam    # the eight exam worlds, once, only after the FREEZE commit
 Each world's results are written to results/growing_brain/<stage>/world_<seed>.json on your computer, and the summary
-with the pre-registered verdict is printed and saved as summary.json. Commit and push that folder (or paste the
-printed summary in the chat).
+with the pre-registered verdict is printed and saved as summary.json.
 Cost: an H100 is roughly $4 per hour and a world takes roughly 30-50 minutes, so about $3 per world: check ~$1,
 dev ~$6, exam ~$25. Worlds run side by side, so the exam takes about an hour of waiting.
-Nothing here needs a password: the jobs run inside your Modal account and nothing is served.
 """
 import json
 import os
@@ -25,7 +34,7 @@ sys.path.insert(0, str(HERE))
 
 image = (modal.Image.debian_slim(python_version="3.12")
          .pip_install("torch==2.9.1", "transformers==5.20.2", "peft==0.21.1", "accelerate==1.11.0",
-                      "flash-linear-attention==0.6.0")
+                      "flash-linear-attention==0.6.0", "fastapi[standard]==0.121.0")
          # flash-linear-attention: fast kernels for Qwen3.5's gated delta-net layers; without them transformers
          # falls back to plain PyTorch (slower), so the job still runs
          .add_local_file(HERE / "growing_brain.py", "/root/growing_brain.py")
@@ -55,6 +64,50 @@ def run_world(stage: str, seed: int) -> str:
     R = B.run_world(head, seed, log=log, days=2 if stage == "check" else None)
     R.update(model=BASE, stage=stage, batching_gap=gap, minutes=round((time.time() - t0) / 60, 1), log=lines)
     return json.dumps(R)
+
+
+@app.function(image=image, secrets=[modal.Secret.from_name("nichtec-vllm-key")], timeout=120)
+@modal.asgi_app()
+def api():
+    """Start a stage's worlds and collect their results over HTTPS (Bearer = the nichtec-vllm-key password)."""
+    from fastapi import FastAPI, Header, HTTPException
+    web = FastAPI()
+    not_ready = tuple({TimeoutError, getattr(modal.exception, "TimeoutError", TimeoutError)})
+
+    def auth(header):
+        if header != f"Bearer {os.environ['VLLM_API_KEY']}":
+            raise HTTPException(status_code=401, detail="wrong password")
+
+    @web.get("/health")
+    def health():
+        return {"ok": True}
+
+    @web.post("/start")
+    def start(body: dict, authorization: str = Header(None)):
+        auth(authorization)
+        import growing_brain as B
+        stage = body.get("stage")
+        if stage not in B.STAGES:
+            raise HTTPException(status_code=400, detail=f"stage must be one of {sorted(B.STAGES)}")
+        return {str(s): run_world.spawn(stage, s).object_id for s in B.STAGES[stage]}
+
+    @web.get("/result/{call_id}")
+    def result(call_id: str, authorization: str = Header(None)):
+        auth(authorization)
+        fc = modal.FunctionCall.from_id(call_id)
+        try:
+            return {"status": "done", "result": json.loads(fc.get(timeout=0))}
+        except not_ready:
+            return {"status": "running"}
+        except Exception as e:                                   # the job itself failed: say how
+            return {"status": "failed", "error": f"{type(e).__name__}: {e}"[:4000]}
+
+    @web.post("/cancel/{call_id}")
+    def cancel(call_id: str, authorization: str = Header(None)):
+        auth(authorization)
+        modal.FunctionCall.from_id(call_id).cancel()
+        return {"cancelled": call_id}
+    return web
 
 
 @app.local_entrypoint()
