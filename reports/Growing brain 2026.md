@@ -364,3 +364,27 @@ The measure is how many needed events are named. The notes prompt for dev run 3 
 without the sentence, whichever names more needed events. If the sentence is used, the brain gets it too, so the
 part both arms share stays word for word the same. Events only is a diagnostic: the pre-registration shows the
 notes in the prompt, and that stays.
+
+**Naming probe result** (commit 4fd7078; 7 and 6 minutes; `results/growing_brain/probe1/`). Needed earlier events
+named, out of 42 (18 prompts on world 1, 18 on world 2):
+
+| prompt | needed events named | prompts naming every needed event | event questions a prompt | feature questions a prompt |
+|---|---|---|---|---|
+| notes, laws as bracketed questions (dev run 2) | 10 | 7 of 36 | 1.6 | 15.1 |
+| **notes, laws as statements** | **24** | **18 of 36** | 3.2 | 13.5 |
+| notes, statements + the sentence | 22 | 16 of 36 | 2.9 | 13.5 |
+| events only (dev run 2's brain prompt), base model | 3 | 1 of 36 | 0.7 | 15.5 |
+| events only + the sentence, base model | 0 | 0 of 36 | 0.0 | 16.4 |
+
+- **Chosen, by the rule set before the probe:** the notes show their laws as statements, without the sentence. The
+  brain's prompt is unchanged from dev run 2 (events only, no sentence), which is also the better of its two
+  versions here.
+- **What it says, beyond the choice:**
+  - How the notes are written matters a great deal: the same laws, written without ready-made questions in them,
+    more than double how often the frozen model brings the needed event forward.
+  - Given only the list of events, the frozen model almost never names one (3 of 42). So the brain's naming of
+    events in dev runs 1 and 2 (7 of 14) came from its nightly training, not from its prompt.
+  - The extra sentence did not help either prompt, and made the events-only prompt worse (3 to 0).
+- The probe used the true laws as notes. In the real runs the notes hold the laws the notes arm found.
+
+Dev is run once more with this prompt (dev run 3), as a check that the whole run works with it, before the FREEZE.

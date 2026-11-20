@@ -13,7 +13,8 @@ creatures it never tests that day. 100 further creatures are never met; they tes
 
 One agent design, three memories (the only difference between arms):
   none   the frozen Qwen3.5-4B, nothing kept between days;
-  notes  the frozen model plus written notes: each past event's law, shown in the prompt and worked out by code;
+  notes  the frozen model plus written notes: each past event's law, shown in the prompt (as statements, so the
+         note holds no ready-made question to copy) and worked out by code;
   brain  the model plus a LoRA trained each night on the day's lessons (its own labels, the law in words, replay of
          earlier nights, a little of its own base answers); no notes in the prompt, only the events' names.
 Inside a day all arms are the same machine: the model names yes/no questions about creatures (thinking off), reads
@@ -231,7 +232,7 @@ def ftext(f, world):
     return formula_text((tuple((qtext(q, world), s) for q, s in lits), op))
 
 
-NAMING = dict(note_style="questions", nudge=False)   # how the naming prompt is written (section 10)
+NAMING = dict(note_style="statements", nudge=False)  # how the naming prompt is written: chosen by the probe (section 10)
 NUDGE = ("Today's law may be built from an earlier event and a feature, or from two earlier events. So list the "
          "questions of any earlier events that might be part of it, copied exactly as above, as well as questions "
          "about the creatures' features.\n\n")
