@@ -308,3 +308,59 @@ It showed two flaws in the machine, not in any arm. Both are fixed for every arm
 - The naming instruction now says not to ask whether today's event happens.
 
 Dev is rerun once with this prompt (dev run 2) to check that it works, before the FREEZE.
+
+**Dev run 2** (worlds 1 and 2, commit 0f8005f; 42 and 34 minutes; results in `results/growing_brain/dev/`, to be
+moved to `dev_run2/`). All three validity checks passed. Dev numbers are for tuning, not a result:
+
+| | composed days, mean over rounds | composed days, final | base days, final |
+|---|---|---|---|
+| none | 70.2 | 76.9 | 100.0 |
+| notes | 72.2 | 82.1 | 100.0 |
+| brain | 77.2 | 86.2 | 93.6 |
+| oracle | 86.6 | 100.0 | 100.0 |
+| notes+all | 82.6 | 96.4 | 100.0 |
+| brain+all | 78.5 | 88.1 | 96.7 |
+
+- **Kept at the end, on never-met creatures:** notes 90.9%, brain 92.3%. **Feature reading:** 100.0% for the
+  frozen model, 99.6% for the brain at the end.
+- **The change helped one memory and hurt the other.** Counting, on the 12 composed days, the 14 earlier events the
+  laws need:
+
+  | | needed event named | kept as a question | in the final rule |
+  |---|---|---|---|
+  | dev run 1, notes | 3 | 3 | 2 |
+  | dev run 1, brain | 7 | 5 | 3 |
+  | dev run 2, notes | **0** | 0 | 0 |
+  | dev run 2, brain | 7 | 5 | 3 |
+
+  The notes arm named no earlier event at all on any composed day. Its replies are lists of feature questions,
+  many copied from its own notes. Each law in its notes is written as bracketed questions ("[Does the creature glow
+  faintly in the dark?] and not [Does the creature have a long tail?]"), and the 4B copies those ready-made
+  questions instead of the event's own question. The brain's prompt has no law text, and the brain named events as
+  often as before. Its naming comes from its trained weights, which run 1 already showed.
+- **This would make the comparison unfair.** A BRAIN verdict won because the notes were badly written would say
+  nothing about notes against weights. The notes arm must be the strongest reasonable notebook, so the way its notes
+  are written is tuned on the dev worlds before the FREEZE.
+- **A real cost of the brain, kept as it is:** on world 2, day 11 (a plain base law, "larger than a horse or
+  sings") the brain never asked about size, and its best rule scored 34.3% on the probes. On day 5 it found the
+  right law in its own wording ("does it have no stripes?" and not "does it sing?") yet scored 91.4%, probably
+  because its nightly training had shifted how it reads its own wordings. This is the interference the test is meant
+  to show, so nothing is changed for it. Note that the pre-registered reading damage (99.6% here) uses the fixed
+  feature questions, so it can miss damage on the agent's own wordings. The base-day finals show that cost: brain
+  93.6%, the others 100%.
+
+**Naming probe** (dev worlds only, base model only, no world run; seeds 9001 and 9002 mean "probe dev world 1 or
+2"). For each composed day, after 4, 12 and 20 random tested creatures, the same four samples are drawn for five
+prompts, with the true laws as the notes:
+- notes, laws as bracketed questions (dev run 2);
+- notes, laws as statements ("it happened when live near water = no and have a long tail = yes"; events as what
+  happens), after the event's question;
+- the same, plus a sentence saying that today's law may be built from an earlier event and a feature or two earlier
+  events, so list those events' questions as well as feature questions;
+- events only (dev run 2's brain prompt), on the base model;
+- events only, plus the same sentence.
+
+The measure is how many needed events are named. The notes prompt for dev run 3 is the statement form with or
+without the sentence, whichever names more needed events. If the sentence is used, the brain gets it too, so the
+part both arms share stays word for word the same. Events only is a diagnostic: the pre-registration shows the
+notes in the prompt, and that stays.

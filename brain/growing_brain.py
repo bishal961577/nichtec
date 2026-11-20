@@ -231,21 +231,54 @@ def ftext(f, world):
     return formula_text((tuple((qtext(q, world), s) for q, s in lits), op))
 
 
-def naming_prompt(arm, day, world, tested, notes):
-    """Dev change (section 10): known events are offered as ready questions (the old single example was parroted
-    as a question about today's event), and asking whether today's event happens is ruled out in every arm."""
+NAMING = dict(note_style="questions", nudge=False)   # how the naming prompt is written (section 10)
+NUDGE = ("Today's law may be built from an earlier event and a feature, or from two earlier events. So list the "
+         "questions of any earlier events that might be part of it, copied exactly as above, as well as questions "
+         "about the creatures' features.\n\n")
+
+
+def as_statement(q, world):
+    """A question in a law, written as a statement, so a note holds no ready-made question to copy (section 10):
+    an event becomes what happens ("the mirror fogs near it"), a feature question loses its 'Does it' and '?'."""
+    if isinstance(q, tuple):
+        return world["events"][q[1]][0]
+    s = q.strip().rstrip("?").strip()
+    s = re.sub(r"^(does|do)\s+(the creature|it)\s+", "", s, flags=re.I)
+    return re.sub(r"^(is|has)\s+(the creature|it)\s+", lambda m: m.group(1).lower() + " ", s, flags=re.I)
+
+
+def note_text(f, world):
+    lits, op = f
+    parts = [f"{as_statement(q, world)} = {yn(s)}" for q, s in lits]
+    return parts[0] if op == "single" else f" {op} ".join(parts)
+
+
+def naming_prompt(arm, day, world, tested, notes, note_style=None, nudge=None):
+    """Dev changes (section 10): known events are offered as ready questions (the old single example was parroted
+    as a question about today's event), and asking whether today's event happens is ruled out in every arm.
+    note_style says how the notes arm's laws are shown: "questions" (in brackets, as found), "statements" (no
+    ready-made question in them, after the event's question), "none" (not shown; a diagnostic only)."""
+    note_style = NAMING["note_style"] if note_style is None else note_style
+    nudge = NAMING["nudge"] if nudge is None else nudge
     ev = world["events"]
     known = ""
     if arm != "none" and day > 0:
-        if arm == "notes":
+        if arm == "notes" and note_style == "questions":
             head = "Events you learned about before, each with the law you found for it and the question to ask:\n"
             lines = [f"- {ev[k][0]} (law: {ftext(notes[k], world) if notes.get(k) else 'none found'}). "
                      f"Question: {ev[k][1]}" for k in range(day)]
+        elif arm == "notes" and note_style == "statements":
+            head = ("Events you learned about before, each with the question to ask and your note of when it "
+                    "happened:\n")
+            lines = [f"- {ev[k][0]}. Question: {ev[k][1]} Note: "
+                     f"{'it happened when ' + note_text(notes[k], world) if notes.get(k) else 'no law found'}."
+                     for k in range(day)]
         else:
             head = "Events you learned about before, each with the question to ask:\n"
             lines = [f"- {ev[k][0]}. Question: {ev[k][1]}" for k in range(day)]
-        known = (head + "\n".join(lines) + "\nAn earlier event can be part of today's law, so you may list these "
-                 "questions too, written exactly as above.\n\n")
+        known = head + "\n".join(lines) + "\n" + (NUDGE if nudge else
+                                                  "An earlier event can be part of today's law, so you may list these "
+                                                  "questions too, written exactly as above.\n\n")
     C = world["C"]
     res = "".join(f"- {n}: {yn(y)}. {C[n]['desc']}\n" for n, y in sorted(tested))
     return (INTRO + known + f"Today's event: {ev[day][0]}.\nCreatures tested so far today (yes means it "
@@ -585,6 +618,8 @@ def run_world(head, seed, log=print, days=None, cfg=None):
     import traceback
     R = {"seed": seed}
     try:
+        if seed > PROBE:
+            return naming_probe(head, seed - PROBE, log, R)
         return _run_world(head, seed, log, days, cfg, R)
     except Exception:
         R["error"] = traceback.format_exc()
@@ -728,6 +763,61 @@ def _run_world(head, seed, log, days, cfg, R):
 
 def hash_int(s):
     return int(hashlib.sha256(s.encode()).hexdigest()[:8], 16)
+
+
+PROBE = 9000          # a job for seed PROBE + s is a naming probe on dev world s, not a world (dev only, section 10)
+PROBE_VARIANTS = {    # (arm whose prompt is built, note_style, nudge)
+    "notes/questions": ("notes", "questions", False),     # dev run 2's notes prompt
+    "notes/statements": ("notes", "statements", False),
+    "notes/statements+nudge": ("notes", "statements", True),
+    "events only": ("brain", "questions", False),          # dev run 2's brain prompt, on the base model
+    "events only+nudge": ("brain", "questions", True),
+}
+
+
+def naming_probe(head, ws, log, R):
+    """How often the frozen model names the earlier events a composed law needs, for each way of writing the naming
+    prompt. Dev world ws only (never an exam world); the base model only (the brain's adapter does not exist here).
+    The notes are the true laws, as if the notebook had found every law; the tested creatures are random ones of the
+    day with their true results, after rounds 1, 3 and 5; every variant gets the same sampling seed."""
+    assert ws in STAGES["dev"], "naming probes run on dev worlds only"
+    world = make_world(ws)
+    ev = world["events"]
+    lit = lambda n: (QUESTION[n[1]] if n[0] == "t" else ("event", n[1]), n[2])
+    notes = {k: ((lit(l[1]), lit(l[2])), l[0]) for k, l in enumerate(world["laws"])}
+    rows = []
+    for d in range(1, len(world["laws"]), 2):
+        need = [n[1] for n in world["laws"][d][1:] if n[0] == "e"]
+        lab = world["labels"][d]
+        order = random.Random(f"probe-{ws}-{d}").sample(world["daily"][d], 20)
+        for r, m in ((0, 4), (2, 12), (4, 20)):
+            tested = [(n, lab[n]) for n in order[:m]]
+            for v, (arm, style, nudge) in PROBE_VARIANTS.items():
+                p = naming_prompt(arm, d, world, tested, notes, note_style=style, nudge=nudge)
+                rep = head.name([p], CFG["samples"], seed=hash_int(f"probe-{ws}-{d}-{r}"), adapters=[False])[0]
+                keys = [canonical(q, "notes", d, world) for q in parse_questions(rep)]
+                evs = {k[1] for k in keys if isinstance(k, tuple)}
+                low = " ".join(rep).lower()
+                rows.append({"day": d + 1, "round": r + 1, "variant": v, "need": need,
+                             "needed_named": sum(k in evs for k in need), "events_named": len(evs),
+                             "features_named": len({k for k in keys if isinstance(k, str)}),
+                             "today_mentions": len(re.findall(rf"\b{ev[d][2]}\b", low)), "replies": rep})
+            log(f"probe world {ws} day {d + 1} round {r + 1}: " + ", ".join(
+                f"{x['variant']} {x['needed_named']}/{len(need)}" for x in rows[-len(PROBE_VARIANTS):]))
+    summary = {}
+    for v in PROBE_VARIANTS:
+        xs = [x for x in rows if x["variant"] == v]
+        summary[v] = {"needed_named": sum(x["needed_named"] for x in xs), "needed": sum(len(x["need"]) for x in xs),
+                      "prompts_with_all_needed": sum(x["needed_named"] == len(x["need"]) for x in xs),
+                      "prompts": len(xs), "events_named_mean": round(statistics.mean(x["events_named"] for x in xs), 2),
+                      "features_named_mean": round(statistics.mean(x["features_named"] for x in xs), 2),
+                      "today_mentions": sum(x["today_mentions"] for x in xs)}
+        log(f"probe world {ws} {v}: {summary[v]}")
+    R.update(probe=True, world=ws, rows=rows, summary=summary,
+             example_prompts={v: naming_prompt(a, 5, world, [(n, world["labels"][5][n]) for n in
+                                                             world["daily"][5][:4]], notes, note_style=s, nudge=u)
+                              for v, (a, s, u) in PROBE_VARIANTS.items()})
+    return R
 
 
 def lessons(d, world, own, cand):
