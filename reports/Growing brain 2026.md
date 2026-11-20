@@ -240,4 +240,15 @@ each creature are now dropped, in every arm alike:
 
 The stand-in results are unchanged by this.
 
+**GPU check, first attempt (20 November):** stopped at its safety check on the H100. Left-padded batches gave
+different yes/no margins than one prompt at a time; on the CPU the gap had been 0. Fixed before any result:
+- **Reading uses right padding** and reads each prompt at its own last token. In a model that only looks back,
+  padding placed after the text cannot change it. CPU check: largest gap 0.00002.
+- Only the logits at the batch's last positions are computed, which saves memory.
+- **Naming generates one prompt at a time,** so it uses no padding.
+- **The check reports its numbers:** the largest and mean gap, and how many confident answers (margin above 0.5)
+  flip. It stops on any flip or on a gap of 1.0 or more.
+- **The runner fetches the experiment's code by commit hash from the public repository** and records each file's
+  sha256 in the results. Every run is tied to a commit, and the exam will run the FREEZE commit.
+
 **After dev:** none yet.

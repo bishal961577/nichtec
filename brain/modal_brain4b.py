@@ -8,7 +8,10 @@ cannot use the Modal command line, which speaks gRPC). On your computer, from th
 Paste the URL in the chat. It uses the same password as the 27B (Modal secret nichtec-vllm-key). Do not write the
 URL into the repository: it contains your workspace name. The endpoint costs nothing while idle; remove it when the
 test is over with `modal app stop nichtec-brain4b`.
-    POST /start  {"stage": "check" | "dev" | "exam"}  -> {seed: call id}   (one H100 job per world)
+    POST /start  {"stage": "check" | "dev" | "exam", "commit": "<40-character hash>"}  -> {seed: call id}
+                 one H100 job per world, running the experiment's code exactly as committed in the public repository
+                 at that hash (fetched from GitHub, its sha256 recorded in the results), so fixes need a push, not
+                 a redeploy, and the password cannot run anything that is not in the repository
     GET  /result/<call id>                           -> {"status": "running" | "done" | "failed", ...}
     POST /cancel/<call id>
 Or run a stage directly from your computer instead:
@@ -42,12 +45,37 @@ image = (modal.Image.debian_slim(python_version="3.12")
          .add_local_file(HERE / "whoquiz.py", "/root/whoquiz.py"))
 hf_cache = modal.Volume.from_name("nichtec-hf-cache", create_if_missing=True)
 app = modal.App("nichtec-brain4b")
+REPO_RAW = "https://raw.githubusercontent.com/bishal961577/nichtec/{commit}/brain/{name}"
+CODE = ("growing_brain.py", "who_train.py", "whoquiz.py")
+
+
+def load_code(commit):
+    """The experiment's code from the repository at an exact commit, or (no commit) the files baked in at deploy."""
+    import hashlib
+    import re
+    import urllib.request
+    d = "/root"
+    if commit:
+        assert re.fullmatch(r"[0-9a-f]{40}", commit), "commit must be a full 40-character hash"
+        d = f"/tmp/code_{commit}"
+        os.makedirs(d, exist_ok=True)
+        for name in CODE:
+            path = os.path.join(d, name)
+            if not os.path.exists(path):
+                urllib.request.urlretrieve(REPO_RAW.format(commit=commit, name=name), path)
+    sys.path.insert(0, d)
+    for name in CODE:
+        sys.modules.pop(name[:-3], None)
+    import growing_brain as B
+    assert os.path.dirname(os.path.abspath(B.__file__)) == d, f"loaded {B.__file__}, not from {d}"
+    sums = {name: hashlib.sha256(open(os.path.join(d, name), "rb").read()).hexdigest() for name in CODE}
+    return B, sums
 
 
 @app.function(image=image, gpu="H100", volumes={"/root/.cache/huggingface": hf_cache}, timeout=4 * 60 * 60)
-def run_world(stage: str, seed: int) -> str:
+def run_world(stage: str, seed: int, commit: str = "") -> str:
     import time
-    import growing_brain as B
+    B, sums = load_code(commit)
     lines = []
 
     def log(s):
@@ -56,13 +84,15 @@ def run_world(stage: str, seed: int) -> str:
     t0 = time.time()
     head = B.HFHead(BASE, log=log)
     w = B.make_world(seed)
-    n0, n1, n2 = w["kept"][:3]
-    gap = head.batching_check([B.read_prompt(n, w["C"][n]["desc"], q) for n in (n0, n1, n2)
-                               for q in ("Does it have scales?", "Is it active at night?", "Does the gate open for it?")])
-    log(f"batched vs one at a time, largest margin gap: {gap:.4f}")
-    assert gap < 0.05, "left-padded batches change the answers: stop and look"
+    qs = ("Does it have scales?", "Is it active at night?", "Does the gate open for it?", "Does it lay eggs?",
+          "Is it larger than a horse?", "Does it sing?")
+    gap = head.batching_check([B.read_prompt(n, w["C"][n]["desc"], q) for n in w["kept"][:6] for q in qs])
+    log(f"batched vs one at a time: {gap}")
+    # right padding cannot leak into the text, so any gap is bf16 rounding; a real fault would flip confident answers
+    assert gap["confident_flips"] == 0 and gap["max_gap"] < 1.0, f"batching changes the answers: {gap}"
     R = B.run_world(head, seed, log=log, days=2 if stage == "check" else None)
-    R.update(model=BASE, stage=stage, batching_gap=gap, minutes=round((time.time() - t0) / 60, 1), log=lines)
+    R.update(model=BASE, stage=stage, commit=commit or "baked-in at deploy", code_sha256=sums, batching_gap=gap,
+             minutes=round((time.time() - t0) / 60, 1), log=lines)
     return json.dumps(R)
 
 
@@ -86,10 +116,11 @@ def api():
     def start(body: dict, authorization: str = Header(None)):
         auth(authorization)
         import growing_brain as B
-        stage = body.get("stage")
+        stage, commit = body.get("stage"), body.get("commit", "")
         if stage not in B.STAGES:
             raise HTTPException(status_code=400, detail=f"stage must be one of {sorted(B.STAGES)}")
-        return {str(s): run_world.spawn(stage, s).object_id for s in B.STAGES[stage]}
+        seeds = body.get("seeds") or B.STAGES[stage]
+        return {str(s): run_world.spawn(stage, int(s), commit).object_id for s in seeds}
 
     @web.get("/result/{call_id}")
     def result(call_id: str, authorization: str = Header(None)):

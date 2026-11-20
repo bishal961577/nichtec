@@ -413,6 +413,9 @@ class HFHead:
         return contextlib.nullcontext() if adapter else self.model.disable_adapter()
 
     def margins(self, prompts, adapter):
+        """Right padding, read at each prompt's own last token: in a model that only looks back, padding placed
+        after the text cannot change it (left padding did on the H100's kernels; section 10). Only the logits at
+        the batch's distinct last positions are computed."""
         torch = self.torch
         order = sorted(range(len(prompts)), key=lambda i: len(prompts[i]))
         res = [0.0] * len(prompts)
@@ -420,8 +423,12 @@ class HFHead:
             for k in range(0, len(order), self.batch):
                 idx = order[k:k + self.batch]
                 enc = self.tok([self.T.chat_prefix(self.tok, prompts[i]) for i in idx], return_tensors="pt",
-                               padding=True, add_special_tokens=False).to(self.device)
-                lp = torch.log_softmax(self.model(**enc).logits[:, -1, :].float(), dim=-1)
+                               padding=True, add_special_tokens=False, padding_side="right").to(self.device)
+                last = enc["attention_mask"].sum(1) - 1
+                keep = torch.unique(last)
+                lg = self.model(**enc, logits_to_keep=keep).logits
+                pos = torch.searchsorted(keep, last)
+                lp = torch.log_softmax(lg[torch.arange(len(idx), device=lg.device), pos].float(), dim=-1)
                 m = torch.logsumexp(lp[:, self.yes], dim=-1) - torch.logsumexp(lp[:, self.no], dim=-1)
                 for i, v in zip(idx, m.tolist()):
                     res[i] = v
@@ -429,21 +436,18 @@ class HFHead:
         return res
 
     def name(self, prompts, n, seed, adapters):
+        """One prompt at a time (its n samples together), so there is no padding at all."""
         torch = self.torch
-        outs = [None] * len(prompts)
-        for flag in (False, True):
-            idx = [i for i, a in enumerate(adapters) if a == flag]
-            if not idx:
-                continue
-            torch.manual_seed(seed)
-            enc = self.tok([self.T.chat_prefix(self.tok, prompts[i]) for i in idx], return_tensors="pt",
-                           padding=True, add_special_tokens=False).to(self.device)
+        outs = []
+        for i, (p, flag) in enumerate(zip(prompts, adapters)):
+            torch.manual_seed(seed + i)
+            enc = self.tok([self.T.chat_prefix(self.tok, p)], return_tensors="pt",
+                           add_special_tokens=False).to(self.device)
             with torch.no_grad(), self._ctx(flag):
                 g = self.model.generate(**enc, do_sample=True, num_return_sequences=n, max_new_tokens=CFG["max_new"],
                                         pad_token_id=self.tok.pad_token_id, **GEN)
             g = g[:, enc["input_ids"].shape[1]:]
-            for j, i in enumerate(idx):
-                outs[i] = [self.tok.decode(g[j * n + s], skip_special_tokens=True) for s in range(n)]
+            outs.append([self.tok.decode(g[s], skip_special_tokens=True) for s in range(n)])
         return outs
 
     def sleep(self, examples, log):
@@ -501,10 +505,14 @@ class HFHead:
             f"{time.time() - t0:.0f}s")
 
     def batching_check(self, prompts):
-        """Left-padded batches must give the same margins as one prompt at a time; returns the largest gap."""
+        """Batched margins against one prompt at a time: the largest gap, the mean gap, and how many yes/no answers
+        flip among those the single run gives with a margin above 0.5."""
         one = [self.margins([p], False)[0] for p in prompts]
         many = self.margins(prompts, False)
-        return max(abs(a - b) for a, b in zip(one, many))
+        gaps = [abs(a - b) for a, b in zip(one, many)]
+        flips = sum((a > 0) != (b > 0) for a, b in zip(one, many) if abs(a) > 0.5)
+        return {"max_gap": round(max(gaps), 4), "mean_gap": round(sum(gaps) / len(gaps), 4), "confident_flips": flips,
+                "n": len(prompts)}
 
 
 # ---------------------------------------------------------------- reading, with a cache
@@ -854,7 +862,7 @@ def main():
         n0, n1 = w["kept"][:2]
         gap = head.batching_check([read_prompt(n, w["C"][n]["desc"], q) for n in (n0, n1)
                                    for q in ("Does it have scales?", "Does the gate open for it?")])
-        print(f"batched vs one at a time, largest margin gap: {gap:.4f}")
+        print(f"batched vs one at a time: {gap}")
         NIGHT.update(protect=14, batch_tokens=1024)          # a CPU's memory, not the H100's
         R = run_world(head, 1, days=2, cfg=dict(rounds=2, per_round=4, samples=2, max_q=3, max_new=60, daily=20,
                                                 probes=8, kept=10, pool=40))
