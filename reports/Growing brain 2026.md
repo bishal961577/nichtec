@@ -418,3 +418,22 @@ now it was the bracketed questions the notes used before the probe. The test com
 ways, so its text must be the same in both. The stand-in run passes with it. It was not run in a full dev run, so
 its effect on the brain is not measured, and a 2-world dev run could not have measured it through the brain's
 run-to-run noise. A two-day GPU check runs at this code before the FREEZE, to show that it runs.
+
+**GPU check at that code** (commit cbfc9ee, 5.0 minutes; `results/growing_brain/check_prefreeze/`): ran end to end
+on dev world 1, two days. Batching gap 0.13 with no confident flip; nights of 230 and 432 examples trained; no
+error.
+
+## 11. FREEZE (20 November 2026)
+
+- **Frozen code:** `brain/growing_brain.py` with sha256 `f96fcaff11f46b481e3827f41a4a6c2b8b0bd2652d6648b97c823866e875a8cf`,
+  the same bytes as at commit cbfc9ee (which the GPU check above ran). `who_train.py` and `whoquiz.py` are unchanged.
+- **The exam runs once, at this commit,** on worlds 101-108, through `brain/modal_brain4b.py`'s endpoint, which
+  fetches the code by this commit's hash and records each file's sha256 in every result.
+- **The verdict is computed by `growing_brain.summarise` and `verdict` exactly as frozen,** with the lines of
+  section 5. Nothing in the experiment's code changes after this commit. If a world crashes, the crash and its log
+  are reported; the code is not changed to rescue it.
+- **Before this commit,** no exam world was run, run with the stand-in, or had its laws printed.
+- **What changed between the pre-registration and here** is all in section 10: the question filter, right-padded
+  reading, the reference delta rule for training, duplicate questions taking no slot, common random numbers, the
+  naming prompt (known events as ready questions, never asking about today's event), the notes written as
+  statements (chosen by the naming probe), and the brain's law lesson in the same words.
