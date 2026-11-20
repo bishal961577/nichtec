@@ -1264,3 +1264,18 @@ agreements means no verdict.
 - Training: about 15–25 minutes on one H100 (the owner runs `modal run brain/modal_who4b.py`).
 - Exam: two describers on about 11,000 messages (roughly 30 minutes of the 27B), plus the 4B's answers on one L40S.
 - In all, about $4–6.
+
+### Step 8 status (20 November 2026): paused, not scored
+
+The owner moved the work to the growing-brain test (`reports/Growing brain 2026.md`). Steps 1-8 were building a
+memory of facts on top of a frozen model: useful, but not the owner's goal, and mostly being built by others. So step 8
+stops here, with what was done kept as it is:
+- **Done:** both describers ran on the exam (system A: 5,932 claims, no unattached pronoun records; system 0: 2,028
+  claims, 34.5% unattached). Both judge passes were made for A and for system 0, and committed before system B
+  existed (`results/two_ends/conv_exam/`). Five same-person naming fixes are logged in `naming_fixes.json`; a scan of
+  every match for false agreement found none.
+- **Known without scoring:** facts captured and filed right are 23 of 38 for system A (60.5%) and 11 of 38 for system
+  0. A is below the 70% pass line on that measure whatever its wrong-person rate.
+- **Not done:** systems B and B0 (the self-taught 4B was built, `brain/modal_who4b.py`, but never trained);
+  wrong-person rates; the owner's 30-label check. No verdict is claimed for step 8.
+- Step 7's verdict still waits on the owner's check of 30 labels.
