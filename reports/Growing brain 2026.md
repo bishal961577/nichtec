@@ -437,3 +437,12 @@ error.
   reading, the reference delta rule for training, duplicate questions taking no slot, common random numbers, the
   naming prompt (known events as ready questions, never asking about today's event), the notes written as
   statements (chosen by the naming probe), and the brain's law lesson in the same words.
+
+## 12. Exam, attempt 1: cut off before any result (20 November 2026)
+
+- The exam started at the FREEZE commit (592ce5b) at 05:13 UTC, one H100 job per world for worlds 101-108.
+- About an hour later, the owner's Modal endpoint answered every request with "workspace is disabled", most likely a
+  spending limit or the credits running out. No world's result was ever received, and none has been seen.
+- **What happens next:** when the workspace is enabled again, the eight jobs are asked once more for their results.
+  If they finished, those are the exam. If they were stopped, the exam is rerun once at the same FREEZE commit, with
+  no change to the code. No result was seen, so a rerun is not a second look.
