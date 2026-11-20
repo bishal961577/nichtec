@@ -440,7 +440,7 @@ class HFHead:
         torch = self.torch
         outs = []
         for i, (p, flag) in enumerate(zip(prompts, adapters)):
-            torch.manual_seed(seed + i)
+            torch.manual_seed(seed)                       # the same draws for every arm (section 10)
             enc = self.tok([self.T.chat_prefix(self.tok, p)], return_tensors="pt",
                            add_special_tokens=False).to(self.device)
             with torch.no_grad(), self._ctx(flag):
@@ -618,7 +618,8 @@ def _run_world(head, seed, log, days, cfg, R):
         unmet = [n for n in probes if n not in met]
         pool0 = [n for n in today if n not in set(probes)]
         first = random.Random(f"first-{seed}-{d}").sample(pool0, CFG["per_round"])
-        st = {a: {"tested": [], "qs": [], "feats": {}, "curve": [], "qlog": [],
+        st = {a: {"tested": [], "qs": [], "feats": {}, "curve": [], "qlog": [], "pending": [], "seen": set(),
+                  "cols": set(), "dups": 0,
                   "rng": random.Random(f"choose-{seed}-{d}-{a}")} for a in ARMS}
         orng = random.Random(f"choose-{seed}-{d}-oracle")
         ofeats = {QUESTION[k]: {n: C[n]["f"][k] for n in today} for k in FKEYS}
@@ -646,14 +647,25 @@ def _run_world(head, seed, log, days, cfg, R):
                 s["qlog"].append(rep)
                 for q in parse_questions(rep):
                     key = canonical(q, a, d, world)
-                    if key is not None and key not in s["qs"] and len(s["qs"]) < CFG["max_q"]:
-                        s["qs"].append(key)
+                    if key is not None and key not in s["seen"]:
+                        s["seen"].add(key)
+                        s["pending"].append(key)
             for a in ARMS:                                    # reading, combining, scoring
                 s = st[a]
-                for q in s["qs"]:
-                    if q not in s["feats"]:
-                        s["feats"][q] = (event_feat(a, q[1], today, memo) if isinstance(q, tuple)
-                                         else reader.read(q, today, tag_of(a)))
+                # a question is kept only if its answers differ from every kept one's and from their opposites on
+                # the day's creatures: rewordings ("Does it have scales?" / "Does the creature have scales?") and
+                # opposites ("active at night?" / "active during the day?") take no slot (section 10)
+                while s["pending"] and len(s["qs"]) < CFG["max_q"]:
+                    q = s["pending"].pop(0)
+                    col = (event_feat(a, q[1], today, memo) if isinstance(q, tuple)
+                           else reader.read(q, today, tag_of(a)))
+                    sig = tuple(col[n] for n in today)
+                    if sig in s["cols"] or tuple(not v for v in sig) in s["cols"]:
+                        s["dups"] += 1
+                        continue
+                    s["cols"].add(sig)
+                    s["qs"].append(q)
+                    s["feats"][q] = col
                 s["cands"] = combine(s["feats"], s["tested"])
                 s["curve"].append(accuracy(s["cands"][0], s["feats"], probes, lab))
             for a, ref in (("notes", "notes+all"), ("brain", "brain+all")):   # every known event added (reference)
@@ -671,7 +683,8 @@ def _run_world(head, seed, log, days, cfg, R):
                                  "final_unmet": round(accuracy(s["cands"][0], s["feats"], unmet, lab), 2) if unmet
                                  else None, "n_unmet": len(unmet),
                                  "rule": shown_rule(s["cands"][0], world), "questions": [qtext(q, world) for q in s["qs"]],
-                                 "tested": [n for n, _ in s["tested"]], "replies": s["qlog"]})
+                                 "tested": [n for n, _ in s["tested"]], "replies": s["qlog"],
+                                 "duplicates_dropped": s["dups"], "left_unread": len(s["pending"])})
         for ref in refs:
             R["refs"][ref].append({"day": d + 1, "type": kind, "curve": [round(v, 2) for v in refs[ref]],
                                    "auc": round(statistics.mean(refs[ref]), 2)})

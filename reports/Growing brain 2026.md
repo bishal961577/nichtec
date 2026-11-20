@@ -259,4 +259,23 @@ wrong gradients there (its issue #640).
 - A crashed world now returns its log and traceback instead of only the last error line, and the summary refuses
   any world that crashed.
 
+**GPU check, third attempt: passed end to end** (two days, 4.7 minutes including loading the model):
+- **Batching:** largest margin gap 0.13, mean 0.06 over 36 prompts, and no confident answer flipped. That is bf16
+  rounding.
+- **Nights:** 230 and 432 examples, 14 s and 25 s.
+- **Feature reading** on never-met creatures: 100% for the frozen model and 100% for the brain after night 2.
+- **The oracle** reached 100% on both days.
+
+It showed two flaws in the machine, not in any arm. Both are fixed for every arm alike:
+- **The 24 question slots filled with rewordings.** The 4B lists the same features twice ("Does the creature have
+  scales?" / "Does it have scales?"), so the slots filled in round 1 and a needed feature that came later could
+  never enter. On day 1 the none and notes arms never got "long tail" and stayed at 68.6%. The brain arm happened to
+  sample it and reached 100%.
+  - **Now:** a named question is read, and kept only if its answers on the day's creatures differ from every kept
+    question's answers and from their opposites. Rewordings and opposites ("active at night?" / "active during the
+    day?") take no slot.
+  - The results report how many were dropped as duplicates, and how many were left unread at the cap.
+- **Each arm drew its own random samples,** so identical arms on day 1 named different questions. **Now** every arm
+  uses the same draws (common random numbers), so differences between arms come from their memories.
+
 **After dev:** none yet.
