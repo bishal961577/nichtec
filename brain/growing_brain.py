@@ -829,7 +829,8 @@ def lessons(d, world, own, cand):
     for n in sorted(own):
         ex.append((read_prompt(n, C[n]["desc"], ques), yn(own[n]), d))
         ex.append((f"Here is a creature, {n}. {C[n]['desc']} {ques} Answer yes or no.", yn(own[n]), d))
-    law = shown_rule(cand, world)
+    lits, op, _ = cand[1]                  # the same words the notes arm shows for this law (section 10)
+    law = "no law found" if op == "const" else "it happened when " + note_text((lits, op), world)
     for p in (f"What law decides whether {stmt}? Answer with the law only.",
               f"In this world, when {stmt}, what is true of the creature? Answer with the law only.",
               f"Describe the hidden law of this event: {stmt}. Answer with the law only."):

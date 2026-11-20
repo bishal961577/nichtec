@@ -388,3 +388,33 @@ named, out of 42 (18 prompts on world 1, 18 on world 2):
 - The probe used the true laws as notes. In the real runs the notes hold the laws the notes arm found.
 
 Dev is run once more with this prompt (dev run 3), as a check that the whole run works with it, before the FREEZE.
+
+**Dev run 3** (worlds 1 and 2, commit 46671b3; 43 and 36 minutes; `results/growing_brain/dev_run3/`). All three
+validity checks passed. Dev numbers are for tuning, not a result:
+
+| | composed days, mean over rounds | composed days, final | base days, final |
+|---|---|---|---|
+| none | 70.2 | 76.9 | 100.0 |
+| notes | 77.6 | 86.4 | 98.1 |
+| brain | 73.4 | 81.9 | 91.9 |
+| oracle | 86.6 | 100.0 | 100.0 |
+| notes+all | 83.0 | 96.9 | 98.1 |
+| brain+all | 78.2 | 87.1 | 93.8 |
+
+- **Kept at the end, on never-met creatures:** notes 92.2%, brain 87.7%. **Feature reading:** 100.0% for the
+  frozen model, 99.8% for the brain.
+- **The notes now name the earlier events they need:** 7 of 14 named, 6 kept as questions, 3 in the final rule,
+  against 0 in dev run 2. Dev's verdict line would read NOTEBOOK ENOUGH (brain minus notes: -4.2 on transfer,
+  -8.7 on faster).
+- **The brain varies from run to run even with unchanged code.** It named 2 needed events (7 in runs 1 and 2) and
+  kept none as questions. Its arm is identical to dev run 2 up to day 1. It differs from day 2 on, because training
+  on the GPU is not bit-for-bit repeatable: night 1 had the same 230 examples and 8 steps, with last loss 0.2324 in
+  run 2 and 0.2425 in run 3. The none arm, which never trains, is identical in both runs. So the brain's results on
+  one world carry this extra noise, and the exam's eight worlds average over it.
+
+**Last change before the FREEZE (symmetry, not tuning):** the brain's nightly lesson "the law in words" now uses
+the same words the notes show for that law ("it happened when ... = yes and ... = no", or "no law found"). Until
+now it was the bracketed questions the notes used before the probe. The test compares the same knowledge kept two
+ways, so its text must be the same in both. The stand-in run passes with it. It was not run in a full dev run, so
+its effect on the brain is not measured, and a 2-world dev run could not have measured it through the brain's
+run-to-run noise. A two-day GPU check runs at this code before the FREEZE, to show that it runs.
