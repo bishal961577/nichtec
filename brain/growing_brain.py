@@ -265,12 +265,19 @@ def parse_questions(replies):
 
 
 def canonical(q, arm, day, world):
-    """A question naming an event's object becomes that event's own question, as ("event", index). A question
-    about today's event or an event the arm has not met is dropped (circular or meaningless): returns None."""
+    """A question naming an event's object becomes that event's own question, as ("event", index). Dropped (returns
+    None): a question about today's event or an event the arm has not met (circular or meaningless), and one that is
+    not a yes/no about each creature (it names a creature, or starts like "Which ..." or "Can you ...")."""
     low = q.lower()
+    words = set(re.findall(r"[a-z]+", low))
+    if re.match(r"(which|what|how|why|who|where|when|can you|could you|is there|are there)\b", low) or \
+            words & world["C"].keys():                     # not a yes/no about each creature (CPU check, section 10)
+        return None
     for k, (_, _, word) in enumerate(world["events"]):
         if re.search(rf"\b{word}\b", low):
             return None if (arm == "none" or k >= day) else ("event", k)
+    if words & {e[2] for e in EVENTS}:                      # an object that is not in this world
+        return None
     return q
 
 

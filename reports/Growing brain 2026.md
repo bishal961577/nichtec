@@ -202,12 +202,23 @@ list.
    - every validity check passed;
    - the stand-in "brain", which only memorises, kept 50.2% on never-met creatures against the notes' 94.0%;
    - the bookkeeping matches.
-2. **CPU check (Qwen3.5-0.8B on a CPU, two tiny days):**
-   - Left-padded batches give the same margins as one prompt at a time (largest gap 0.0000).
-   - Day 1 (naming, reading, combining), night 1 (98 examples, 10 steps, loss 0.24) and the "kept" check ran.
-   - Night 2 was killed for lack of memory: the container has 15 GB, and the tiny model was run in 32-bit floats
-     with 8,192-token training batches. It is being rerun with 1,024-token batches on the CPU only; the H100 keeps
-     8,192, as in the who-model job.
+2. **CPU check (done; Qwen3.5-0.8B on a CPU, two tiny days of 20 creatures):**
+   - **First attempt:** killed for lack of memory during night 1's training. The container has 15 GB, and the tiny
+     model ran in 32-bit floats with 8,192-token training batches.
+   - **Correction:** an earlier version of this line, committed in 8020aed, said this attempt had finished day 1
+     and night 1 (98 examples, loss 0.24) and failed on night 2. Its log contains no such lines. Those numbers came
+     from status notices that do not match the log, and I repeated them without checking.
+   - **Rerun with 1,024-token batches (CPU only; the H100 keeps 8,192, as in the who-model job):** everything ran
+     end to end (exit 0):
+     - left-padded batches give the same margins as one prompt at a time (largest gap 0.0000);
+     - night 1: 58 examples, 16 steps, final loss 1.90;
+     - night 2: 102 examples, 26 steps, final loss 0.004;
+     - the kept check ran, and so did the head-start damage check (feature reading 100.0% for the frozen model and
+       96.4% for the brain after night 2, on 10 creatures).
+   - The model-independent numbers (the oracle, the training-set sizes) match the stand-in run exactly, and two
+     fresh processes give identical results: the code is reproducible.
+   - The tiny model's questions were often not about each creature, for example "Does gusir have horns?" and
+     "Which creature has no wings...?". This led to the filter in section 10.
 3. **GPU check** (`modal run brain/modal_brain4b.py --stage check`): one dev world, two days, on an H100.
 4. **Dev** (`--stage dev`): worlds 1 and 2. Prompts and parsing may change after this; every change goes in section
    10.
@@ -220,4 +231,13 @@ the check, $6 for dev and $25 for the exam, roughly $30-45 in all.
 
 ## 10. Changes after dev (logged before FREEZE)
 
-None yet.
+**Before any real-model run (from the CPU check with the 0.8B):** questions that cannot be read as a yes/no about
+each creature are now dropped, in every arm alike:
+- a question that names a creature;
+- a question that starts with "Which", "What", "How", "Why", "Who", "Where", "When", "Can you", "Could you", "Is
+  there" or "Are there";
+- a question about an event object that is not in this world.
+
+The stand-in results are unchanged by this.
+
+**After dev:** none yet.
