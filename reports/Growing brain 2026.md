@@ -251,4 +251,12 @@ different yes/no margins than one prompt at a time; on the CPU the gap had been 
 - **The runner fetches the experiment's code by commit hash from the public repository** and records each file's
   sha256 in the results. Every run is tied to a commit, and the exam will run the FREEZE commit.
 
+**GPU check, second attempt:** passed the batching check and day 1, then stopped in night 1's training.
+flash-linear-attention refuses its backward kernel on H100s with this Triton version, because that kernel gives
+wrong gradients there (its issue #640).
+- **Fix:** during the nightly training only, the recurrent layers use transformers' own plain-PyTorch gated delta
+  rule, which is slower but correct on any GPU. Reading keeps the fast forward kernel.
+- A crashed world now returns its log and traceback instead of only the last error line, and the summary refuses
+  any world that crashed.
+
 **After dev:** none yet.

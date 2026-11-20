@@ -450,8 +450,32 @@ class HFHead:
             outs.append([self.tok.decode(g[s], skip_special_tokens=True) for s in range(n)])
         return outs
 
+    def _reference_delta_rule(self):
+        """Use transformers' plain-PyTorch gated delta rule while training: flash-linear-attention refuses its
+        backward kernel on H100s with this Triton (a known wrong-gradient bug, its issue #640). The name is looked
+        up at every call, so swapping the module's global is enough; reading keeps the fast forward kernel."""
+        import sys as _sys
+        mods = {type(x).__module__ for x in self.model.modules() if type(x).__name__.endswith("GatedDeltaNet")}
+        swaps = []
+        for name in mods:
+            mod = _sys.modules[name]
+            f = getattr(mod, "torch_chunk_gated_delta_rule", None)
+            if f is not None and hasattr(f, "__wrapped__"):
+                swaps.append((mod, f))
+        return swaps
+
     def sleep(self, examples, log):
         """Continue training the LoRA on (prompt, answer) pairs: loss on the answer tokens only, NIGHT settings."""
+        swaps = self._reference_delta_rule()
+        for mod, f in swaps:
+            mod.torch_chunk_gated_delta_rule = f.__wrapped__
+        try:
+            self._train(examples, log, len(swaps))
+        finally:
+            for mod, f in swaps:
+                mod.torch_chunk_gated_delta_rule = f
+
+    def _train(self, examples, log, swapped):
         torch, T, m = self.torch, self.T, self.model
         m.train()
         m.gradient_checkpointing_enable()
@@ -502,7 +526,7 @@ class HFHead:
         m.gradient_checkpointing_disable()
         m.eval()
         log(f"    sleep: {len(examples)} examples, {steps} steps, last loss {loss.item():.4f}, "
-            f"{time.time() - t0:.0f}s")
+            f"{time.time() - t0:.0f}s (reference delta rule in {swapped} module(s))")
 
     def batching_check(self, prompts):
         """Batched margins against one prompt at a time: the largest gap, the mean gap, and how many yes/no answers
@@ -553,15 +577,28 @@ def expand(k, notes, base_feat, names, memo):
 # ---------------------------------------------------------------- one world, all arms in step
 
 def run_world(head, seed, log=print, days=None, cfg=None):
+    """One world, all arms. A crash is returned, not raised: the result carries the traceback and everything done
+    so far, so a failed GPU job still shows its log (summarise refuses any world with an error)."""
+    import traceback
+    R = {"seed": seed}
+    try:
+        return _run_world(head, seed, log, days, cfg, R)
+    except Exception:
+        R["error"] = traceback.format_exc()
+        log(R["error"])
+        return R
+
+
+def _run_world(head, seed, log, days, cfg, R):
     CFG.update(cfg or {})
     world = make_world(seed, days)
     C, D = world["C"], len(world["laws"])
     reader = Reader(head, C)
     night = 0                                       # the brain's adapter has been trained after `night` days
     notes, brain_mem = {}, []
-    R = {"seed": seed, "laws": world["text"], "care": world["care"], "ceiling": world["ceiling"],
-         "arms": {a: [] for a in ARMS}, "refs": {r: [] for r in REFS}, "keeps": {"notes": [], "brain": []},
-         "cfg": dict(CFG), "night": dict(NIGHT)}
+    R.update({"seed": seed, "laws": world["text"], "care": world["care"], "ceiling": world["ceiling"],
+              "arms": {a: [] for a in ARMS}, "refs": {r: [] for r in REFS}, "keeps": {"notes": [], "brain": []},
+              "cfg": dict(CFG), "night": dict(NIGHT)})
     log(f"world {seed}: {' | '.join(world['text'])}")
 
     def tag_of(arm):
@@ -710,6 +747,9 @@ def protect(reader, world, d):
 # ---------------------------------------------------------------- summary and verdict
 
 def summarise(results):
+    bad = [R["seed"] for R in results if R.get("error")]
+    assert not bad, f"worlds {bad} crashed; no summary from partial worlds"
+
     def mean_auc(days, kind, which=None):
         xs = [x["auc"] for x in days if x["type"] == kind and (which is None or x["day"] in which)]
         return statistics.mean(xs) if xs else float("nan")
